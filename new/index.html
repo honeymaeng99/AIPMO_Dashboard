@@ -1,0 +1,564 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AI 과제 관리 프로그램</title>
+<script src="https://unpkg.com/vue@3/dist/vue.global.prod.js"></script>
+<link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;600;700;800&family=Noto+Sans+KR:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'Noto Sans KR',-apple-system,sans-serif;background:#F8F9FA;min-height:100vh;color:#212529}
+::-webkit-scrollbar{width:6px;height:6px}
+::-webkit-scrollbar-thumb{background:#CED4DA;border-radius:3px}
+[v-cloak]{display:none}
+
+@keyframes fadeUp{from{opacity:0;transform:translateY(16px)}to{opacity:1;transform:none}}
+@keyframes modalIn{from{opacity:0;transform:translateY(20px) scale(.97)}to{opacity:1;transform:none}}
+@keyframes slideRow{from{opacity:0;transform:translateY(-6px)}to{opacity:1;transform:none}}
+@keyframes spin{to{transform:rotate(360deg)}}
+
+/* ===== Header ===== */
+.header{background:linear-gradient(135deg,#1A1B2E 0%,#2D2B55 50%,#1A1B2E 100%);padding:24px 40px;border-bottom:1px solid rgba(255,255,255,.06)}
+.header-inner{max-width:1320px;margin:0 auto;display:flex;align-items:center;justify-content:space-between}
+.logo{display:flex;align-items:center;gap:14px}
+.logo-icon{width:40px;height:40px;border-radius:12px;display:flex;align-items:center;justify-content:center;background:linear-gradient(135deg,#748FFC,#7048E8);font-size:20px;box-shadow:0 4px 15px rgba(112,72,232,.4)}
+.logo h1{color:#fff;font-size:20px;font-weight:800;letter-spacing:-.03em;font-family:'Outfit',sans-serif}
+.logo .sub{color:rgba(255,255,255,.45);font-size:12px;font-weight:500;margin-top:2px}
+.btn-add{display:flex;align-items:center;gap:8px;padding:10px 22px;background:linear-gradient(135deg,#748FFC,#7048E8);color:#fff;border:none;border-radius:12px;font-size:14px;font-weight:700;cursor:pointer;box-shadow:0 4px 15px rgba(112,72,232,.35);transition:all .2s;font-family:inherit}
+.btn-add:hover{transform:translateY(-1px);box-shadow:0 6px 20px rgba(112,72,232,.45)}
+
+/* ===== Main ===== */
+.main{max-width:1320px;margin:0 auto;padding:28px 40px 60px}
+
+/* ===== Summary ===== */
+.summary{display:flex;gap:10px;margin-bottom:24px;flex-wrap:wrap;animation:fadeUp .5s ease}
+.s-card{flex:1 1 0;min-width:100px;padding:20px 16px;background:#fff;border:1px solid #E9ECEF;border-radius:14px;cursor:pointer;transition:all .25s cubic-bezier(.4,0,.2,1);text-align:center}
+.s-card:hover{transform:translateY(-2px);box-shadow:0 6px 20px rgba(0,0,0,.08)}
+.s-card.active{border:none;transform:translateY(-2px);color:#fff}
+.s-card .num{font-size:28px;font-weight:800;font-family:'Outfit',sans-serif;letter-spacing:-.03em}
+.s-card .lbl{font-size:12px;font-weight:600;margin-top:4px}
+.s-card:not(.active) .num{color:#212529}
+.s-card:not(.active) .lbl{color:#868E96}
+.s-card.active .lbl{color:rgba(255,255,255,.85)}
+
+/* ===== Filter ===== */
+.filter-bar{background:#fff;border-radius:16px;padding:18px 24px;margin-bottom:20px;border:1px solid #E9ECEF;display:flex;gap:12px;align-items:center;flex-wrap:wrap;animation:fadeUp .5s ease .1s both}
+.filter-bar .f-label{font-size:13px;font-weight:700;color:#495057;margin-right:4px}
+.filter-bar select,.filter-bar input{padding:8px 14px;border-radius:10px;border:1px solid #DEE2E6;font-size:13px;color:#495057;background:#fff;outline:none;font-family:inherit}
+.filter-bar select{cursor:pointer;min-width:120px}
+.search-wrap{flex:1;min-width:200px;position:relative}
+.search-wrap .ico{position:absolute;left:12px;top:50%;transform:translateY(-50%);font-size:14px;color:#ADB5BD;pointer-events:none}
+.search-wrap input{width:100%;padding-left:34px}
+.btn-reset{padding:8px 16px;border-radius:10px;border:1px solid #DEE2E6;background:#F8F9FA;font-size:12px;font-weight:600;color:#868E96;cursor:pointer;font-family:inherit}
+
+.result-count{font-size:13px;color:#868E96;font-weight:600;margin-bottom:12px;padding:0 4px}
+.result-count span{color:#3B5BDB;font-weight:800}
+
+/* ===== Table ===== */
+.table-wrap{background:#fff;border-radius:16px;border:1px solid #E9ECEF;overflow:hidden;animation:fadeUp .5s ease .2s both;box-shadow:0 1px 3px rgba(0,0,0,.03)}
+.table-scroll{overflow-x:auto}
+table{width:100%;border-collapse:collapse;font-size:13px}
+thead tr{background:#F8F9FB}
+th{padding:14px 16px;text-align:left;font-weight:700;color:#868E96;font-size:11px;letter-spacing:.04em;text-transform:uppercase;border-bottom:1px solid #E9ECEF;white-space:nowrap;cursor:pointer;user-select:none}
+th .si{margin-left:4px;transition:color .2s}
+td{padding:14px 16px;border-bottom:1px solid #F1F3F5}
+tbody tr{cursor:pointer;transition:background .15s}
+tbody tr:hover{background:#F8F9FB}
+
+.td-id{font-weight:700;color:#ADB5BD;font-size:12px;font-family:'Outfit',monospace}
+.td-title{font-weight:700;color:#212529;letter-spacing:-.02em}
+.td-text{color:#495057;font-weight:500}
+.td-sub{color:#868E96;font-size:12px;font-weight:500}
+.td-date{color:#868E96;font-size:12px;font-family:'Outfit',monospace}
+
+/* ===== Badge ===== */
+.badge{display:inline-flex;align-items:center;gap:6px;padding:4px 12px;border-radius:20px;font-size:12px;font-weight:600;letter-spacing:-.02em;white-space:nowrap}
+.badge .dot{width:6px;height:6px;border-radius:50%}
+
+/* ===== Inline select ===== */
+.st-sel{padding:4px 8px;border-radius:8px;border:1px solid #DEE2E6;font-size:11px;color:#495057;background:#F8F9FA;cursor:pointer;outline:none;font-family:inherit}
+
+/* ===== Empty ===== */
+.empty{padding:60px;text-align:center;color:#ADB5BD}
+.empty .icon{font-size:36px;margin-bottom:12px}
+.empty .t{font-weight:700;font-size:15px;margin-bottom:4px}
+.empty .d{font-size:13px}
+
+/* ===== Loading ===== */
+.loading{display:flex;flex-direction:column;align-items:center;justify-content:center;padding:80px 20px;color:#868E96}
+.spinner{width:32px;height:32px;border:3px solid #E9ECEF;border-top-color:#7048E8;border-radius:50%;animation:spin .7s linear infinite;margin-bottom:16px}
+
+/* ===== Modal ===== */
+.modal-overlay{position:fixed;inset:0;z-index:1000;display:flex;align-items:center;justify-content:center}
+.modal-bg{position:absolute;inset:0;background:rgba(0,0,0,.45);backdrop-filter:blur(4px)}
+.modal-box{position:relative;background:#fff;border-radius:20px;padding:36px 32px 28px;width:min(560px,92vw);max-height:88vh;overflow-y:auto;box-shadow:0 25px 60px rgba(0,0,0,.2);animation:modalIn .3s ease}
+
+.modal-header{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:24px}
+.modal-header h2{font-size:22px;font-weight:800;color:#212529;letter-spacing:-.03em}
+.modal-header .tid{font-size:11px;font-weight:700;color:#ADB5BD;letter-spacing:.08em;margin-bottom:6px}
+.btn-close{background:#F1F3F5;border:none;border-radius:10px;width:36px;height:36px;cursor:pointer;font-size:18px;color:#868E96;display:flex;align-items:center;justify-content:center}
+
+/* ===== Form ===== */
+.form-grid{display:grid;grid-template-columns:1fr 1fr;gap:16px 20px}
+.form-grid .full{grid-column:1/-1}
+.form-grid label{display:block;font-size:11px;font-weight:700;color:#868E96;margin-bottom:6px;letter-spacing:.04em}
+.form-grid input,.form-grid select{width:100%;padding:10px 14px;border-radius:10px;border:1px solid #DEE2E6;font-size:14px;outline:none;font-family:inherit;background:#fff}
+.form-grid input.err,.form-grid select.err{border:2px solid #FF6B6B}
+.err-msg{font-size:11px;color:#FF6B6B;margin-top:4px;font-weight:600}
+
+/* ===== Detail ===== */
+.detail-grid{display:grid;grid-template-columns:1fr 1fr;gap:16px 24px;margin-bottom:24px}
+.detail-grid .lb{font-size:11px;font-weight:700;color:#ADB5BD;margin-bottom:4px;letter-spacing:.04em}
+.detail-grid .vl{font-size:14px;font-weight:600;color:#495057}
+.detail-sec{margin-bottom:20px}
+.detail-sec .lb{font-size:11px;font-weight:700;color:#ADB5BD;margin-bottom:4px;letter-spacing:.04em}
+.detail-sec .vl{font-size:14px;color:#495057;line-height:1.6}
+
+/* ===== History ===== */
+.history-section{margin-top:20px;padding-top:16px;border-top:1px solid #F1F3F5}
+.history-section h4{font-size:12px;font-weight:700;color:#868E96;margin-bottom:12px}
+.history-item{display:flex;align-items:center;gap:10px;padding:8px 0;font-size:12px;color:#495057}
+.history-item .arrow{color:#ADB5BD}
+.history-item .time{color:#ADB5BD;font-size:11px;margin-left:auto;font-family:'Outfit',monospace}
+
+/* ===== Status bar ===== */
+.status-bar{display:flex;align-items:center;gap:12px;padding-top:16px;border-top:1px solid #F1F3F5;flex-wrap:wrap}
+.status-bar .tit{font-size:12px;font-weight:700;color:#868E96}
+.status-btns{display:flex;gap:6px;flex-wrap:wrap}
+.s-btn{padding:6px 14px;border-radius:20px;font-size:12px;font-weight:600;cursor:pointer;transition:all .2s;font-family:inherit}
+
+.modal-footer{display:flex;gap:10px;justify-content:flex-end;margin-top:28px}
+.btn-cancel{padding:10px 24px;border-radius:10px;border:1px solid #DEE2E6;background:#fff;font-size:14px;font-weight:600;color:#868E96;cursor:pointer;font-family:inherit}
+.btn-submit{padding:10px 28px;border-radius:10px;border:none;background:linear-gradient(135deg,#748FFC,#7048E8);color:#fff;font-size:14px;font-weight:700;cursor:pointer;box-shadow:0 4px 15px rgba(112,72,232,.3);font-family:inherit}
+.btn-submit:hover{box-shadow:0 6px 20px rgba(112,72,232,.4)}
+.btn-delete{padding:10px 20px;border-radius:10px;border:1px solid #FF6B6B;background:#fff;font-size:13px;font-weight:600;color:#FF6B6B;cursor:pointer;font-family:inherit;margin-right:auto}
+.btn-delete:hover{background:#FFF5F5}
+
+/* ===== Toast ===== */
+.toast{position:fixed;top:24px;right:24px;z-index:2000;padding:14px 24px;border-radius:12px;color:#fff;font-size:14px;font-weight:600;box-shadow:0 8px 30px rgba(0,0,0,.15);animation:fadeUp .3s ease}
+.toast.success{background:#2B8A3E}
+.toast.error{background:#E03131}
+
+@media(max-width:768px){
+  .header{padding:16px 20px}
+  .main{padding:20px 16px 40px}
+  .summary{gap:6px}
+  .s-card{min-width:70px;padding:14px 8px}
+  .s-card .num{font-size:20px}
+  .filter-bar{padding:14px 16px}
+}
+</style>
+</head>
+<body>
+
+<div id="app" v-cloak>
+
+  <!-- Header -->
+  <header class="header">
+    <div class="header-inner">
+      <div class="logo">
+        <div class="logo-icon">⚡</div>
+        <div>
+          <h1>AI 과제 관리</h1>
+          <div class="sub">Task Management Platform</div>
+        </div>
+      </div>
+      <button class="btn-add" @click="showAdd = true">
+        <span style="font-size:18px;line-height:1">+</span> 과제 추가
+      </button>
+    </div>
+  </header>
+
+  <div class="main">
+
+    <!-- Loading -->
+    <div v-if="loading" class="loading">
+      <div class="spinner"></div>
+      <div>데이터를 불러오는 중...</div>
+    </div>
+
+    <template v-else>
+
+      <!-- Summary Cards -->
+      <div class="summary">
+        <div class="s-card" :class="{active: !filterStatus}"
+             :style="!filterStatus ? 'background:#343A40;box-shadow:0 8px 25px #343A4044' : ''"
+             @click="filterStatus = null">
+          <div class="num">{{ tasks.length }}</div>
+          <div class="lbl">전체 과제</div>
+        </div>
+        <div v-for="(s, i) in statuses" :key="s"
+             class="s-card" :class="{active: filterStatus === s}"
+             :style="filterStatus === s ? `background:${summaryColors[i+1]};box-shadow:0 8px 25px ${summaryColors[i+1]}44` : ''"
+             @click="filterStatus = filterStatus === s ? null : s">
+          <div class="num">{{ countByStatus(s) }}</div>
+          <div class="lbl">{{ s }}</div>
+        </div>
+      </div>
+
+      <!-- Filter -->
+      <div class="filter-bar">
+        <div class="f-label">필터</div>
+        <select v-model="filterTeam">
+          <option value="">전체 부서</option>
+          <option v-for="d in departments" :key="d" :value="d">{{ d }}</option>
+        </select>
+        <select v-model="filterManager">
+          <option value="">전체 담당자</option>
+          <option v-for="m in managers" :key="m" :value="m">{{ m }}</option>
+        </select>
+        <div class="search-wrap">
+          <span class="ico">🔍</span>
+          <input v-model="keyword" placeholder="과제명, ID, 키워드 검색...">
+        </div>
+        <button v-if="hasFilter" class="btn-reset" @click="clearFilters">초기화</button>
+      </div>
+
+      <!-- Count -->
+      <div class="result-count">총 <span>{{ filtered.length }}</span>건</div>
+
+      <!-- Table -->
+      <div class="table-wrap">
+        <div class="table-scroll">
+          <table>
+            <thead>
+              <tr>
+                <th style="width:90px" @click="toggleSort('id')">ID <span class="si" :style="{color: sortCol==='id'?'#3B5BDB':'', opacity: sortCol==='id'?1:0.25}">{{ sortIcon('id') }}</span></th>
+                <th @click="toggleSort('title')">과제명 <span class="si" :style="{color: sortCol==='title'?'#3B5BDB':'', opacity: sortCol==='title'?1:0.25}">{{ sortIcon('title') }}</span></th>
+                <th style="width:110px" @click="toggleSort('team')">부서 <span class="si" :style="{color: sortCol==='team'?'#3B5BDB':'', opacity: sortCol==='team'?1:0.25}">{{ sortIcon('team') }}</span></th>
+                <th style="width:90px" @click="toggleSort('manager')">담당자 <span class="si" :style="{color: sortCol==='manager'?'#3B5BDB':'', opacity: sortCol==='manager'?1:0.25}">{{ sortIcon('manager') }}</span></th>
+                <th style="width:120px" @click="toggleSort('status')">상태 <span class="si" :style="{color: sortCol==='status'?'#3B5BDB':'', opacity: sortCol==='status'?1:0.25}">{{ sortIcon('status') }}</span></th>
+                <th style="width:120px" @click="toggleSort('ai_area')">AI 영역 <span class="si" :style="{color: sortCol==='ai_area'?'#3B5BDB':'', opacity: sortCol==='ai_area'?1:0.25}">{{ sortIcon('ai_area') }}</span></th>
+                <th style="width:100px" @click="toggleSort('start_date')">시작일 <span class="si" :style="{color: sortCol==='start_date'?'#3B5BDB':'', opacity: sortCol==='start_date'?1:0.25}">{{ sortIcon('start_date') }}</span></th>
+                <th style="width:110px" @click="toggleSort('end_date')">완료 예정일 <span class="si" :style="{color: sortCol==='end_date'?'#3B5BDB':'', opacity: sortCol==='end_date'?1:0.25}">{{ sortIcon('end_date') }}</span></th>
+                <th style="width:90px">상태 변경</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr v-if="filtered.length === 0">
+                <td colspan="9">
+                  <div class="empty">
+                    <div class="icon">📋</div>
+                    <div class="t">결과가 없습니다</div>
+                    <div class="d">필터 조건을 변경해 보세요</div>
+                  </div>
+                </td>
+              </tr>
+              <tr v-for="(t, i) in filtered" :key="t.id" @click="openDetail(t)"
+                  :style="{animation: `slideRow .3s ease ${i*0.03}s both`}">
+                <td class="td-id">{{ t.id }}</td>
+                <td class="td-title">{{ t.title }}</td>
+                <td class="td-text">{{ t.team }}</td>
+                <td class="td-text">{{ t.manager }}</td>
+                <td><span class="badge" :style="{background: sc(t.status).bg, color: sc(t.status).text}"><span class="dot" :style="{background: sc(t.status).dot}"></span>{{ t.status }}</span></td>
+                <td class="td-sub">{{ t.ai_area }}</td>
+                <td class="td-date">{{ t.start_date }}</td>
+                <td class="td-date">{{ t.end_date || '-' }}</td>
+                <td @click.stop>
+                  <select class="st-sel" :value="t.status" @change="changeStatus(t, $event.target.value)">
+                    <option v-for="s in statuses" :key="s" :value="s">{{ s }}</option>
+                  </select>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+    </template>
+  </div>
+
+  <!-- ===== Add Modal ===== -->
+  <div v-if="showAdd" class="modal-overlay" @click.self="showAdd = false">
+    <div class="modal-bg" @click="showAdd = false"></div>
+    <div class="modal-box">
+      <div class="modal-header">
+        <h2>새 과제 등록</h2>
+        <button class="btn-close" @click="showAdd = false">✕</button>
+      </div>
+      <div class="form-grid">
+        <div class="full">
+          <label>과제명 *</label>
+          <input v-model="form.title" :class="{err: errors.title}" placeholder="과제명">
+          <div v-if="errors.title" class="err-msg">필수 입력</div>
+        </div>
+        <div>
+          <label>부서</label>
+          <select v-model="form.team">
+            <option v-for="d in departments" :key="d" :value="d">{{ d }}</option>
+          </select>
+        </div>
+        <div>
+          <label>담당자 *</label>
+          <input v-model="form.manager" :class="{err: errors.manager}" placeholder="담당자">
+          <div v-if="errors.manager" class="err-msg">필수 입력</div>
+        </div>
+        <div>
+          <label>AI 적용 영역</label>
+          <input v-model="form.ai_area" placeholder="AI 적용 영역">
+        </div>
+        <div>
+          <label>현재 상태</label>
+          <select v-model="form.status">
+            <option v-for="s in statuses" :key="s" :value="s">{{ s }}</option>
+          </select>
+        </div>
+        <div>
+          <label>시작일 *</label>
+          <input type="date" v-model="form.start_date" :class="{err: errors.start_date}">
+          <div v-if="errors.start_date" class="err-msg">필수 입력</div>
+        </div>
+        <div>
+          <label>완료 예정일</label>
+          <input type="date" v-model="form.end_date">
+        </div>
+        <div class="full">
+          <label>목표</label>
+          <input v-model="form.goal" placeholder="목표">
+        </div>
+        <div class="full">
+          <label>기대효과</label>
+          <input v-model="form.effect" placeholder="기대효과">
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn-cancel" @click="showAdd = false">취소</button>
+        <button class="btn-submit" @click="submitTask">등록</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===== Detail Modal ===== -->
+  <div v-if="detail" class="modal-overlay" @click.self="detail = null">
+    <div class="modal-bg" @click="detail = null"></div>
+    <div class="modal-box">
+      <div class="modal-header">
+        <div>
+          <div class="tid">{{ detail.id }}</div>
+          <h2>{{ detail.title }}</h2>
+        </div>
+        <button class="btn-close" @click="detail = null">✕</button>
+      </div>
+      <div class="detail-grid">
+        <div><div class="lb">부서</div><div class="vl">{{ detail.team }}</div></div>
+        <div><div class="lb">담당자</div><div class="vl">{{ detail.manager }}</div></div>
+        <div><div class="lb">시작일</div><div class="vl">{{ detail.start_date }}</div></div>
+        <div><div class="lb">완료 예정일</div><div class="vl">{{ detail.end_date || '-' }}</div></div>
+        <div><div class="lb">AI 적용 영역</div><div class="vl">{{ detail.ai_area }}</div></div>
+        <div><div class="lb">등록일</div><div class="vl">{{ detail.created_at?.split('T')[0] }}</div></div>
+      </div>
+      <div class="detail-sec">
+        <div class="lb">목표</div>
+        <div class="vl">{{ detail.goal || '-' }}</div>
+      </div>
+      <div class="detail-sec">
+        <div class="lb">기대효과</div>
+        <div class="vl">{{ detail.effect || '-' }}</div>
+      </div>
+      <div class="status-bar">
+        <span class="tit">상태 변경</span>
+        <div class="status-btns">
+          <button v-for="s in statuses" :key="s" class="s-btn"
+                  :style="{border: s===detail.status ? '2px solid '+sc(s).dot : '1px solid #DEE2E6', background: s===detail.status ? sc(s).bg : '#fff', color: s===detail.status ? sc(s).text : '#868E96'}"
+                  @click="changeStatus(detail, s)">{{ s }}</button>
+        </div>
+      </div>
+
+      <!-- 변경 이력 -->
+      <div v-if="history.length" class="history-section">
+        <h4>변경 이력</h4>
+        <div v-for="h in history" :key="h.id" class="history-item">
+          <span class="badge" :style="{background: sc(h.before_status).bg, color: sc(h.before_status).text, padding:'2px 8px', fontSize:'11px'}"><span class="dot" :style="{background: sc(h.before_status).dot, width:'5px',height:'5px'}"></span>{{ h.before_status }}</span>
+          <span class="arrow">→</span>
+          <span class="badge" :style="{background: sc(h.after_status).bg, color: sc(h.after_status).text, padding:'2px 8px', fontSize:'11px'}"><span class="dot" :style="{background: sc(h.after_status).dot, width:'5px',height:'5px'}"></span>{{ h.after_status }}</span>
+          <span style="font-size:11px;color:#868E96">{{ h.changed_by }}</span>
+          <span class="time">{{ h.changed_at?.split('T')[0] }}</span>
+        </div>
+      </div>
+
+      <div class="modal-footer" style="margin-top:24px">
+        <button class="btn-delete" @click="deleteTask(detail.id)">삭제</button>
+        <button class="btn-cancel" @click="detail = null">닫기</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Toast -->
+  <div v-if="toast.show" class="toast" :class="toast.type">{{ toast.msg }}</div>
+
+</div>
+
+<script>
+const { createApp, ref, computed, onMounted, watch } = Vue;
+
+const API = '/api';
+
+const STATUS_COLORS = {
+  "아이디어": { bg:"#F0F4FF", text:"#3B5BDB", dot:"#3B5BDB" },
+  "PoC":      { bg:"#FFF4E6", text:"#E8590C", dot:"#E8590C" },
+  "Pilot":    { bg:"#F3F0FF", text:"#7048E8", dot:"#7048E8" },
+  "현장 적용": { bg:"#E6FCF5", text:"#0CA678", dot:"#0CA678" },
+  "개발 완료": { bg:"#EBFBEE", text:"#2B8A3E", dot:"#2B8A3E" },
+  "보류":      { bg:"#F1F3F5", text:"#868E96", dot:"#868E96" },
+};
+
+createApp({
+  setup() {
+    const statuses = ["아이디어","PoC","Pilot","현장 적용","개발 완료","보류"];
+    const departments = ["AI혁신팀","설비팀","품질팀","생산팀","물류팀","경영지원팀"];
+    const summaryColors = ["#343A40","#3B5BDB","#E8590C","#7048E8","#0CA678","#2B8A3E","#868E96"];
+
+    const tasks = ref([]);
+    const loading = ref(true);
+    const filterStatus = ref(null);
+    const filterTeam = ref("");
+    const filterManager = ref("");
+    const keyword = ref("");
+    const sortCol = ref(null);
+    const sortDir = ref("asc");
+
+    const showAdd = ref(false);
+    const form = ref({ title:"", team:"AI혁신팀", manager:"", status:"PoC", goal:"", ai_area:"", start_date:"", end_date:"", effect:"" });
+    const errors = ref({});
+
+    const detail = ref(null);
+    const history = ref([]);
+
+    const toast = ref({ show:false, msg:"", type:"success" });
+
+    function showToast(msg, type="success") {
+      toast.value = { show:true, msg, type };
+      setTimeout(() => toast.value.show = false, 2500);
+    }
+
+    // ===== API 호출 =====
+    async function fetchTasks() {
+      try {
+        const res = await fetch(`${API}/tasks`);
+        tasks.value = await res.json();
+      } catch(e) {
+        showToast("서버 연결 실패. server.py가 실행 중인지 확인하세요.", "error");
+      } finally {
+        loading.value = false;
+      }
+    }
+
+    async function fetchHistory(taskId) {
+      try {
+        const res = await fetch(`${API}/tasks/${taskId}/history`);
+        history.value = await res.json();
+      } catch(e) { history.value = []; }
+    }
+
+    // ===== Computed =====
+    const managers = computed(() => [...new Set(tasks.value.map(t => t.manager))]);
+    const hasFilter = computed(() => !!(filterStatus.value || filterTeam.value || filterManager.value || keyword.value));
+
+    const filtered = computed(() => {
+      let r = [...tasks.value];
+      if (filterStatus.value) r = r.filter(t => t.status === filterStatus.value);
+      if (filterTeam.value) r = r.filter(t => t.team === filterTeam.value);
+      if (filterManager.value) r = r.filter(t => t.manager === filterManager.value);
+      if (keyword.value) {
+        const kw = keyword.value;
+        r = r.filter(t => t.title.includes(kw) || t.id.includes(kw) || (t.goal||'').includes(kw) || (t.ai_area||'').includes(kw));
+      }
+      if (sortCol.value) {
+        r.sort((a, b) => {
+          const av = a[sortCol.value]||"", bv = b[sortCol.value]||"";
+          return sortDir.value === "asc" ? av.localeCompare(bv) : bv.localeCompare(av);
+        });
+      }
+      return r;
+    });
+
+    function countByStatus(s) { return tasks.value.filter(t => t.status === s).length; }
+    function sc(status) { return STATUS_COLORS[status] || STATUS_COLORS["보류"]; }
+    function clearFilters() { filterStatus.value=null; filterTeam.value=""; filterManager.value=""; keyword.value=""; }
+
+    function toggleSort(col) {
+      if (sortCol.value===col) sortDir.value = sortDir.value==="asc"?"desc":"asc";
+      else { sortCol.value=col; sortDir.value="asc"; }
+    }
+    function sortIcon(col) { return sortCol.value===col ? (sortDir.value==="asc"?"↑":"↓") : "↕"; }
+
+    // ===== 과제 등록 =====
+    async function submitTask() {
+      const errs = {};
+      if (!form.value.title.trim()) errs.title = true;
+      if (!form.value.manager.trim()) errs.manager = true;
+      if (!form.value.start_date) errs.start_date = true;
+      errors.value = errs;
+      if (Object.keys(errs).length) return;
+
+      try {
+        const res = await fetch(`${API}/tasks`, {
+          method:"POST",
+          headers:{"Content-Type":"application/json"},
+          body: JSON.stringify(form.value)
+        });
+        if (!res.ok) throw new Error();
+        await fetchTasks();
+        showAdd.value = false;
+        form.value = { title:"", team:"AI혁신팀", manager:"", status:"PoC", goal:"", ai_area:"", start_date:"", end_date:"", effect:"" };
+        errors.value = {};
+        showToast("과제가 등록되었습니다");
+      } catch(e) { showToast("등록 실패", "error"); }
+    }
+
+    // ===== 상태 변경 =====
+    async function changeStatus(task, newStatus) {
+      if (task.status === newStatus) return;
+      try {
+        const res = await fetch(`${API}/tasks/${task.id}/status`, {
+          method:"PATCH",
+          headers:{"Content-Type":"application/json"},
+          body: JSON.stringify({ status: newStatus })
+        });
+        if (!res.ok) throw new Error();
+        const updated = await res.json();
+        // 로컬 업데이트
+        const idx = tasks.value.findIndex(t => t.id === task.id);
+        if (idx !== -1) tasks.value[idx] = updated;
+        if (detail.value && detail.value.id === task.id) {
+          detail.value = updated;
+          fetchHistory(task.id);
+        }
+        showToast(`상태 변경: ${newStatus}`);
+      } catch(e) { showToast("상태 변경 실패", "error"); }
+    }
+
+    // ===== 상세 보기 =====
+    function openDetail(task) {
+      detail.value = { ...task };
+      fetchHistory(task.id);
+    }
+
+    // ===== 삭제 =====
+    async function deleteTask(taskId) {
+      if (!confirm("정말 삭제하시겠습니까?")) return;
+      try {
+        const res = await fetch(`${API}/tasks/${taskId}`, { method:"DELETE" });
+        if (!res.ok) throw new Error();
+        await fetchTasks();
+        detail.value = null;
+        showToast("삭제 완료");
+      } catch(e) { showToast("삭제 실패", "error"); }
+    }
+
+    onMounted(fetchTasks);
+
+    return {
+      statuses, departments, summaryColors, tasks, loading,
+      filterStatus, filterTeam, filterManager, keyword,
+      sortCol, sortDir, showAdd, form, errors, detail, history, toast,
+      managers, hasFilter, filtered,
+      countByStatus, sc, clearFilters, toggleSort, sortIcon,
+      submitTask, changeStatus, openDetail, deleteTask
+    };
+  }
+}).mount('#app');
+</script>
+</body>
+</html>
