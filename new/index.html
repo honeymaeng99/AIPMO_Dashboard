@@ -196,6 +196,16 @@ tbody tr:hover{background:#F8F9FB}
 .btn-submit:hover{box-shadow:0 6px 20px rgba(112,72,232,.4)}
 .btn-delete{padding:10px 20px;border-radius:10px;border:1px solid #FF6B6B;background:#fff;font-size:13px;font-weight:600;color:#FF6B6B;cursor:pointer;font-family:inherit;margin-right:auto}
 .btn-delete:hover{background:#FFF5F5}
+.btn-edit{padding:8px 18px;border-radius:10px;border:1px solid #748FFC;background:#F0F4FF;font-size:13px;font-weight:700;color:#3B5BDB;cursor:pointer;font-family:inherit;display:flex;align-items:center;gap:6px;transition:all .2s}
+.btn-edit:hover{background:#DCE4FF}
+.btn-save{padding:8px 18px;border-radius:10px;border:none;background:linear-gradient(135deg,#748FFC,#7048E8);font-size:13px;font-weight:700;color:#fff;cursor:pointer;font-family:inherit;display:flex;align-items:center;gap:6px;transition:all .2s;box-shadow:0 4px 12px rgba(112,72,232,.3)}
+.btn-save:hover{box-shadow:0 6px 16px rgba(112,72,232,.4)}
+.btn-edit-cancel{padding:8px 18px;border-radius:10px;border:1px solid #DEE2E6;background:#fff;font-size:13px;font-weight:600;color:#868E96;cursor:pointer;font-family:inherit;transition:all .2s}
+.edit-input{width:100%;padding:8px 12px;border-radius:8px;border:1px solid #E9ECEF;font-size:14px;outline:none;font-family:inherit;background:#FAFBFC;transition:border .2s}
+.edit-input:focus{border-color:#748FFC;background:#fff}
+.edit-select{width:100%;padding:8px 12px;border-radius:8px;border:1px solid #E9ECEF;font-size:14px;outline:none;font-family:inherit;background:#FAFBFC;cursor:pointer}
+.edit-textarea{width:100%;padding:8px 12px;border-radius:8px;border:1px solid #E9ECEF;font-size:14px;outline:none;font-family:inherit;background:#FAFBFC;resize:vertical;min-height:60px}
+.edit-checkbox-wrap{display:flex;align-items:center;gap:6px;cursor:pointer;margin-top:4px}
 
 /* ===== Toast ===== */
 .toast{position:fixed;top:24px;right:24px;z-index:2000;padding:14px 24px;border-radius:12px;color:#fff;font-size:14px;font-weight:600;box-shadow:0 8px 30px rgba(0,0,0,.15);animation:fadeUp .3s ease}
@@ -223,7 +233,7 @@ tbody tr:hover{background:#F8F9FB}
         <div class="logo-icon">⚡</div>
         <div>
           <h1>AI 과제 관리</h1>
-          <div class="sub">Task Management Platform</div>
+          <div class="sub">Project Management Platform</div>
         </div>
       </div>
       <button class="btn-add" @click="showAdd = true">
@@ -262,6 +272,10 @@ tbody tr:hover{background:#F8F9FB}
       <!-- Filter -->
       <div class="filter-bar">
         <div class="f-label">필터</div>
+        <select v-model="filterStatus">
+          <option :value="null">전체 상태</option>
+          <option v-for="s in statuses" :key="s" :value="s">{{ s }}</option>
+        </select>
         <select v-model="filterDomain">
           <option value="">전체 도메인</option>
           <option v-for="d in domains" :key="d" :value="d">{{ d }}</option>
@@ -269,10 +283,6 @@ tbody tr:hover{background:#F8F9FB}
         <select v-model="filterTeam">
           <option value="">전체 실행/대표팀</option>
           <option v-for="d in teams" :key="d" :value="d">{{ d }}</option>
-        </select>
-        <select v-model="filterLeader">
-          <option value="">전체 담당자</option>
-          <option v-for="m in leaders" :key="m" :value="m">{{ m }}</option>
         </select>
         <div class="search-wrap">
           <span class="ico">🔍</span>
@@ -295,14 +305,15 @@ tbody tr:hover{background:#F8F9FB}
                 <th @click="toggleSort('project_name')">과제명 <span class="si" :style="{color: sortCol==='project_name'?'#3B5BDB':'', opacity: sortCol==='project_name'?1:0.25}">{{ sortIcon('project_name') }}</span></th>
                 <th style="width:100px" @click="toggleSort('domain')">도메인 <span class="si" :style="{color: sortCol==='domain'?'#3B5BDB':'', opacity: sortCol==='domain'?1:0.25}">{{ sortIcon('domain') }}</span></th>
                 <th style="width:110px" @click="toggleSort('owner_team')">실행/대표팀 <span class="si" :style="{color: sortCol==='owner_team'?'#3B5BDB':'', opacity: sortCol==='owner_team'?1:0.25}">{{ sortIcon('owner_team') }}</span></th>
-                <th style="width:90px" @click="toggleSort('project_leader')">담당자 <span class="si" :style="{color: sortCol==='project_leader'?'#3B5BDB':'', opacity: sortCol==='project_leader'?1:0.25}">{{ sortIcon('project_leader') }}</span></th>
-                <th style="width:120px" @click="toggleSort('projects_type')">유형 <span class="si" :style="{color: sortCol==='projects_type'?'#3B5BDB':'', opacity: sortCol==='projects_type'?1:0.25}">{{ sortIcon('projects_type') }}</span></th>
+                <th style="width:90px" @click="toggleSort('executive_owner')">대표 임원 <span class="si" :style="{color: sortCol==='executive_owner'?'#3B5BDB':'', opacity: sortCol==='executive_owner'?1:0.25}">{{ sortIcon('executive_owner') }}</span></th>
+                <th style="width:90px" @click="toggleSort('project_leader')">실무 리더 <span class="si" :style="{color: sortCol==='project_leader'?'#3B5BDB':'', opacity: sortCol==='project_leader'?1:0.25}">{{ sortIcon('project_leader') }}</span></th>
+                <th style="width:120px" @click="toggleSort('projects_type')">과제 유형 <span class="si" :style="{color: sortCol==='projects_type'?'#3B5BDB':'', opacity: sortCol==='projects_type'?1:0.25}">{{ sortIcon('projects_type') }}</span></th>
                 <th style="width:100px" @click="toggleSort('planning_date')">기획일 <span class="si" :style="{color: sortCol==='planning_date'?'#3B5BDB':'', opacity: sortCol==='planning_date'?1:0.25}">{{ sortIcon('planning_date') }}</span></th>
               </tr>
             </thead>
             <tbody>
               <tr v-if="filtered.length === 0">
-                <td colspan="8">
+                <td colspan="9">
                   <div class="empty">
                     <div class="icon">📋</div>
                     <div class="t">결과가 없습니다</div>
@@ -317,6 +328,7 @@ tbody tr:hover{background:#F8F9FB}
                 <td class="td-title">{{ p.project_name }}</td>
                 <td class="td-text">{{ p.domain }}</td>
                 <td class="td-text">{{ p.owner_team }}</td>
+                <td class="td-text">{{ p.executive_owner }}</td>
                 <td class="td-text">{{ p.project_leader }}</td>
                 <td class="td-sub">{{ p.projects_type || '-' }}</td>
                 <td class="td-date">{{ p.planning_date || '-' }}</td>
@@ -570,7 +582,7 @@ tbody tr:hover{background:#F8F9FB}
     <div class="modal-bg" @click="detail = null"></div>
     <div class="modal-box wide">
       <div style="display:flex;justify-content:flex-end;margin-bottom:-8px">
-        <button class="btn-close" @click="detail = null">✕</button>
+        <button class="btn-close" @click="detail = null; editing = false">✕</button>
       </div>
 
       <!-- 헤더 바 -->
@@ -580,7 +592,15 @@ tbody tr:hover{background:#F8F9FB}
         </span>
         <div style="flex:1">
           <div class="dh-id">{{ detail.id }}</div>
-          <div class="dh-name">{{ detail.project_name }}</div>
+          <div class="dh-name">{{ editing ? '' : detail.project_name }}</div>
+          <input v-if="editing" v-model="editForm.project_name" class="edit-input" style="font-size:18px;font-weight:800;margin-top:4px">
+        </div>
+        <div style="display:flex;gap:8px;align-items:center">
+          <button v-if="!editing" class="btn-edit" @click="startEdit">✏️ 수정</button>
+          <template v-if="editing">
+            <button class="btn-save" @click="updateProject">💾 저장</button>
+            <button class="btn-edit-cancel" @click="cancelEdit">취소</button>
+          </template>
         </div>
       </div>
 
@@ -591,13 +611,29 @@ tbody tr:hover{background:#F8F9FB}
           <span class="sec-text">기본 정보</span>
         </div>
         <div class="detail-grid">
-          <div class="d-item"><div class="lb">도메인</div><div class="vl">{{ detail.domain || '-' }}</div></div>
-          <div class="d-item"><div class="lb">과제 유형</div><div class="vl">{{ detail.projects_type || '-' }}</div></div>
-          <div class="d-item"><div class="lb">협업 부서</div><div class="vl">{{ detail.collaboration_dept || '-' }}</div></div>
+          <div class="d-item"><div class="lb">도메인</div>
+            <div v-if="!editing" class="vl">{{ detail.domain || '-' }}</div>
+            <select v-else v-model="editForm.domain" class="edit-select"><option v-for="d in domains" :key="d" :value="d">{{ d }}</option></select>
+          </div>
+          <div class="d-item"><div class="lb">과제 유형</div>
+            <div v-if="!editing" class="vl">{{ detail.projects_type || '-' }}</div>
+            <input v-else v-model="editForm.projects_type" class="edit-input" placeholder="과제 유형">
+          </div>
+          <div class="d-item"><div class="lb">현재 상태</div>
+            <div v-if="!editing" class="vl">{{ detail.current_status || '-' }}</div>
+            <select v-else v-model="editForm.current_status" class="edit-select"><option v-for="s in statuses" :key="s" :value="s">{{ s }}</option></select>
+          </div>
+          <div class="d-item"><div class="lb">협업 부서</div>
+            <div v-if="!editing" class="vl">{{ detail.collaboration_dept || '-' }}</div>
+            <input v-else v-model="editForm.collaboration_dept" class="edit-input" placeholder="협업 부서">
+          </div>
           <div class="d-item"><div class="lb">등록일</div><div class="vl">{{ detail.created_at?.split('T')[0] || '-' }}</div></div>
         </div>
         <div class="detail-sec" style="margin-top:4px">
-          <div class="d-item"><div class="lb">과제 설명</div><div class="vl">{{ detail.project_description || '-' }}</div></div>
+          <div class="d-item"><div class="lb">과제 설명</div>
+            <div v-if="!editing" class="vl">{{ detail.project_description || '-' }}</div>
+            <textarea v-else v-model="editForm.project_description" class="edit-textarea" placeholder="과제 설명"></textarea>
+          </div>
         </div>
       </div>
 
@@ -608,9 +644,18 @@ tbody tr:hover{background:#F8F9FB}
           <span class="sec-text">조직 정보</span>
         </div>
         <div class="detail-grid" style="grid-template-columns:1fr 1fr 1fr">
-          <div class="d-item"><div class="lb">실행/대표팀</div><div class="vl">{{ detail.owner_team || '-' }}</div></div>
-          <div class="d-item"><div class="lb">대표 임원</div><div class="vl">{{ detail.executive_owner || '-' }}</div></div>
-          <div class="d-item"><div class="lb">과제 리더</div><div class="vl">{{ detail.project_leader || '-' }}</div></div>
+          <div class="d-item"><div class="lb">실행/대표팀</div>
+            <div v-if="!editing" class="vl">{{ detail.owner_team || '-' }}</div>
+            <input v-else v-model="editForm.owner_team" class="edit-input" placeholder="실행/대표팀">
+          </div>
+          <div class="d-item"><div class="lb">대표 임원</div>
+            <div v-if="!editing" class="vl">{{ detail.executive_owner || '-' }}</div>
+            <input v-else v-model="editForm.executive_owner" class="edit-input" placeholder="대표 임원">
+          </div>
+          <div class="d-item"><div class="lb">과제 리더</div>
+            <div v-if="!editing" class="vl">{{ detail.project_leader || '-' }}</div>
+            <input v-else v-model="editForm.project_leader" class="edit-input" placeholder="과제 리더">
+          </div>
         </div>
       </div>
 
@@ -621,11 +666,26 @@ tbody tr:hover{background:#F8F9FB}
           <span class="sec-text">일정</span>
         </div>
         <div class="detail-grid" style="grid-template-columns:repeat(3,1fr)">
-          <div class="d-item"><div class="lb">기획일</div><div class="vl">{{ detail.planning_date || '-' }}</div></div>
-          <div class="d-item"><div class="lb">Data 확보일</div><div class="vl">{{ detail.data_ready_date || '-' }}</div></div>
-          <div class="d-item"><div class="lb">PoC 일자</div><div class="vl">{{ detail.poc_date || '-' }}</div></div>
-          <div class="d-item"><div class="lb">MVP/Pilot 일자</div><div class="vl">{{ detail.mvp_pilot_date || '-' }}</div></div>
-          <div class="d-item"><div class="lb">전면적용일</div><div class="vl">{{ detail.full_deployment_date || '-' }}</div></div>
+          <div class="d-item"><div class="lb">기획일</div>
+            <div v-if="!editing" class="vl">{{ detail.planning_date || '-' }}</div>
+            <input v-else type="date" v-model="editForm.planning_date" class="edit-input">
+          </div>
+          <div class="d-item"><div class="lb">Data 확보일</div>
+            <div v-if="!editing" class="vl">{{ detail.data_ready_date || '-' }}</div>
+            <input v-else type="date" v-model="editForm.data_ready_date" class="edit-input">
+          </div>
+          <div class="d-item"><div class="lb">PoC 일자</div>
+            <div v-if="!editing" class="vl">{{ detail.poc_date || '-' }}</div>
+            <input v-else type="date" v-model="editForm.poc_date" class="edit-input">
+          </div>
+          <div class="d-item"><div class="lb">MVP/Pilot 일자</div>
+            <div v-if="!editing" class="vl">{{ detail.mvp_pilot_date || '-' }}</div>
+            <input v-else type="date" v-model="editForm.mvp_pilot_date" class="edit-input">
+          </div>
+          <div class="d-item"><div class="lb">전면적용일</div>
+            <div v-if="!editing" class="vl">{{ detail.full_deployment_date || '-' }}</div>
+            <input v-else type="date" v-model="editForm.full_deployment_date" class="edit-input">
+          </div>
         </div>
       </div>
 
@@ -636,20 +696,44 @@ tbody tr:hover{background:#F8F9FB}
           <span class="sec-text">성과 지표</span>
         </div>
         <div class="detail-grid" style="grid-template-columns:repeat(4,1fr)">
-          <div class="d-item"><div class="lb">성과지표 Y1</div><div class="vl">{{ detail.performance_y1 ?? '-' }}</div></div>
-          <div class="d-item"><div class="lb">성과지표 Y2</div><div class="vl">{{ detail.performance_y2 ?? '-' }}</div></div>
-          <div class="d-item"><div class="lb">성과지표 X1</div><div class="vl">{{ detail.performance_x1 ?? '-' }}</div></div>
-          <div class="d-item"><div class="lb">성과지표 X2</div><div class="vl">{{ detail.performance_x2 ?? '-' }}</div></div>
+          <div class="d-item"><div class="lb">성과지표 Y1</div>
+            <div v-if="!editing" class="vl">{{ detail.performance_y1 ?? '-' }}</div>
+            <input v-else type="text" inputmode="decimal" v-model="editForm.performance_y1" class="edit-input" placeholder="숫자 입력">
+          </div>
+          <div class="d-item"><div class="lb">성과지표 Y2</div>
+            <div v-if="!editing" class="vl">{{ detail.performance_y2 ?? '-' }}</div>
+            <input v-else type="text" inputmode="decimal" v-model="editForm.performance_y2" class="edit-input" placeholder="숫자 입력">
+          </div>
+          <div class="d-item"><div class="lb">성과지표 X1</div>
+            <div v-if="!editing" class="vl">{{ detail.performance_x1 ?? '-' }}</div>
+            <input v-else type="text" inputmode="decimal" v-model="editForm.performance_x1" class="edit-input" placeholder="숫자 입력">
+          </div>
+          <div class="d-item"><div class="lb">성과지표 X2</div>
+            <div v-if="!editing" class="vl">{{ detail.performance_x2 ?? '-' }}</div>
+            <input v-else type="text" inputmode="decimal" v-model="editForm.performance_x2" class="edit-input" placeholder="숫자 입력">
+          </div>
         </div>
         <div class="detail-grid" style="margin-top:8px">
-          <div class="d-item"><div class="lb">KPI</div><div class="vl">{{ detail.kpi || '-' }}</div></div>
-          <div class="d-item"><div class="lb">재무 성과 (억 원)</div><div class="vl">{{ detail.financial_performance ?? '-' }}</div></div>
+          <div class="d-item"><div class="lb">KPI</div>
+            <div v-if="!editing" class="vl">{{ detail.kpi || '-' }}</div>
+            <input v-else v-model="editForm.kpi" class="edit-input" placeholder="KPI">
+          </div>
+          <div class="d-item"><div class="lb">재무 성과 (억 원)</div>
+            <div v-if="!editing" class="vl">{{ detail.financial_performance ?? '-' }}</div>
+            <input v-else type="text" inputmode="decimal" v-model="editForm.financial_performance" class="edit-input" placeholder="예: 1.5">
+          </div>
         </div>
         <div class="detail-sec" style="margin-top:8px">
-          <div class="d-item"><div class="lb">기대효과</div><div class="vl">{{ detail.expected_impact || '-' }}</div></div>
+          <div class="d-item"><div class="lb">기대효과</div>
+            <div v-if="!editing" class="vl">{{ detail.expected_impact || '-' }}</div>
+            <input v-else v-model="editForm.expected_impact" class="edit-input" placeholder="기대효과">
+          </div>
         </div>
         <div class="detail-sec">
-          <div class="d-item"><div class="lb">프로세스 지표</div><div class="vl">{{ detail.process_metric || '-' }}</div></div>
+          <div class="d-item"><div class="lb">프로세스 지표</div>
+            <div v-if="!editing" class="vl">{{ detail.process_metric || '-' }}</div>
+            <input v-else v-model="editForm.process_metric" class="edit-input" placeholder="프로세스 지표">
+          </div>
         </div>
       </div>
 
@@ -660,17 +744,35 @@ tbody tr:hover{background:#F8F9FB}
           <span class="sec-text">전략 과제 여부</span>
         </div>
         <div class="detail-strategy-inline">
-          <div class="detail-strategy-chip">
+          <label v-if="editing" class="form-strategy-chip" style="margin:0;cursor:pointer">
+            <span class="chip-dot" :style="{background: editForm.mtc_strategic_project ? '#2B8A3E' : '#CED4DA'}"></span>
+            <input type="checkbox" v-model="editForm.mtc_strategic_project" :true-value="1" :false-value="0" style="display:none">
+            MTC 전략 과제
+            <span class="chip-status" :style="{color: editForm.mtc_strategic_project ? '#2B8A3E' : '#ADB5BD'}">{{ editForm.mtc_strategic_project ? 'YES' : 'NO' }}</span>
+          </label>
+          <div v-else class="detail-strategy-chip">
             <span class="chip-dot" :style="{background: detail.mtc_strategic_project ? '#2B8A3E' : '#CED4DA'}"></span>
             MTC 전략 과제
             <strong :style="{marginLeft:'auto', color: detail.mtc_strategic_project ? '#2B8A3E' : '#ADB5BD'}">{{ detail.mtc_strategic_project ? 'YES' : 'NO' }}</strong>
           </div>
-          <div class="detail-strategy-chip">
+          <label v-if="editing" class="form-strategy-chip" style="margin:0;cursor:pointer">
+            <span class="chip-dot" :style="{background: editForm.aic_strategic_project ? '#2B8A3E' : '#CED4DA'}"></span>
+            <input type="checkbox" v-model="editForm.aic_strategic_project" :true-value="1" :false-value="0" style="display:none">
+            AIC 전략 과제
+            <span class="chip-status" :style="{color: editForm.aic_strategic_project ? '#2B8A3E' : '#ADB5BD'}">{{ editForm.aic_strategic_project ? 'YES' : 'NO' }}</span>
+          </label>
+          <div v-else class="detail-strategy-chip">
             <span class="chip-dot" :style="{background: detail.aic_strategic_project ? '#2B8A3E' : '#CED4DA'}"></span>
             AIC 전략 과제
             <strong :style="{marginLeft:'auto', color: detail.aic_strategic_project ? '#2B8A3E' : '#ADB5BD'}">{{ detail.aic_strategic_project ? 'YES' : 'NO' }}</strong>
           </div>
-          <div class="detail-strategy-chip">
+          <label v-if="editing" class="form-strategy-chip" style="margin:0;cursor:pointer">
+            <span class="chip-dot" :style="{background: editForm.dtc_strategic_project ? '#2B8A3E' : '#CED4DA'}"></span>
+            <input type="checkbox" v-model="editForm.dtc_strategic_project" :true-value="1" :false-value="0" style="display:none">
+            DTC 전략 과제
+            <span class="chip-status" :style="{color: editForm.dtc_strategic_project ? '#2B8A3E' : '#ADB5BD'}">{{ editForm.dtc_strategic_project ? 'YES' : 'NO' }}</span>
+          </label>
+          <div v-else class="detail-strategy-chip">
             <span class="chip-dot" :style="{background: detail.dtc_strategic_project ? '#2B8A3E' : '#CED4DA'}"></span>
             DTC 전략 과제
             <strong :style="{marginLeft:'auto', color: detail.dtc_strategic_project ? '#2B8A3E' : '#ADB5BD'}">{{ detail.dtc_strategic_project ? 'YES' : 'NO' }}</strong>
@@ -685,17 +787,37 @@ tbody tr:hover{background:#F8F9FB}
           <span class="sec-text">GPU 자원</span>
         </div>
         <div class="detail-grid" style="grid-template-columns:repeat(3,1fr)">
-          <div class="d-item"><div class="lb">현재 GPU 수량</div><div class="vl">{{ detail.current_gpu_count ?? '-' }}</div></div>
-          <div class="d-item"><div class="lb">현재 GPU 사양</div><div class="vl">{{ detail.current_gpu_spec || '-' }}</div></div>
-          <div class="d-item"><div class="lb">필요 GPU 수량</div><div class="vl">{{ detail.required_gpu_count ?? '-' }}</div></div>
-          <div class="d-item"><div class="lb">필요 GPU 사양</div><div class="vl">{{ detail.required_gpu_spec || '-' }}</div></div>
-          <div class="d-item"><div class="lb">GPU 요청 B300 환산</div><div class="vl">{{ detail.gpu_request_b300_equivalent ?? '-' }}</div></div>
+          <div class="d-item"><div class="lb">현재 GPU 수량</div>
+            <div v-if="!editing" class="vl">{{ detail.current_gpu_count ?? '-' }}</div>
+            <input v-else type="text" inputmode="numeric" v-model="editForm.current_gpu_count" class="edit-input" placeholder="숫자 입력">
+          </div>
+          <div class="d-item"><div class="lb">현재 GPU 사양</div>
+            <div v-if="!editing" class="vl">{{ detail.current_gpu_spec || '-' }}</div>
+            <input v-else v-model="editForm.current_gpu_spec" class="edit-input" placeholder="예: A100, H100">
+          </div>
+          <div class="d-item"><div class="lb">필요 GPU 수량</div>
+            <div v-if="!editing" class="vl">{{ detail.required_gpu_count ?? '-' }}</div>
+            <input v-else type="text" inputmode="numeric" v-model="editForm.required_gpu_count" class="edit-input" placeholder="숫자 입력">
+          </div>
+          <div class="d-item"><div class="lb">필요 GPU 사양</div>
+            <div v-if="!editing" class="vl">{{ detail.required_gpu_spec || '-' }}</div>
+            <input v-else v-model="editForm.required_gpu_spec" class="edit-input" placeholder="예: B300">
+          </div>
+          <div class="d-item"><div class="lb">GPU 요청 B300 환산</div>
+            <div v-if="!editing" class="vl">{{ detail.gpu_request_b300_equivalent ?? '-' }}</div>
+            <input v-else type="text" inputmode="decimal" v-model="editForm.gpu_request_b300_equivalent" class="edit-input" placeholder="숫자 입력">
+          </div>
           <div class="d-item">
             <div class="lb">GPU 요청 승인</div>
-            <div class="vl" style="display:flex;align-items:center;gap:6px">
+            <div v-if="!editing" class="vl" style="display:flex;align-items:center;gap:6px">
               <span :style="{width:'10px',height:'10px',borderRadius:'50%',display:'inline-block',background: detail.gpu_request_approved ? '#2B8A3E' : '#CED4DA'}"></span>
               <span :style="{color: detail.gpu_request_approved ? '#2B8A3E' : '#ADB5BD', fontWeight:700}">{{ detail.gpu_request_approved ? 'YES' : 'NO' }}</span>
             </div>
+            <label v-else class="edit-checkbox-wrap">
+              <input type="checkbox" v-model="editForm.gpu_request_approved" :true-value="1" :false-value="0" style="display:none">
+              <span :style="{width:'10px',height:'10px',borderRadius:'50%',display:'inline-block',background: editForm.gpu_request_approved ? '#2B8A3E' : '#CED4DA'}"></span>
+              <span :style="{color: editForm.gpu_request_approved ? '#2B8A3E' : '#ADB5BD', fontWeight:700, fontSize:'14px'}">{{ editForm.gpu_request_approved ? 'YES' : 'NO' }}</span>
+            </label>
           </div>
         </div>
       </div>
@@ -707,7 +829,10 @@ tbody tr:hover{background:#F8F9FB}
           <span class="sec-text">기타</span>
         </div>
         <div class="detail-sec">
-          <div class="d-item"><div class="lb">추가 지원 요청 사항</div><div class="vl">{{ detail.additional_support_request || '-' }}</div></div>
+          <div class="d-item"><div class="lb">추가 지원 요청 사항</div>
+            <div v-if="!editing" class="vl">{{ detail.additional_support_request || '-' }}</div>
+            <textarea v-else v-model="editForm.additional_support_request" class="edit-textarea" placeholder="추가 지원 요청 사항"></textarea>
+          </div>
         </div>
       </div>
 
@@ -793,6 +918,8 @@ createApp({
 
     const detail = ref(null);
     const history = ref([]);
+    const editing = ref(false);
+    const editForm = ref({});
 
     const toast = ref({ show:false, msg:"", type:"success" });
 
@@ -842,9 +969,16 @@ createApp({
         );
       }
       if (sortCol.value) {
+        const statusOrder = {"기획":0,"Data 확보":1,"PoC":2,"MVP/Pilot":3,"전면적용":4,"Pending/Drop":5};
         r.sort((a, b) => {
-          const av = (a[sortCol.value]||"").toString();
-          const bv = (b[sortCol.value]||"").toString();
+          let av, bv;
+          if (sortCol.value === 'current_status') {
+            av = statusOrder[a.current_status] ?? 99;
+            bv = statusOrder[b.current_status] ?? 99;
+            return sortDir.value === "asc" ? av - bv : bv - av;
+          }
+          av = (a[sortCol.value]||"").toString();
+          bv = (b[sortCol.value]||"").toString();
           return sortDir.value === "asc" ? av.localeCompare(bv) : bv.localeCompare(av);
         });
       }
@@ -928,7 +1062,49 @@ createApp({
     // ===== 상세 보기 =====
     function openDetail(project) {
       detail.value = { ...project };
+      editing.value = false;
+      editForm.value = {};
       fetchHistory(project.id);
+    }
+
+    // ===== 수정 =====
+    function startEdit() {
+      editForm.value = { ...detail.value };
+      editing.value = true;
+    }
+
+    function cancelEdit() {
+      editing.value = false;
+      editForm.value = {};
+    }
+
+    async function updateProject() {
+      const payload = {};
+      for (const [k, v] of Object.entries(editForm.value)) {
+        if (k === 'id' || k === 'created_at' || k === 'updated_at') continue;
+        payload[k] = (v === "" || v === null) ? null : v;
+      }
+      ['financial_performance','performance_y1','performance_y2','performance_x1','performance_x2','gpu_request_b300_equivalent'].forEach(k => {
+        if (payload[k] != null) payload[k] = parseFloat(payload[k]) || null;
+      });
+      ['current_gpu_count','required_gpu_count'].forEach(k => {
+        if (payload[k] != null) payload[k] = parseInt(payload[k]) || null;
+      });
+      try {
+        const res = await fetch(`${API}/projects/${detail.value.id}`, {
+          method:"PUT",
+          headers:{"Content-Type":"application/json"},
+          body: JSON.stringify(payload)
+        });
+        if (!res.ok) throw new Error();
+        const updated = await res.json();
+        detail.value = updated;
+        const idx = projects.value.findIndex(p => p.id === updated.id);
+        if (idx !== -1) projects.value[idx] = updated;
+        editing.value = false;
+        editForm.value = {};
+        showToast("과제가 수정되었습니다");
+      } catch(e) { showToast("수정 실패", "error"); }
     }
 
     // ===== 삭제 =====
@@ -951,7 +1127,8 @@ createApp({
       sortCol, sortDir, showAdd, form, errors, detail, history, toast,
       teams, leaders, hasFilter, filtered,
       countByStatus, sc, clearFilters, toggleSort, sortIcon,
-      submitProject, changeStatus, openDetail, deleteProject
+      submitProject, changeStatus, openDetail, deleteProject,
+      editing, editForm, startEdit, cancelEdit, updateProject
     };
   }
 }).mount('#app');
