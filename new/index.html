@@ -109,6 +109,19 @@ tbody tr:hover{background:#F8F9FB}
 .form-grid input.err,.form-grid select.err{border:2px solid #FF6B6B}
 .err-msg{font-size:11px;color:#FF6B6B;margin-top:4px;font-weight:600}
 
+/* ===== Form Item Card ===== */
+.f-item{background:#fff;border-radius:10px;padding:14px 16px;border:1px solid rgba(0,0,0,.04)}
+.f-item label{display:block;font-size:10px;font-weight:700;color:#ADB5BD;margin-bottom:6px;letter-spacing:.05em;text-transform:uppercase}
+.f-item input,.f-item select,.f-item textarea{width:100%;padding:9px 12px;border-radius:8px;border:1px solid #E9ECEF;font-size:14px;outline:none;font-family:inherit;background:#FAFBFC;transition:border .2s}
+.f-item input:focus,.f-item select:focus,.f-item textarea:focus{border-color:#748FFC;background:#fff}
+.f-item textarea{resize:vertical;min-height:60px}
+.f-item input.err,.f-item select.err{border:2px solid #FF6B6B}
+.form-strategy-chips{display:flex;gap:10px;flex-wrap:wrap}
+.form-strategy-chip{display:flex;align-items:center;gap:8px;padding:12px 18px;background:#fff;border-radius:10px;border:1px solid rgba(0,0,0,.04);font-size:13px;font-weight:600;color:#495057;flex:1;min-width:140px;cursor:pointer;transition:all .2s}
+.form-strategy-chip:hover{box-shadow:0 2px 8px rgba(0,0,0,.06)}
+.form-strategy-chip .chip-dot{width:10px;height:10px;border-radius:50%;flex-shrink:0;transition:background .2s}
+.form-strategy-chip .chip-status{margin-left:auto;font-weight:700;font-size:12px;min-width:32px;text-align:right}
+
 /* ===== Form Section Card ===== */
 .form-section-card{grid-column:1/-1;border-radius:14px;padding:20px 22px 12px;margin-bottom:4px;border:1px solid}
 .form-section-card .form-grid-inner{display:grid;grid-template-columns:1fr 1fr;gap:16px 20px}
@@ -147,22 +160,32 @@ tbody tr:hover{background:#F8F9FB}
 .toggle-inline-item{display:flex;align-items:center;gap:8px;font-size:13px;font-weight:600;color:#495057;cursor:pointer}
 
 /* ===== Detail ===== */
-.detail-grid{display:grid;grid-template-columns:1fr 1fr;gap:16px 24px;margin-bottom:24px}
-.detail-grid .lb{font-size:11px;font-weight:700;color:#ADB5BD;margin-bottom:4px;letter-spacing:.04em}
-.detail-grid .vl{font-size:14px;font-weight:600;color:#495057}
-.detail-sec{margin-bottom:20px}
-.detail-sec .lb{font-size:11px;font-weight:700;color:#ADB5BD;margin-bottom:4px;letter-spacing:.04em}
-.detail-sec .vl{font-size:14px;color:#495057;line-height:1.6}
+.detail-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px 20px;margin-bottom:8px}
+.detail-grid .d-item{background:#fff;border-radius:10px;padding:12px 14px;border:1px solid rgba(0,0,0,.04)}
+.detail-grid .lb{font-size:10px;font-weight:700;color:#ADB5BD;margin-bottom:5px;letter-spacing:.05em;text-transform:uppercase}
+.detail-grid .vl{font-size:14px;font-weight:600;color:#343A40}
+.detail-sec{margin-bottom:8px}
+.detail-sec .d-item{background:#fff;border-radius:10px;padding:12px 14px;border:1px solid rgba(0,0,0,.04)}
+.detail-sec .lb{font-size:10px;font-weight:700;color:#ADB5BD;margin-bottom:5px;letter-spacing:.05em;text-transform:uppercase}
+.detail-sec .vl{font-size:14px;color:#495057;line-height:1.7;font-weight:500}
+.detail-header-bar{display:flex;align-items:center;gap:12px;margin-bottom:20px;padding:16px 18px;background:#fff;border-radius:12px;border:1px solid rgba(0,0,0,.04)}
+.detail-header-bar .dh-id{font-family:'Outfit',monospace;font-size:12px;font-weight:700;color:#ADB5BD;letter-spacing:.06em}
+.detail-header-bar .dh-name{font-size:18px;font-weight:800;color:#212529;letter-spacing:-.02em;flex:1}
+.detail-strategy-inline{display:flex;gap:10px;flex-wrap:wrap}
+.detail-strategy-chip{display:flex;align-items:center;gap:8px;padding:10px 18px;background:#fff;border-radius:10px;border:1px solid rgba(0,0,0,.04);font-size:13px;font-weight:600;color:#495057;flex:1;min-width:140px}
+.detail-strategy-chip .chip-dot{width:10px;height:10px;border-radius:50%;flex-shrink:0}
+.detail-strategy-chip strong{min-width:32px;text-align:right}
 
 /* ===== History ===== */
-.history-section{margin-top:20px;padding-top:16px;border-top:1px solid #F1F3F5}
-.history-section h4{font-size:12px;font-weight:700;color:#868E96;margin-bottom:12px}
-.history-item{display:flex;align-items:center;gap:10px;padding:8px 0;font-size:12px;color:#495057}
+.history-section{margin-top:16px;padding:16px 18px;background:#FAFBFC;border-radius:12px;border:1px solid #E9ECEF}
+.history-section h4{font-size:12px;font-weight:700;color:#868E96;margin-bottom:12px;letter-spacing:.03em}
+.history-item{display:flex;align-items:center;gap:10px;padding:8px 0;font-size:12px;color:#495057;border-bottom:1px solid #F1F3F5}
+.history-item:last-child{border-bottom:none}
 .history-item .arrow{color:#ADB5BD}
 .history-item .time{color:#ADB5BD;font-size:11px;margin-left:auto;font-family:'Outfit',monospace}
 
 /* ===== Status bar ===== */
-.status-bar{display:flex;align-items:center;gap:12px;padding-top:16px;border-top:1px solid #F1F3F5;flex-wrap:wrap}
+.status-bar{display:flex;align-items:center;gap:12px;padding:16px 18px;background:#FAFBFC;border-radius:12px;border:1px solid #E9ECEF;flex-wrap:wrap;margin-top:12px}
 .status-bar .tit{font-size:12px;font-weight:700;color:#868E96}
 .status-btns{display:flex;gap:6px;flex-wrap:wrap}
 .s-btn{padding:6px 14px;border-radius:20px;font-size:12px;font-weight:600;cursor:pointer;transition:all .2s;font-family:inherit}
@@ -268,19 +291,18 @@ tbody tr:hover{background:#F8F9FB}
             <thead>
               <tr>
                 <th style="width:90px" @click="toggleSort('id')">ID <span class="si" :style="{color: sortCol==='id'?'#3B5BDB':'', opacity: sortCol==='id'?1:0.25}">{{ sortIcon('id') }}</span></th>
+                <th style="width:130px" @click="toggleSort('current_status')">상태 <span class="si" :style="{color: sortCol==='current_status'?'#3B5BDB':'', opacity: sortCol==='current_status'?1:0.25}">{{ sortIcon('current_status') }}</span></th>
                 <th @click="toggleSort('project_name')">과제명 <span class="si" :style="{color: sortCol==='project_name'?'#3B5BDB':'', opacity: sortCol==='project_name'?1:0.25}">{{ sortIcon('project_name') }}</span></th>
                 <th style="width:100px" @click="toggleSort('domain')">도메인 <span class="si" :style="{color: sortCol==='domain'?'#3B5BDB':'', opacity: sortCol==='domain'?1:0.25}">{{ sortIcon('domain') }}</span></th>
                 <th style="width:110px" @click="toggleSort('owner_team')">실행/대표팀 <span class="si" :style="{color: sortCol==='owner_team'?'#3B5BDB':'', opacity: sortCol==='owner_team'?1:0.25}">{{ sortIcon('owner_team') }}</span></th>
                 <th style="width:90px" @click="toggleSort('project_leader')">담당자 <span class="si" :style="{color: sortCol==='project_leader'?'#3B5BDB':'', opacity: sortCol==='project_leader'?1:0.25}">{{ sortIcon('project_leader') }}</span></th>
-                <th style="width:130px" @click="toggleSort('current_status')">상태 <span class="si" :style="{color: sortCol==='current_status'?'#3B5BDB':'', opacity: sortCol==='current_status'?1:0.25}">{{ sortIcon('current_status') }}</span></th>
                 <th style="width:120px" @click="toggleSort('projects_type')">유형 <span class="si" :style="{color: sortCol==='projects_type'?'#3B5BDB':'', opacity: sortCol==='projects_type'?1:0.25}">{{ sortIcon('projects_type') }}</span></th>
                 <th style="width:100px" @click="toggleSort('planning_date')">기획일 <span class="si" :style="{color: sortCol==='planning_date'?'#3B5BDB':'', opacity: sortCol==='planning_date'?1:0.25}">{{ sortIcon('planning_date') }}</span></th>
-                <th style="width:90px">상태 변경</th>
               </tr>
             </thead>
             <tbody>
               <tr v-if="filtered.length === 0">
-                <td colspan="9">
+                <td colspan="8">
                   <div class="empty">
                     <div class="icon">📋</div>
                     <div class="t">결과가 없습니다</div>
@@ -291,18 +313,13 @@ tbody tr:hover{background:#F8F9FB}
               <tr v-for="(p, i) in filtered" :key="p.id" @click="openDetail(p)"
                   :style="{animation: `slideRow .3s ease ${i*0.03}s both`}">
                 <td class="td-id">{{ p.id }}</td>
+                <td><span class="badge" :style="{background: sc(p.current_status).bg, color: sc(p.current_status).text}"><span class="dot" :style="{background: sc(p.current_status).dot}"></span>{{ p.current_status }}</span></td>
                 <td class="td-title">{{ p.project_name }}</td>
                 <td class="td-text">{{ p.domain }}</td>
                 <td class="td-text">{{ p.owner_team }}</td>
                 <td class="td-text">{{ p.project_leader }}</td>
-                <td><span class="badge" :style="{background: sc(p.current_status).bg, color: sc(p.current_status).text}"><span class="dot" :style="{background: sc(p.current_status).dot}"></span>{{ p.current_status }}</span></td>
                 <td class="td-sub">{{ p.projects_type || '-' }}</td>
                 <td class="td-date">{{ p.planning_date || '-' }}</td>
-                <td @click.stop>
-                  <select class="st-sel" :value="p.current_status" @change="changeStatus(p, $event.target.value)">
-                    <option v-for="s in statuses" :key="s" :value="s">{{ s }}</option>
-                  </select>
-                </td>
               </tr>
             </tbody>
           </table>
@@ -329,12 +346,12 @@ tbody tr:hover{background:#F8F9FB}
             <span class="sec-text">기본 정보</span>
           </div>
           <div class="form-grid-inner">
-            <div class="full">
+            <div class="full f-item">
               <label>과제명 *</label>
               <input v-model="form.project_name" :class="{err: errors.project_name}" placeholder="과제명을 입력하세요">
               <div v-if="errors.project_name" class="err-msg">필수 입력</div>
             </div>
-            <div>
+            <div class="f-item">
               <label>도메인 *</label>
               <select v-model="form.domain" :class="{err: errors.domain}">
                 <option value="">선택하세요</option>
@@ -342,21 +359,21 @@ tbody tr:hover{background:#F8F9FB}
               </select>
               <div v-if="errors.domain" class="err-msg">필수 입력</div>
             </div>
-            <div>
+            <div class="f-item">
               <label>과제 유형</label>
               <input v-model="form.projects_type" placeholder="예: 예측 분석, 컴퓨터 비전">
             </div>
-            <div>
+            <div class="f-item">
               <label>현재 상태</label>
               <select v-model="form.current_status">
                 <option v-for="s in statuses" :key="s" :value="s">{{ s }}</option>
               </select>
             </div>
-            <div>
+            <div class="f-item">
               <label>협업 부서</label>
               <input v-model="form.collaboration_dept" placeholder="협업 부서">
             </div>
-            <div class="full">
+            <div class="full f-item">
               <label>과제 설명</label>
               <textarea v-model="form.project_description" placeholder="과제에 대한 설명"></textarea>
             </div>
@@ -369,20 +386,22 @@ tbody tr:hover{background:#F8F9FB}
             <div class="sec-icon" style="background:#EDE5FF;color:#7048E8">👥</div>
             <span class="sec-text">조직 정보</span>
           </div>
-          <div class="form-grid-inner">
-            <div>
-              <label>실행/대표팀</label>
-              <input v-model="form.owner_team" placeholder="실행/대표팀">
+          <div class="form-grid-inner" style="grid-template-columns:1fr 1fr 1fr">
+            <div class="f-item">
+              <label>실행/대표팀 *</label>
+              <input v-model="form.owner_team" :class="{err: errors.owner_team}" placeholder="실행/대표팀">
+              <div v-if="errors.owner_team" class="err-msg">필수 입력</div>
             </div>
-            <div>
-              <label>대표 임원</label>
-              <input v-model="form.executive_owner" placeholder="대표 임원">
+            <div class="f-item">
+              <label>대표 임원 *</label>
+              <input v-model="form.executive_owner" :class="{err: errors.executive_owner}" placeholder="대표 임원">
+              <div v-if="errors.executive_owner" class="err-msg">필수 입력</div>
             </div>
-            <div>
-              <label>과제 리더</label>
-              <input v-model="form.project_leader" placeholder="과제 리더">
+            <div class="f-item">
+              <label>과제 리더 *</label>
+              <input v-model="form.project_leader" :class="{err: errors.project_leader}" placeholder="과제 리더">
+              <div v-if="errors.project_leader" class="err-msg">필수 입력</div>
             </div>
-            <div></div>
           </div>
         </div>
 
@@ -392,28 +411,27 @@ tbody tr:hover{background:#F8F9FB}
             <div class="sec-icon" style="background:#FFE0C2;color:#E8590C">📅</div>
             <span class="sec-text">일정</span>
           </div>
-          <div class="form-grid-inner">
-            <div>
+          <div class="form-grid-inner" style="grid-template-columns:1fr 1fr 1fr">
+            <div class="f-item">
               <label>기획일</label>
               <input type="date" v-model="form.planning_date">
             </div>
-            <div>
+            <div class="f-item">
               <label>Data 확보일</label>
               <input type="date" v-model="form.data_ready_date">
             </div>
-            <div>
+            <div class="f-item">
               <label>PoC 일자</label>
               <input type="date" v-model="form.poc_date">
             </div>
-            <div>
+            <div class="f-item">
               <label>MVP/Pilot 일자</label>
               <input type="date" v-model="form.mvp_pilot_date">
             </div>
-            <div>
+            <div class="f-item">
               <label>전면적용일</label>
               <input type="date" v-model="form.full_deployment_date">
             </div>
-            <div></div>
           </div>
         </div>
 
@@ -423,36 +441,38 @@ tbody tr:hover{background:#F8F9FB}
             <div class="sec-icon" style="background:#C3E6CB;color:#2B8A3E">📊</div>
             <span class="sec-text">성과 지표</span>
           </div>
-          <div class="form-grid-inner">
-            <div>
+          <div class="form-grid-inner" style="grid-template-columns:repeat(4,1fr)">
+            <div class="f-item">
               <label>성과지표 Y1</label>
               <input type="text" inputmode="decimal" v-model="form.performance_y1" placeholder="숫자 입력">
             </div>
-            <div>
+            <div class="f-item">
               <label>성과지표 Y2</label>
               <input type="text" inputmode="decimal" v-model="form.performance_y2" placeholder="숫자 입력">
             </div>
-            <div>
+            <div class="f-item">
               <label>성과지표 X1</label>
               <input type="text" inputmode="decimal" v-model="form.performance_x1" placeholder="숫자 입력">
             </div>
-            <div>
+            <div class="f-item">
               <label>성과지표 X2</label>
               <input type="text" inputmode="decimal" v-model="form.performance_x2" placeholder="숫자 입력">
             </div>
-            <div class="full">
+          </div>
+          <div class="form-grid-inner" style="margin-top:10px">
+            <div class="full f-item">
               <label>기대효과</label>
               <input v-model="form.expected_impact" placeholder="기대효과">
             </div>
-            <div>
+            <div class="f-item">
               <label>KPI</label>
               <input v-model="form.kpi" placeholder="KPI">
             </div>
-            <div>
+            <div class="f-item">
               <label>재무 성과 (억 원)</label>
               <input type="text" inputmode="decimal" v-model="form.financial_performance" placeholder="예: 1.5">
             </div>
-            <div class="full">
+            <div class="full f-item">
               <label>프로세스 지표</label>
               <input v-model="form.process_metric" placeholder="프로세스 지표">
             </div>
@@ -465,10 +485,25 @@ tbody tr:hover{background:#F8F9FB}
             <div class="sec-icon" style="background:#FDE68A;color:#B45309">⭐</div>
             <span class="sec-text">전략 과제 여부</span>
           </div>
-          <div class="toggle-inline">
-            <label class="toggle-inline-item"><input type="checkbox" class="toggle-check" v-model="form.mtc_strategic_project" :true-value="1" :false-value="0"><span>MTC 전략 과제</span></label>
-            <label class="toggle-inline-item"><input type="checkbox" class="toggle-check" v-model="form.aic_strategic_project" :true-value="1" :false-value="0"><span>AIC 전략 과제</span></label>
-            <label class="toggle-inline-item"><input type="checkbox" class="toggle-check" v-model="form.dtc_strategic_project" :true-value="1" :false-value="0"><span>DTC 전략 과제</span></label>
+          <div class="form-grid-inner" style="grid-template-columns:1fr 1fr 1fr">
+            <label class="form-strategy-chip" style="margin:0;display:flex;align-items:center;justify-content:center;height:100%">
+              <span class="chip-dot" :style="{background: form.mtc_strategic_project ? '#2B8A3E' : '#CED4DA'}"></span>
+              <input type="checkbox" class="toggle-check" v-model="form.mtc_strategic_project" :true-value="1" :false-value="0" style="display:none">
+              MTC 전략 과제
+              <span class="chip-status" :style="{color: form.mtc_strategic_project ? '#2B8A3E' : '#ADB5BD'}">{{ form.mtc_strategic_project ? 'YES' : 'NO' }}</span>
+            </label>
+            <label class="form-strategy-chip" style="margin:0;display:flex;align-items:center;justify-content:center;height:100%">
+              <span class="chip-dot" :style="{background: form.aic_strategic_project ? '#2B8A3E' : '#CED4DA'}"></span>
+              <input type="checkbox" class="toggle-check" v-model="form.aic_strategic_project" :true-value="1" :false-value="0" style="display:none">
+              AIC 전략 과제
+              <span class="chip-status" :style="{color: form.aic_strategic_project ? '#2B8A3E' : '#ADB5BD'}">{{ form.aic_strategic_project ? 'YES' : 'NO' }}</span>
+            </label>
+            <label class="form-strategy-chip" style="margin:0;display:flex;align-items:center;justify-content:center;height:100%">
+              <span class="chip-dot" :style="{background: form.dtc_strategic_project ? '#2B8A3E' : '#CED4DA'}"></span>
+              <input type="checkbox" class="toggle-check" v-model="form.dtc_strategic_project" :true-value="1" :false-value="0" style="display:none">
+              DTC 전략 과제
+              <span class="chip-status" :style="{color: form.dtc_strategic_project ? '#2B8A3E' : '#ADB5BD'}">{{ form.dtc_strategic_project ? 'YES' : 'NO' }}</span>
+            </label>
           </div>
         </div>
 
@@ -478,33 +513,35 @@ tbody tr:hover{background:#F8F9FB}
             <div class="sec-icon" style="background:#D5D8DC;color:#495057">🖥️</div>
             <span class="sec-text">GPU 자원</span>
           </div>
-          <div class="form-grid-inner">
-            <div>
+          <div class="form-grid-inner" style="grid-template-columns:1fr 1fr 1fr">
+            <div class="f-item">
               <label>현재 GPU 수량</label>
               <input type="text" inputmode="numeric" v-model="form.current_gpu_count" placeholder="숫자 입력">
             </div>
-            <div>
+            <div class="f-item">
               <label>현재 GPU 사양</label>
               <input v-model="form.current_gpu_spec" placeholder="예: A100, H100">
             </div>
-            <div>
+            <div class="f-item">
               <label>필요 GPU 수량</label>
               <input type="text" inputmode="numeric" v-model="form.required_gpu_count" placeholder="숫자 입력">
             </div>
-            <div>
+            <div class="f-item">
               <label>필요 GPU 사양</label>
               <input v-model="form.required_gpu_spec" placeholder="예: B300">
             </div>
-            <div>
+            <div class="f-item">
               <label>GPU 요청 B300 환산</label>
               <input type="text" inputmode="decimal" v-model="form.gpu_request_b300_equivalent" placeholder="숫자 입력">
             </div>
-            <div>
-              <label class="toggle-inline-item" style="padding-top:20px">
-                <input type="checkbox" class="toggle-check" v-model="form.gpu_request_approved" :true-value="1" :false-value="0">
-                <span>GPU 요청 승인 여부</span>
-              </label>
-            </div>
+            <label class="f-item" style="cursor:pointer">
+              <div class="lb" style="text-transform:uppercase">GPU 요청 승인</div>
+              <input type="checkbox" v-model="form.gpu_request_approved" :true-value="1" :false-value="0" style="display:none">
+              <div style="display:flex;align-items:center;gap:6px;margin-top:8px">
+                <span :style="{width:'10px',height:'10px',borderRadius:'50%',display:'inline-block',background: form.gpu_request_approved ? '#2B8A3E' : '#CED4DA'}"></span>
+                <span :style="{color: form.gpu_request_approved ? '#2B8A3E' : '#ADB5BD', fontWeight:700, fontSize:'14px'}">{{ form.gpu_request_approved ? 'YES' : 'NO' }}</span>
+              </div>
+            </label>
           </div>
         </div>
 
@@ -514,11 +551,9 @@ tbody tr:hover{background:#F8F9FB}
             <div class="sec-icon" style="background:#BAE0FF;color:#1C7ED6">💬</div>
             <span class="sec-text">기타</span>
           </div>
-          <div class="form-grid-inner">
-            <div class="full">
-              <label>추가 지원 요청 사항</label>
-              <textarea v-model="form.additional_support_request" placeholder="추가 지원이 필요한 사항을 입력하세요"></textarea>
-            </div>
+          <div class="f-item">
+            <label>추가 지원 요청 사항</label>
+            <textarea v-model="form.additional_support_request" placeholder="추가 지원이 필요한 사항을 입력하세요"></textarea>
           </div>
         </div>
 
@@ -533,40 +568,150 @@ tbody tr:hover{background:#F8F9FB}
   <!-- ===== Detail Modal ===== -->
   <div v-if="detail" class="modal-overlay" @click.self="detail = null">
     <div class="modal-bg" @click="detail = null"></div>
-    <div class="modal-box">
-      <div class="modal-header">
-        <div>
-          <div class="tid">{{ detail.id }}</div>
-          <h2>{{ detail.project_name }}</h2>
-        </div>
+    <div class="modal-box wide">
+      <div style="display:flex;justify-content:flex-end;margin-bottom:-8px">
         <button class="btn-close" @click="detail = null">✕</button>
       </div>
-      <div class="detail-grid">
-        <div><div class="lb">도메인</div><div class="vl">{{ detail.domain }}</div></div>
-        <div><div class="lb">과제 유형</div><div class="vl">{{ detail.projects_type || '-' }}</div></div>
-        <div><div class="lb">실행/대표팀</div><div class="vl">{{ detail.owner_team || '-' }}</div></div>
-        <div><div class="lb">대표 임원</div><div class="vl">{{ detail.executive_owner || '-' }}</div></div>
-        <div><div class="lb">과제 리더</div><div class="vl">{{ detail.project_leader || '-' }}</div></div>
-        <div><div class="lb">협업 부서</div><div class="vl">{{ detail.collaboration_dept || '-' }}</div></div>
-        <div><div class="lb">기획일</div><div class="vl">{{ detail.planning_date || '-' }}</div></div>
-        <div><div class="lb">Data 확보일</div><div class="vl">{{ detail.data_ready_date || '-' }}</div></div>
-        <div><div class="lb">PoC 일자</div><div class="vl">{{ detail.poc_date || '-' }}</div></div>
-        <div><div class="lb">MVP/Pilot 일자</div><div class="vl">{{ detail.mvp_pilot_date || '-' }}</div></div>
-        <div><div class="lb">전면적용일</div><div class="vl">{{ detail.full_deployment_date || '-' }}</div></div>
-        <div><div class="lb">등록일</div><div class="vl">{{ detail.created_at?.split('T')[0] }}</div></div>
+
+      <!-- 헤더 바 -->
+      <div class="detail-header-bar">
+        <span class="badge" :style="{background: sc(detail.current_status).bg, color: sc(detail.current_status).text, padding:'6px 14px', fontSize:'13px'}">
+          <span class="dot" :style="{background: sc(detail.current_status).dot}"></span>{{ detail.current_status }}
+        </span>
+        <div style="flex:1">
+          <div class="dh-id">{{ detail.id }}</div>
+          <div class="dh-name">{{ detail.project_name }}</div>
+        </div>
       </div>
-      <div class="detail-sec">
-        <div class="lb">과제 설명</div>
-        <div class="vl">{{ detail.project_description || '-' }}</div>
+
+      <!-- ── 기본 정보 ── -->
+      <div class="form-section-card sec-basic" style="margin-bottom:12px">
+        <div class="form-section-title">
+          <div class="sec-icon" style="background:#DCE4FF;color:#3B5BDB">📋</div>
+          <span class="sec-text">기본 정보</span>
+        </div>
+        <div class="detail-grid">
+          <div class="d-item"><div class="lb">도메인</div><div class="vl">{{ detail.domain || '-' }}</div></div>
+          <div class="d-item"><div class="lb">과제 유형</div><div class="vl">{{ detail.projects_type || '-' }}</div></div>
+          <div class="d-item"><div class="lb">협업 부서</div><div class="vl">{{ detail.collaboration_dept || '-' }}</div></div>
+          <div class="d-item"><div class="lb">등록일</div><div class="vl">{{ detail.created_at?.split('T')[0] || '-' }}</div></div>
+        </div>
+        <div class="detail-sec" style="margin-top:4px">
+          <div class="d-item"><div class="lb">과제 설명</div><div class="vl">{{ detail.project_description || '-' }}</div></div>
+        </div>
       </div>
-      <div class="detail-sec">
-        <div class="lb">기대효과</div>
-        <div class="vl">{{ detail.expected_impact || '-' }}</div>
+
+      <!-- ── 조직 정보 ── -->
+      <div class="form-section-card sec-org" style="margin-bottom:12px">
+        <div class="form-section-title">
+          <div class="sec-icon" style="background:#EDE5FF;color:#7048E8">👥</div>
+          <span class="sec-text">조직 정보</span>
+        </div>
+        <div class="detail-grid" style="grid-template-columns:1fr 1fr 1fr">
+          <div class="d-item"><div class="lb">실행/대표팀</div><div class="vl">{{ detail.owner_team || '-' }}</div></div>
+          <div class="d-item"><div class="lb">대표 임원</div><div class="vl">{{ detail.executive_owner || '-' }}</div></div>
+          <div class="d-item"><div class="lb">과제 리더</div><div class="vl">{{ detail.project_leader || '-' }}</div></div>
+        </div>
       </div>
-      <div v-if="detail.kpi" class="detail-sec">
-        <div class="lb">KPI</div>
-        <div class="vl">{{ detail.kpi }}</div>
+
+      <!-- ── 일정 ── -->
+      <div class="form-section-card sec-schedule" style="margin-bottom:12px">
+        <div class="form-section-title">
+          <div class="sec-icon" style="background:#FFE0C2;color:#E8590C">📅</div>
+          <span class="sec-text">일정</span>
+        </div>
+        <div class="detail-grid" style="grid-template-columns:repeat(3,1fr)">
+          <div class="d-item"><div class="lb">기획일</div><div class="vl">{{ detail.planning_date || '-' }}</div></div>
+          <div class="d-item"><div class="lb">Data 확보일</div><div class="vl">{{ detail.data_ready_date || '-' }}</div></div>
+          <div class="d-item"><div class="lb">PoC 일자</div><div class="vl">{{ detail.poc_date || '-' }}</div></div>
+          <div class="d-item"><div class="lb">MVP/Pilot 일자</div><div class="vl">{{ detail.mvp_pilot_date || '-' }}</div></div>
+          <div class="d-item"><div class="lb">전면적용일</div><div class="vl">{{ detail.full_deployment_date || '-' }}</div></div>
+        </div>
       </div>
+
+      <!-- ── 성과 지표 ── -->
+      <div class="form-section-card sec-perf" style="margin-bottom:12px">
+        <div class="form-section-title">
+          <div class="sec-icon" style="background:#C3E6CB;color:#2B8A3E">📊</div>
+          <span class="sec-text">성과 지표</span>
+        </div>
+        <div class="detail-grid" style="grid-template-columns:repeat(4,1fr)">
+          <div class="d-item"><div class="lb">성과지표 Y1</div><div class="vl">{{ detail.performance_y1 ?? '-' }}</div></div>
+          <div class="d-item"><div class="lb">성과지표 Y2</div><div class="vl">{{ detail.performance_y2 ?? '-' }}</div></div>
+          <div class="d-item"><div class="lb">성과지표 X1</div><div class="vl">{{ detail.performance_x1 ?? '-' }}</div></div>
+          <div class="d-item"><div class="lb">성과지표 X2</div><div class="vl">{{ detail.performance_x2 ?? '-' }}</div></div>
+        </div>
+        <div class="detail-grid" style="margin-top:8px">
+          <div class="d-item"><div class="lb">KPI</div><div class="vl">{{ detail.kpi || '-' }}</div></div>
+          <div class="d-item"><div class="lb">재무 성과 (억 원)</div><div class="vl">{{ detail.financial_performance ?? '-' }}</div></div>
+        </div>
+        <div class="detail-sec" style="margin-top:8px">
+          <div class="d-item"><div class="lb">기대효과</div><div class="vl">{{ detail.expected_impact || '-' }}</div></div>
+        </div>
+        <div class="detail-sec">
+          <div class="d-item"><div class="lb">프로세스 지표</div><div class="vl">{{ detail.process_metric || '-' }}</div></div>
+        </div>
+      </div>
+
+      <!-- ── 전략 과제 ── -->
+      <div class="form-section-card sec-strategy" style="margin-bottom:12px">
+        <div class="form-section-title">
+          <div class="sec-icon" style="background:#FDE68A;color:#B45309">⭐</div>
+          <span class="sec-text">전략 과제 여부</span>
+        </div>
+        <div class="detail-strategy-inline">
+          <div class="detail-strategy-chip">
+            <span class="chip-dot" :style="{background: detail.mtc_strategic_project ? '#2B8A3E' : '#CED4DA'}"></span>
+            MTC 전략 과제
+            <strong :style="{marginLeft:'auto', color: detail.mtc_strategic_project ? '#2B8A3E' : '#ADB5BD'}">{{ detail.mtc_strategic_project ? 'YES' : 'NO' }}</strong>
+          </div>
+          <div class="detail-strategy-chip">
+            <span class="chip-dot" :style="{background: detail.aic_strategic_project ? '#2B8A3E' : '#CED4DA'}"></span>
+            AIC 전략 과제
+            <strong :style="{marginLeft:'auto', color: detail.aic_strategic_project ? '#2B8A3E' : '#ADB5BD'}">{{ detail.aic_strategic_project ? 'YES' : 'NO' }}</strong>
+          </div>
+          <div class="detail-strategy-chip">
+            <span class="chip-dot" :style="{background: detail.dtc_strategic_project ? '#2B8A3E' : '#CED4DA'}"></span>
+            DTC 전략 과제
+            <strong :style="{marginLeft:'auto', color: detail.dtc_strategic_project ? '#2B8A3E' : '#ADB5BD'}">{{ detail.dtc_strategic_project ? 'YES' : 'NO' }}</strong>
+          </div>
+        </div>
+      </div>
+
+      <!-- ── GPU 자원 ── -->
+      <div class="form-section-card sec-gpu" style="margin-bottom:12px">
+        <div class="form-section-title">
+          <div class="sec-icon" style="background:#D5D8DC;color:#495057">🖥️</div>
+          <span class="sec-text">GPU 자원</span>
+        </div>
+        <div class="detail-grid" style="grid-template-columns:repeat(3,1fr)">
+          <div class="d-item"><div class="lb">현재 GPU 수량</div><div class="vl">{{ detail.current_gpu_count ?? '-' }}</div></div>
+          <div class="d-item"><div class="lb">현재 GPU 사양</div><div class="vl">{{ detail.current_gpu_spec || '-' }}</div></div>
+          <div class="d-item"><div class="lb">필요 GPU 수량</div><div class="vl">{{ detail.required_gpu_count ?? '-' }}</div></div>
+          <div class="d-item"><div class="lb">필요 GPU 사양</div><div class="vl">{{ detail.required_gpu_spec || '-' }}</div></div>
+          <div class="d-item"><div class="lb">GPU 요청 B300 환산</div><div class="vl">{{ detail.gpu_request_b300_equivalent ?? '-' }}</div></div>
+          <div class="d-item">
+            <div class="lb">GPU 요청 승인</div>
+            <div class="vl" style="display:flex;align-items:center;gap:6px">
+              <span :style="{width:'10px',height:'10px',borderRadius:'50%',display:'inline-block',background: detail.gpu_request_approved ? '#2B8A3E' : '#CED4DA'}"></span>
+              <span :style="{color: detail.gpu_request_approved ? '#2B8A3E' : '#ADB5BD', fontWeight:700}">{{ detail.gpu_request_approved ? 'YES' : 'NO' }}</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ── 기타 ── -->
+      <div class="form-section-card sec-etc" style="margin-bottom:12px">
+        <div class="form-section-title">
+          <div class="sec-icon" style="background:#BAE0FF;color:#1C7ED6">💬</div>
+          <span class="sec-text">기타</span>
+        </div>
+        <div class="detail-sec">
+          <div class="d-item"><div class="lb">추가 지원 요청 사항</div><div class="vl">{{ detail.additional_support_request || '-' }}</div></div>
+        </div>
+      </div>
+
+      <!-- ── 상태 변경 ── -->
       <div class="status-bar">
         <span class="tit">상태 변경</span>
         <div class="status-btns">
@@ -721,6 +866,9 @@ createApp({
       const errs = {};
       if (!form.value.project_name.trim()) errs.project_name = true;
       if (!form.value.domain) errs.domain = true;
+      if (!form.value.owner_team?.trim()) errs.owner_team = true;
+      if (!form.value.executive_owner?.trim()) errs.executive_owner = true;
+      if (!form.value.project_leader?.trim()) errs.project_leader = true;
       errors.value = errs;
       if (Object.keys(errs).length) return;
 
