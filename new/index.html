@@ -5,6 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>AI 과제 관리 프로그램</title>
 <script src="https://unpkg.com/vue@3/dist/vue.global.prod.js"></script>
+<script src="https://cdn.sheetjs.com/xlsx-0.20.3/package/dist/xlsx.full.min.js"></script>
 <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;600;700;800&family=Noto+Sans+KR:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 <style>
 *{box-sizing:border-box;margin:0;padding:0}
@@ -207,6 +208,27 @@ tbody tr:hover{background:#F8F9FB}
 .edit-textarea{width:100%;padding:8px 12px;border-radius:8px;border:1px solid #E9ECEF;font-size:14px;outline:none;font-family:inherit;background:#FAFBFC;resize:vertical;min-height:60px}
 .edit-checkbox-wrap{display:flex;align-items:center;gap:6px;cursor:pointer;margin-top:4px}
 
+/* ===== AI Chat ===== */
+.chat-fab{position:fixed;bottom:28px;right:28px;z-index:900;width:56px;height:56px;border-radius:50%;border:none;background:linear-gradient(135deg,#748FFC,#7048E8);color:#fff;font-size:24px;cursor:pointer;box-shadow:0 6px 24px rgba(112,72,232,.4);display:flex;align-items:center;justify-content:center;transition:all .25s}
+.chat-fab:hover{transform:scale(1.08);box-shadow:0 8px 30px rgba(112,72,232,.5)}
+.chat-window{position:fixed;bottom:96px;right:28px;z-index:1100;width:380px;height:520px;background:#fff;border-radius:20px;box-shadow:0 16px 50px rgba(0,0,0,.18);display:flex;flex-direction:column;overflow:hidden;animation:modalIn .25s ease}
+.chat-header{padding:16px 20px;background:linear-gradient(135deg,#1A1B2E,#2D2B55);color:#fff;display:flex;align-items:center;gap:10px}
+.chat-header .ch-icon{width:32px;height:32px;border-radius:10px;background:linear-gradient(135deg,#748FFC,#7048E8);display:flex;align-items:center;justify-content:center;font-size:16px}
+.chat-header .ch-title{flex:1;font-size:14px;font-weight:700}
+.chat-header .ch-sub{font-size:11px;color:rgba(255,255,255,.5);margin-top:1px}
+.chat-header .ch-close{background:none;border:none;color:rgba(255,255,255,.6);font-size:18px;cursor:pointer;padding:4px}
+.chat-header .ch-close:hover{color:#fff}
+.chat-body{flex:1;overflow-y:auto;padding:16px;display:flex;flex-direction:column;gap:10px;background:#F8F9FA}
+.chat-msg{max-width:85%;padding:10px 14px;border-radius:14px;font-size:13px;line-height:1.6;font-weight:500}
+.chat-msg.ai{background:#fff;color:#343A40;border:1px solid #E9ECEF;align-self:flex-start;border-bottom-left-radius:4px}
+.chat-msg.user{background:linear-gradient(135deg,#748FFC,#7048E8);color:#fff;align-self:flex-end;border-bottom-right-radius:4px}
+.chat-input-wrap{padding:12px 16px;border-top:1px solid #E9ECEF;display:flex;gap:8px;background:#fff}
+.chat-input-wrap input{flex:1;padding:10px 14px;border-radius:12px;border:1px solid #DEE2E6;font-size:13px;outline:none;font-family:inherit;background:#F8F9FA}
+.chat-input-wrap input:focus{border-color:#748FFC;background:#fff}
+.chat-send{width:38px;height:38px;border-radius:10px;border:none;background:linear-gradient(135deg,#748FFC,#7048E8);color:#fff;font-size:16px;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:all .2s}
+.chat-send:hover{box-shadow:0 4px 12px rgba(112,72,232,.3)}
+@media(max-width:480px){.chat-window{width:calc(100vw - 24px);right:12px;bottom:84px;height:60vh}}
+
 /* ===== Toast ===== */
 .toast{position:fixed;top:24px;right:24px;z-index:2000;padding:14px 24px;border-radius:12px;color:#fff;font-size:14px;font-weight:600;box-shadow:0 8px 30px rgba(0,0,0,.15);animation:fadeUp .3s ease}
 .toast.success{background:#2B8A3E}
@@ -236,9 +258,14 @@ tbody tr:hover{background:#F8F9FB}
           <div class="sub">Project Management Platform</div>
         </div>
       </div>
-      <button class="btn-add" @click="showAdd = true">
-        <span style="font-size:18px;line-height:1">+</span> 과제 추가
-      </button>
+      <div style="display:flex;gap:10px;align-items:center">
+        <button class="btn-add" style="background:linear-gradient(135deg,#2B8A3E,#20C997);box-shadow:0 4px 15px rgba(43,138,62,.35)" @click="exportExcel">
+          <span style="font-size:16px;line-height:1">📥</span> 엑셀 다운로드
+        </button>
+        <button class="btn-add" @click="showAdd = true">
+          <span style="font-size:18px;line-height:1">+</span> 과제 추가
+        </button>
+      </div>
     </div>
   </header>
 
@@ -663,7 +690,7 @@ tbody tr:hover{background:#F8F9FB}
       <div class="form-section-card sec-schedule" style="margin-bottom:12px">
         <div class="form-section-title">
           <div class="sec-icon" style="background:#FFE0C2;color:#E8590C">📅</div>
-          <span class="sec-text">일정</span>
+          <span class="sec-text">일정 목표</span>
         </div>
         <div class="detail-grid" style="grid-template-columns:repeat(3,1fr)">
           <div class="d-item"><div class="lb">기획일</div>
@@ -865,6 +892,30 @@ tbody tr:hover{background:#F8F9FB}
     </div>
   </div>
 
+  <!-- AI Chat FAB -->
+  <button class="chat-fab" @click="showChat = !showChat" :title="showChat ? '채팅 닫기' : 'AI 어시스턴트'">
+    {{ showChat ? '✕' : '🤖' }}
+  </button>
+
+  <!-- AI Chat Window -->
+  <div v-if="showChat" class="chat-window">
+    <div class="chat-header">
+      <div class="ch-icon">🤖</div>
+      <div>
+        <div class="ch-title">AI 어시스턴트</div>
+        <div class="ch-sub">과제에 대해 물어보세요</div>
+      </div>
+      <button class="ch-close" @click="showChat = false">✕</button>
+    </div>
+    <div class="chat-body" ref="chatBodyRef">
+      <div v-for="(m, i) in chatMessages" :key="i" class="chat-msg" :class="m.role">{{ m.text }}</div>
+    </div>
+    <div class="chat-input-wrap">
+      <input v-model="chatInput" placeholder="질문을 입력하세요..." @keyup.enter="sendChat">
+      <button class="chat-send" @click="sendChat">➤</button>
+    </div>
+  </div>
+
   <!-- Toast -->
   <div v-if="toast.show" class="toast" :class="toast.type">{{ toast.msg }}</div>
 
@@ -922,6 +973,13 @@ createApp({
     const editForm = ref({});
 
     const toast = ref({ show:false, msg:"", type:"success" });
+
+    const showChat = ref(false);
+    const chatInput = ref("");
+    const chatBodyRef = ref(null);
+    const chatMessages = ref([
+      { role:"ai", text:"안녕하세요! AI 어시스턴트입니다. 과제에 대해 궁금한 점을 물어보세요." }
+    ]);
 
     function showToast(msg, type="success") {
       toast.value = { show:true, msg, type };
@@ -1059,6 +1117,57 @@ createApp({
       } catch(e) { showToast("상태 변경 실패", "error"); }
     }
 
+    // ===== AI 채팅 =====
+    function sendChat() {
+      const msg = chatInput.value.trim();
+      if (!msg) return;
+      chatMessages.value.push({ role:"user", text: msg });
+      chatInput.value = "";
+      // TODO: 실제 AI API 연동
+      setTimeout(() => {
+        chatMessages.value.push({ role:"ai", text:"AI 기능은 현재 준비 중입니다. 곧 과제에 대한 질문에 답변할 수 있도록 업데이트될 예정입니다." });
+        if (chatBodyRef.value) chatBodyRef.value.scrollTop = chatBodyRef.value.scrollHeight;
+      }, 500);
+      setTimeout(() => { if (chatBodyRef.value) chatBodyRef.value.scrollTop = chatBodyRef.value.scrollHeight; }, 50);
+    }
+
+    // ===== 엑셀 다운로드 =====
+    function exportExcel() {
+      const headers = {
+        id:'ID', current_status:'상태', project_name:'과제명', domain:'도메인',
+        projects_type:'과제 유형', owner_team:'실행/대표팀', executive_owner:'대표 임원',
+        project_leader:'실무 리더', project_description:'과제 설명', collaboration_dept:'협업 부서',
+        planning_date:'기획일', data_ready_date:'Data 확보일', poc_date:'PoC 일자',
+        mvp_pilot_date:'MVP/Pilot 일자', full_deployment_date:'전면적용일',
+        performance_y1:'성과지표 Y1', performance_y2:'성과지표 Y2',
+        performance_x1:'성과지표 X1', performance_x2:'성과지표 X2',
+        expected_impact:'기대효과', kpi:'KPI', financial_performance:'재무 성과 (억 원)',
+        process_metric:'프로세스 지표',
+        mtc_strategic_project:'MTC 전략 과제', aic_strategic_project:'AIC 전략 과제',
+        dtc_strategic_project:'DTC 전략 과제',
+        current_gpu_count:'현재 GPU 수량', current_gpu_spec:'현재 GPU 사양',
+        required_gpu_count:'필요 GPU 수량', required_gpu_spec:'필요 GPU 사양',
+        gpu_request_approved:'GPU 요청 승인', gpu_request_b300_equivalent:'GPU 요청 B300 환산',
+        additional_support_request:'추가 지원 요청 사항',
+        created_at:'등록일', updated_at:'수정일'
+      };
+      const cols = Object.keys(headers);
+      const rows = filtered.value.map(p => {
+        const row = {};
+        cols.forEach(k => {
+          let v = p[k];
+          if (['mtc_strategic_project','aic_strategic_project','dtc_strategic_project','gpu_request_approved'].includes(k)) v = v ? 'YES' : 'NO';
+          row[headers[k]] = v ?? '';
+        });
+        return row;
+      });
+      const ws = XLSX.utils.json_to_sheet(rows);
+      const wb = XLSX.utils.book_new();
+      XLSX.utils.book_append_sheet(wb, ws, '과제 목록');
+      XLSX.writeFile(wb, `과제목록_${new Date().toISOString().slice(0,10)}.xlsx`);
+      showToast(`${rows.length}건 엑셀 다운로드 완료`);
+    }
+
     // ===== 상세 보기 =====
     function openDetail(project) {
       detail.value = { ...project };
@@ -1127,8 +1236,9 @@ createApp({
       sortCol, sortDir, showAdd, form, errors, detail, history, toast,
       teams, leaders, hasFilter, filtered,
       countByStatus, sc, clearFilters, toggleSort, sortIcon,
-      submitProject, changeStatus, openDetail, deleteProject,
-      editing, editForm, startEdit, cancelEdit, updateProject
+      submitProject, changeStatus, openDetail, deleteProject, exportExcel,
+      editing, editForm, startEdit, cancelEdit, updateProject,
+      showChat, chatInput, chatMessages, chatBodyRef, sendChat
     };
   }
 }).mount('#app');
