@@ -1,0 +1,589 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AI 과제 관리 프로그램</title>
+<link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;600;700;800&family=Noto+Sans+KR:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body { font-family: 'Noto Sans KR', -apple-system, sans-serif; background: #F8F9FA; min-height: 100vh; color: #212529; }
+::-webkit-scrollbar { width: 6px; height: 6px; }
+::-webkit-scrollbar-thumb { background: #CED4DA; border-radius: 3px; }
+
+/* Animations */
+@keyframes fadeUp { from { opacity:0; transform: translateY(16px); } to { opacity:1; transform: none; } }
+@keyframes modalIn { from { opacity:0; transform: translateY(20px) scale(0.97); } to { opacity:1; transform: none; } }
+@keyframes slideDown { from { opacity:0; transform: translateY(-6px); } to { opacity:1; transform: none; } }
+
+/* Header */
+.header {
+  background: linear-gradient(135deg, #1A1B2E 0%, #2D2B55 50%, #1A1B2E 100%);
+  padding: 24px 40px; border-bottom: 1px solid rgba(255,255,255,0.06);
+}
+.header-inner { max-width: 1320px; margin: 0 auto; display: flex; align-items: center; justify-content: space-between; }
+.logo { display: flex; align-items: center; gap: 14px; }
+.logo-icon {
+  width: 40px; height: 40px; border-radius: 12px; display: flex; align-items: center; justify-content: center;
+  background: linear-gradient(135deg, #748FFC, #7048E8); font-size: 20px; box-shadow: 0 4px 15px rgba(112,72,232,0.4);
+}
+.logo h1 { color: #fff; font-size: 20px; font-weight: 800; letter-spacing: -0.03em; font-family: 'Outfit', sans-serif; }
+.logo .sub { color: rgba(255,255,255,0.45); font-size: 12px; font-weight: 500; margin-top: 2px; }
+
+.btn-add {
+  display: flex; align-items: center; gap: 8px; padding: 10px 22px;
+  background: linear-gradient(135deg, #748FFC, #7048E8); color: #fff; border: none; border-radius: 12px;
+  font-size: 14px; font-weight: 700; cursor: pointer; box-shadow: 0 4px 15px rgba(112,72,232,0.35);
+  transition: all 0.2s; font-family: 'Noto Sans KR', sans-serif;
+}
+.btn-add:hover { transform: translateY(-1px); box-shadow: 0 6px 20px rgba(112,72,232,0.45); }
+
+/* Main */
+.main { max-width: 1320px; margin: 0 auto; padding: 28px 40px 60px; }
+
+/* Summary Cards */
+.summary { display: flex; gap: 10px; margin-bottom: 24px; flex-wrap: wrap; animation: fadeUp 0.5s ease; }
+.summary-card {
+  flex: 1 1 0; min-width: 100px; padding: 20px 16px; background: #fff;
+  border: 1px solid #E9ECEF; border-radius: 14px; cursor: pointer;
+  transition: all 0.25s cubic-bezier(.4,0,.2,1); text-align: center;
+}
+.summary-card:hover { transform: translateY(-2px); box-shadow: 0 6px 20px rgba(0,0,0,0.08); }
+.summary-card.active { border: none; transform: translateY(-2px); color: #fff; }
+.summary-card .num { font-size: 28px; font-weight: 800; font-family: 'Outfit', sans-serif; letter-spacing: -0.03em; }
+.summary-card .label { font-size: 12px; font-weight: 600; margin-top: 4px; }
+.summary-card:not(.active) .num { color: #212529; }
+.summary-card:not(.active) .label { color: #868E96; }
+.summary-card.active .label { color: rgba(255,255,255,0.85); }
+
+/* Filter Bar */
+.filter-bar {
+  background: #fff; border-radius: 16px; padding: 18px 24px; margin-bottom: 20px;
+  border: 1px solid #E9ECEF; display: flex; gap: 12px; align-items: center; flex-wrap: wrap;
+  animation: fadeUp 0.5s ease 0.1s both;
+}
+.filter-bar .filter-label { font-size: 13px; font-weight: 700; color: #495057; margin-right: 4px; }
+.filter-bar select, .filter-bar input {
+  padding: 8px 14px; border-radius: 10px; border: 1px solid #DEE2E6; font-size: 13px;
+  color: #495057; background: #fff; outline: none; font-family: 'Noto Sans KR', sans-serif;
+}
+.filter-bar select { cursor: pointer; min-width: 120px; }
+.filter-bar .search-wrap { flex: 1; min-width: 200px; position: relative; }
+.filter-bar .search-wrap .icon { position: absolute; left: 12px; top: 50%; transform: translateY(-50%); font-size: 14px; color: #ADB5BD; }
+.filter-bar .search-wrap input { width: 100%; padding-left: 34px; }
+.btn-reset {
+  padding: 8px 16px; border-radius: 10px; border: 1px solid #DEE2E6; background: #F8F9FA;
+  font-size: 12px; font-weight: 600; color: #868E96; cursor: pointer; font-family: 'Noto Sans KR', sans-serif;
+}
+
+.result-count { font-size: 13px; color: #868E96; font-weight: 600; margin-bottom: 12px; padding: 0 4px; }
+.result-count span { color: #3B5BDB; font-weight: 800; }
+
+/* Table */
+.table-wrap {
+  background: #fff; border-radius: 16px; border: 1px solid #E9ECEF; overflow: hidden;
+  animation: fadeUp 0.5s ease 0.2s both; box-shadow: 0 1px 3px rgba(0,0,0,0.03);
+}
+.table-scroll { overflow-x: auto; }
+table { width: 100%; border-collapse: collapse; font-size: 13px; }
+thead tr { background: #F8F9FB; }
+th {
+  padding: 14px 16px; text-align: left; font-weight: 700; color: #868E96;
+  font-size: 11px; letter-spacing: 0.04em; text-transform: uppercase;
+  border-bottom: 1px solid #E9ECEF; white-space: nowrap; cursor: pointer; user-select: none;
+}
+th .sort-icon { margin-left: 4px; }
+td { padding: 14px 16px; border-bottom: 1px solid #F1F3F5; }
+tbody tr { cursor: pointer; transition: background 0.15s; }
+tbody tr:hover { background: #F8F9FB; }
+
+.td-id { font-weight: 700; color: #ADB5BD; font-size: 12px; font-family: 'Outfit', monospace; }
+.td-title { font-weight: 700; color: #212529; letter-spacing: -0.02em; }
+.td-text { color: #495057; font-weight: 500; }
+.td-sub { color: #868E96; font-size: 12px; font-weight: 500; }
+.td-date { color: #868E96; font-size: 12px; font-family: 'Outfit', monospace; }
+
+/* Status Badge */
+.badge {
+  display: inline-flex; align-items: center; gap: 6px; padding: 4px 12px; border-radius: 20px;
+  font-size: 12px; font-weight: 600; letter-spacing: -0.02em; white-space: nowrap;
+}
+.badge .dot { width: 6px; height: 6px; border-radius: 50%; }
+
+/* Status Dropdown */
+.status-select {
+  padding: 4px 8px; border-radius: 8px; border: 1px solid #DEE2E6; font-size: 11px;
+  color: #495057; background: #F8F9FA; cursor: pointer; outline: none; font-family: 'Noto Sans KR', sans-serif;
+}
+
+/* Empty */
+.empty { padding: 60px; text-align: center; color: #ADB5BD; }
+.empty .icon { font-size: 36px; margin-bottom: 12px; }
+.empty .title { font-weight: 700; font-size: 15px; margin-bottom: 4px; }
+.empty .desc { font-size: 13px; }
+
+/* Modal Overlay */
+.modal-overlay {
+  position: fixed; inset: 0; z-index: 1000; display: flex; align-items: center; justify-content: center;
+}
+.modal-bg { position: absolute; inset: 0; background: rgba(0,0,0,0.45); backdrop-filter: blur(4px); }
+.modal-box {
+  position: relative; background: #fff; border-radius: 20px; padding: 36px 32px 28px;
+  width: min(560px, 92vw); max-height: 88vh; overflow-y: auto;
+  box-shadow: 0 25px 60px rgba(0,0,0,0.2); animation: modalIn 0.3s ease;
+}
+
+/* Modal header */
+.modal-header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 24px; }
+.modal-header h2 { font-size: 22px; font-weight: 800; color: #212529; letter-spacing: -0.03em; }
+.modal-header .task-id { font-size: 11px; font-weight: 700; color: #ADB5BD; letter-spacing: 0.08em; margin-bottom: 6px; }
+.btn-close {
+  background: #F1F3F5; border: none; border-radius: 10px; width: 36px; height: 36px;
+  cursor: pointer; font-size: 18px; color: #868E96; display: flex; align-items: center; justify-content: center;
+}
+
+/* Form grid */
+.form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px 20px; }
+.form-grid .full { grid-column: 1 / -1; }
+.form-grid label { display: block; font-size: 11px; font-weight: 700; color: #868E96; margin-bottom: 6px; letter-spacing: 0.04em; }
+.form-grid input, .form-grid select {
+  width: 100%; padding: 10px 14px; border-radius: 10px; border: 1px solid #DEE2E6;
+  font-size: 14px; outline: none; font-family: 'Noto Sans KR', sans-serif; background: #fff;
+}
+.form-grid input.error, .form-grid select.error { border: 2px solid #FF6B6B; }
+.error-msg { font-size: 11px; color: #FF6B6B; margin-top: 4px; font-weight: 600; }
+
+/* Detail grid */
+.detail-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px 24px; margin-bottom: 24px; }
+.detail-grid .label { font-size: 11px; font-weight: 700; color: #ADB5BD; margin-bottom: 4px; letter-spacing: 0.04em; }
+.detail-grid .value { font-size: 14px; font-weight: 600; color: #495057; }
+.detail-section { margin-bottom: 20px; }
+.detail-section .label { font-size: 11px; font-weight: 700; color: #ADB5BD; margin-bottom: 4px; letter-spacing: 0.04em; }
+.detail-section .value { font-size: 14px; color: #495057; line-height: 1.6; }
+
+/* Status change buttons */
+.status-bar { display: flex; align-items: center; gap: 12px; padding-top: 16px; border-top: 1px solid #F1F3F5; flex-wrap: wrap; }
+.status-bar .title { font-size: 12px; font-weight: 700; color: #868E96; }
+.status-btns { display: flex; gap: 6px; flex-wrap: wrap; }
+.status-btn {
+  padding: 6px 14px; border-radius: 20px; font-size: 12px; font-weight: 600;
+  cursor: pointer; transition: all 0.2s; font-family: 'Noto Sans KR', sans-serif;
+}
+
+/* Modal footer */
+.modal-footer { display: flex; gap: 10px; justify-content: flex-end; margin-top: 28px; }
+.btn-cancel {
+  padding: 10px 24px; border-radius: 10px; border: 1px solid #DEE2E6; background: #fff;
+  font-size: 14px; font-weight: 600; color: #868E96; cursor: pointer; font-family: 'Noto Sans KR', sans-serif;
+}
+.btn-submit {
+  padding: 10px 28px; border-radius: 10px; border: none;
+  background: linear-gradient(135deg, #748FFC, #7048E8); color: #fff;
+  font-size: 14px; font-weight: 700; cursor: pointer; box-shadow: 0 4px 15px rgba(112,72,232,0.3);
+  font-family: 'Noto Sans KR', sans-serif;
+}
+.btn-submit:hover { box-shadow: 0 6px 20px rgba(112,72,232,0.4); }
+
+.hidden { display: none !important; }
+
+@media (max-width: 768px) {
+  .header { padding: 16px 20px; }
+  .main { padding: 20px 16px 40px; }
+  .summary { gap: 6px; }
+  .summary-card { min-width: 70px; padding: 14px 8px; }
+  .summary-card .num { font-size: 20px; }
+  .filter-bar { padding: 14px 16px; }
+}
+</style>
+</head>
+<body>
+
+<!-- Header -->
+<header class="header">
+  <div class="header-inner">
+    <div class="logo">
+      <div class="logo-icon">⚡</div>
+      <div>
+        <h1>AI 과제 관리</h1>
+        <div class="sub">Task Management Platform</div>
+      </div>
+    </div>
+    <button class="btn-add" onclick="openAddModal()">
+      <span style="font-size:18px;line-height:1">+</span> 과제 추가
+    </button>
+  </div>
+</header>
+
+<!-- Main -->
+<div class="main">
+  <!-- Summary Cards -->
+  <div class="summary" id="summaryCards"></div>
+
+  <!-- Filter Bar -->
+  <div class="filter-bar">
+    <div class="filter-label">필터</div>
+    <select id="filterTeam" onchange="render()">
+      <option value="">전체 부서</option>
+    </select>
+    <select id="filterManager" onchange="render()">
+      <option value="">전체 담당자</option>
+    </select>
+    <div class="search-wrap">
+      <span class="icon">🔍</span>
+      <input id="filterKeyword" placeholder="과제명, ID, 키워드 검색..." oninput="render()">
+    </div>
+    <button class="btn-reset hidden" id="btnReset" onclick="clearFilters()">초기화</button>
+  </div>
+
+  <!-- Result Count -->
+  <div class="result-count">총 <span id="resultCount">0</span>건</div>
+
+  <!-- Table -->
+  <div class="table-wrap">
+    <div class="table-scroll">
+      <table>
+        <thead>
+          <tr>
+            <th style="width:90px" onclick="handleSort('id')">ID <span class="sort-icon" id="sort-id">↕</span></th>
+            <th onclick="handleSort('title')">과제명 <span class="sort-icon" id="sort-title">↕</span></th>
+            <th style="width:110px" onclick="handleSort('team')">부서 <span class="sort-icon" id="sort-team">↕</span></th>
+            <th style="width:90px" onclick="handleSort('manager')">담당자 <span class="sort-icon" id="sort-manager">↕</span></th>
+            <th style="width:120px" onclick="handleSort('status')">상태 <span class="sort-icon" id="sort-status">↕</span></th>
+            <th style="width:120px" onclick="handleSort('aiArea')">AI 영역 <span class="sort-icon" id="sort-aiArea">↕</span></th>
+            <th style="width:100px" onclick="handleSort('startDate')">시작일 <span class="sort-icon" id="sort-startDate">↕</span></th>
+            <th style="width:110px" onclick="handleSort('endDate')">완료 예정일 <span class="sort-icon" id="sort-endDate">↕</span></th>
+            <th style="width:90px">상태 변경</th>
+          </tr>
+        </thead>
+        <tbody id="tableBody"></tbody>
+      </table>
+    </div>
+  </div>
+</div>
+
+<!-- Add Modal -->
+<div class="modal-overlay hidden" id="addModal">
+  <div class="modal-bg" onclick="closeAddModal()"></div>
+  <div class="modal-box">
+    <div class="modal-header">
+      <h2>새 과제 등록</h2>
+      <button class="btn-close" onclick="closeAddModal()">✕</button>
+    </div>
+    <div class="form-grid">
+      <div class="full">
+        <label>과제명 *</label>
+        <input id="add-title" placeholder="과제명">
+      </div>
+      <div>
+        <label>부서</label>
+        <select id="add-team"></select>
+      </div>
+      <div>
+        <label>담당자 *</label>
+        <input id="add-manager" placeholder="담당자">
+      </div>
+      <div>
+        <label>AI 적용 영역</label>
+        <input id="add-aiArea" placeholder="AI 적용 영역">
+      </div>
+      <div>
+        <label>현재 상태</label>
+        <select id="add-status"></select>
+      </div>
+      <div>
+        <label>시작일 *</label>
+        <input type="date" id="add-startDate">
+      </div>
+      <div>
+        <label>완료 예정일</label>
+        <input type="date" id="add-endDate">
+      </div>
+      <div class="full">
+        <label>목표</label>
+        <input id="add-goal" placeholder="목표">
+      </div>
+      <div class="full">
+        <label>기대효과</label>
+        <input id="add-effect" placeholder="기대효과">
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn-cancel" onclick="closeAddModal()">취소</button>
+      <button class="btn-submit" onclick="submitTask()">등록</button>
+    </div>
+  </div>
+</div>
+
+<!-- Detail Modal -->
+<div class="modal-overlay hidden" id="detailModal">
+  <div class="modal-bg" onclick="closeDetailModal()"></div>
+  <div class="modal-box" id="detailContent"></div>
+</div>
+
+<script>
+// ===== DATA =====
+const STATUSES = ["아이디어", "PoC", "Pilot", "현장 적용", "개발 완료", "보류"];
+const DEPARTMENTS = ["AI혁신팀", "설비팀", "품질팀", "생산팀", "물류팀", "경영지원팀"];
+const STATUS_COLORS = {
+  "아이디어": { bg: "#F0F4FF", text: "#3B5BDB", dot: "#3B5BDB" },
+  "PoC": { bg: "#FFF4E6", text: "#E8590C", dot: "#E8590C" },
+  "Pilot": { bg: "#F3F0FF", text: "#7048E8", dot: "#7048E8" },
+  "현장 적용": { bg: "#E6FCF5", text: "#0CA678", dot: "#0CA678" },
+  "개발 완료": { bg: "#EBFBEE", text: "#2B8A3E", dot: "#2B8A3E" },
+  "보류": { bg: "#F1F3F5", text: "#868E96", dot: "#868E96" },
+};
+const SUMMARY_COLORS = ["#343A40", "#3B5BDB", "#E8590C", "#7048E8", "#0CA678", "#2B8A3E", "#868E96"];
+
+let tasks = [
+  { id:"AIP-001", title:"설비 이상 감지 AI 모델", team:"설비팀", manager:"김민수", status:"Pilot", goal:"설비 고장 사전 예측", aiArea:"예측 분석", startDate:"2025-01-15", endDate:"2025-06-30", effect:"설비 가동률 15% 향상", createdAt:"2025-01-10" },
+  { id:"AIP-002", title:"품질 검사 자동화", team:"품질팀", manager:"이지은", status:"PoC", goal:"육안 검사 대체", aiArea:"컴퓨터 비전", startDate:"2025-02-01", endDate:"2025-08-31", effect:"검사 시간 60% 단축", createdAt:"2025-01-20" },
+  { id:"AIP-003", title:"수요 예측 모델", team:"물류팀", manager:"박준혁", status:"현장 적용", goal:"재고 최적화", aiArea:"시계열 예측", startDate:"2024-09-01", endDate:"2025-03-31", effect:"재고 비용 20% 절감", createdAt:"2024-08-15" },
+  { id:"AIP-004", title:"문서 자동 분류 시스템", team:"경영지원팀", manager:"최서연", status:"개발 완료", goal:"문서 분류 자동화", aiArea:"NLP", startDate:"2024-06-01", endDate:"2024-12-31", effect:"업무 효율 30% 향상", createdAt:"2024-05-20" },
+  { id:"AIP-005", title:"공정 최적화 AI", team:"생산팀", manager:"정우성", status:"아이디어", goal:"생산 효율 극대화", aiArea:"강화학습", startDate:"2025-04-01", endDate:"2025-12-31", effect:"생산성 25% 향상", createdAt:"2025-03-01" },
+  { id:"AIP-006", title:"에너지 소비 예측", team:"설비팀", manager:"한예슬", status:"PoC", goal:"에너지 절감", aiArea:"예측 분석", startDate:"2025-03-01", endDate:"2025-09-30", effect:"에너지 비용 10% 절감", createdAt:"2025-02-15" },
+  { id:"AIP-007", title:"스마트 물류 배차", team:"물류팀", manager:"오태석", status:"Pilot", goal:"배송 효율화", aiArea:"최적화 알고리즘", startDate:"2025-01-20", endDate:"2025-07-31", effect:"배송 비용 18% 절감", createdAt:"2025-01-05" },
+  { id:"AIP-008", title:"챗봇 고객 응대", team:"경영지원팀", manager:"윤하나", status:"현장 적용", goal:"고객 문의 자동 응대", aiArea:"대화형 AI", startDate:"2024-07-01", endDate:"2025-01-31", effect:"응대 시간 50% 감소", createdAt:"2024-06-10" },
+  { id:"AIP-009", title:"용접 품질 실시간 모니터링", team:"품질팀", manager:"강동원", status:"보류", goal:"용접 불량 감소", aiArea:"컴퓨터 비전", startDate:"2025-02-15", endDate:"2025-10-31", effect:"불량률 40% 감소", createdAt:"2025-02-01" },
+  { id:"AIP-010", title:"AI 기반 채용 스크리닝", team:"경영지원팀", manager:"임수정", status:"아이디어", goal:"채용 효율화", aiArea:"NLP", startDate:"2025-05-01", endDate:"2025-11-30", effect:"스크리닝 시간 70% 단축", createdAt:"2025-03-20" },
+  { id:"AIP-011", title:"예방 정비 스케줄링", team:"설비팀", manager:"김민수", status:"개발 완료", goal:"정비 최적화", aiArea:"예측 분석", startDate:"2024-04-01", endDate:"2024-11-30", effect:"정비 비용 22% 절감", createdAt:"2024-03-15" },
+  { id:"AIP-012", title:"원자재 가격 예측", team:"물류팀", manager:"박준혁", status:"PoC", goal:"구매 전략 최적화", aiArea:"시계열 예측", startDate:"2025-03-15", endDate:"2025-09-30", effect:"구매 비용 8% 절감", createdAt:"2025-03-01" },
+];
+
+let filterStatus = null;
+let sortCol = null;
+let sortDir = "asc";
+
+// ===== SAVE / LOAD from localStorage =====
+function saveTasks() {
+  try { localStorage.setItem('ai_tasks', JSON.stringify(tasks)); } catch(e) {}
+}
+function loadTasks() {
+  try {
+    const saved = localStorage.getItem('ai_tasks');
+    if (saved) tasks = JSON.parse(saved);
+  } catch(e) {}
+}
+
+// ===== HELPERS =====
+function badgeHTML(status) {
+  const c = STATUS_COLORS[status] || STATUS_COLORS["보류"];
+  return `<span class="badge" style="background:${c.bg};color:${c.text}"><span class="dot" style="background:${c.dot}"></span>${status}</span>`;
+}
+
+function statusSelectHTML(taskId, currentStatus) {
+  let opts = STATUSES.map(s => `<option value="${s}" ${s===currentStatus?'selected':''}>${s}</option>`).join('');
+  return `<select class="status-select" onchange="changeStatus('${taskId}', this.value)" onclick="event.stopPropagation()">${opts}</select>`;
+}
+
+// ===== FILTER & RENDER =====
+function getFiltered() {
+  let r = [...tasks];
+  if (filterStatus) r = r.filter(t => t.status === filterStatus);
+  const team = document.getElementById('filterTeam').value;
+  const manager = document.getElementById('filterManager').value;
+  const kw = document.getElementById('filterKeyword').value.trim();
+  if (team) r = r.filter(t => t.team === team);
+  if (manager) r = r.filter(t => t.manager === manager);
+  if (kw) r = r.filter(t => t.title.includes(kw) || t.id.includes(kw) || t.goal.includes(kw) || t.aiArea.includes(kw));
+  if (sortCol) {
+    r.sort((a, b) => {
+      const av = a[sortCol] || "", bv = b[sortCol] || "";
+      return sortDir === "asc" ? av.localeCompare(bv) : bv.localeCompare(av);
+    });
+  }
+  return { filtered: r, hasFilter: !!(filterStatus || team || manager || kw) };
+}
+
+function render() {
+  const { filtered, hasFilter } = getFiltered();
+
+  // Summary
+  const counts = { "전체": tasks.length };
+  STATUSES.forEach(s => counts[s] = tasks.filter(t => t.status === s).length);
+  const labels = ["전체", ...STATUSES];
+  const labelNames = ["전체 과제", ...STATUSES];
+  document.getElementById('summaryCards').innerHTML = labels.map((s, i) => {
+    const active = (s === "전체" && !filterStatus) || filterStatus === s;
+    const color = SUMMARY_COLORS[i];
+    return `<div class="summary-card ${active?'active':''}" style="${active?`background:${color};box-shadow:0 8px 25px ${color}44`:''}" onclick="toggleStatusFilter('${s}')">
+      <div class="num">${counts[s === "전체" ? "전체" : s]}</div>
+      <div class="label">${labelNames[i]}</div>
+    </div>`;
+  }).join('');
+
+  // Reset button
+  document.getElementById('btnReset').classList.toggle('hidden', !hasFilter);
+
+  // Count
+  document.getElementById('resultCount').textContent = filtered.length;
+
+  // Sort icons
+  ['id','title','team','manager','status','aiArea','startDate','endDate'].forEach(col => {
+    const el = document.getElementById('sort-' + col);
+    if (el) {
+      if (sortCol === col) { el.textContent = sortDir === 'asc' ? '↑' : '↓'; el.style.color = '#3B5BDB'; el.style.opacity = '1'; }
+      else { el.textContent = '↕'; el.style.color = ''; el.style.opacity = '0.25'; }
+    }
+  });
+
+  // Table
+  const tbody = document.getElementById('tableBody');
+  if (filtered.length === 0) {
+    tbody.innerHTML = `<tr><td colspan="9"><div class="empty"><div class="icon">📋</div><div class="title">결과가 없습니다</div><div class="desc">필터 조건을 변경해 보세요</div></div></td></tr>`;
+    return;
+  }
+  tbody.innerHTML = filtered.map((t, i) => `
+    <tr onclick="openDetail('${t.id}')" style="animation: slideDown 0.3s ease ${i*0.03}s both">
+      <td class="td-id">${t.id}</td>
+      <td class="td-title">${t.title}</td>
+      <td class="td-text">${t.team}</td>
+      <td class="td-text">${t.manager}</td>
+      <td>${badgeHTML(t.status)}</td>
+      <td class="td-sub">${t.aiArea}</td>
+      <td class="td-date">${t.startDate}</td>
+      <td class="td-date">${t.endDate || '-'}</td>
+      <td>${statusSelectHTML(t.id, t.status)}</td>
+    </tr>
+  `).join('');
+}
+
+function toggleStatusFilter(status) {
+  if (status === "전체") filterStatus = null;
+  else filterStatus = filterStatus === status ? null : status;
+  render();
+}
+
+function clearFilters() {
+  filterStatus = null;
+  document.getElementById('filterTeam').value = '';
+  document.getElementById('filterManager').value = '';
+  document.getElementById('filterKeyword').value = '';
+  render();
+}
+
+function handleSort(col) {
+  if (sortCol === col) sortDir = sortDir === 'asc' ? 'desc' : 'asc';
+  else { sortCol = col; sortDir = 'asc'; }
+  render();
+}
+
+function changeStatus(taskId, newStatus) {
+  const task = tasks.find(t => t.id === taskId);
+  if (task) { task.status = newStatus; saveTasks(); render(); }
+}
+
+// ===== ADD MODAL =====
+function openAddModal() {
+  document.getElementById('addModal').classList.remove('hidden');
+  // Clear fields
+  ['title','manager','aiArea','startDate','endDate','goal','effect'].forEach(f => {
+    const el = document.getElementById('add-' + f);
+    if (el) { el.value = ''; el.classList.remove('error'); }
+  });
+}
+function closeAddModal() { document.getElementById('addModal').classList.add('hidden'); }
+
+function submitTask() {
+  const title = document.getElementById('add-title').value.trim();
+  const manager = document.getElementById('add-manager').value.trim();
+  const startDate = document.getElementById('add-startDate').value;
+  let valid = true;
+
+  [['add-title', title], ['add-manager', manager], ['add-startDate', startDate]].forEach(([id, val]) => {
+    const el = document.getElementById(id);
+    if (!val) { el.classList.add('error'); valid = false; } else { el.classList.remove('error'); }
+  });
+  if (!valid) return;
+
+  const id = 'AIP-' + String(tasks.length + 1).padStart(3, '0');
+  tasks.unshift({
+    id, title,
+    team: document.getElementById('add-team').value,
+    manager,
+    status: document.getElementById('add-status').value,
+    goal: document.getElementById('add-goal').value.trim(),
+    aiArea: document.getElementById('add-aiArea').value.trim(),
+    startDate,
+    endDate: document.getElementById('add-endDate').value,
+    effect: document.getElementById('add-effect').value.trim(),
+    createdAt: new Date().toISOString().split('T')[0],
+  });
+  saveTasks();
+  closeAddModal();
+  render();
+}
+
+// ===== DETAIL MODAL =====
+function openDetail(taskId) {
+  const t = tasks.find(x => x.id === taskId);
+  if (!t) return;
+  const c = STATUS_COLORS[t.status];
+  document.getElementById('detailContent').innerHTML = `
+    <div class="modal-header">
+      <div>
+        <div class="task-id">${t.id}</div>
+        <h2>${t.title}</h2>
+      </div>
+      <button class="btn-close" onclick="closeDetailModal()">✕</button>
+    </div>
+    <div class="detail-grid">
+      ${[['부서', t.team],['담당자', t.manager],['시작일', t.startDate],['완료 예정일', t.endDate || '-'],['AI 적용 영역', t.aiArea],['등록일', t.createdAt]].map(([l,v]) =>
+        `<div><div class="label">${l}</div><div class="value">${v}</div></div>`
+      ).join('')}
+    </div>
+    <div class="detail-section">
+      <div class="label">목표</div>
+      <div class="value">${t.goal || '-'}</div>
+    </div>
+    <div class="detail-section">
+      <div class="label">기대효과</div>
+      <div class="value">${t.effect || '-'}</div>
+    </div>
+    <div class="status-bar">
+      <span class="title">상태 변경</span>
+      <div class="status-btns">
+        ${STATUSES.map(s => {
+          const sc = STATUS_COLORS[s];
+          const active = s === t.status;
+          return `<button class="status-btn" onclick="changeStatusFromDetail('${t.id}','${s}')"
+            style="border:${active ? '2px solid '+sc.dot : '1px solid #DEE2E6'};background:${active?sc.bg:'#fff'};color:${active?sc.text:'#868E96'}">${s}</button>`;
+        }).join('')}
+      </div>
+    </div>
+  `;
+  document.getElementById('detailModal').classList.remove('hidden');
+}
+
+function closeDetailModal() { document.getElementById('detailModal').classList.add('hidden'); }
+
+function changeStatusFromDetail(taskId, newStatus) {
+  changeStatus(taskId, newStatus);
+  openDetail(taskId); // re-render detail
+}
+
+// ===== INIT =====
+function init() {
+  loadTasks();
+
+  // Populate filter dropdowns
+  const teamSelect = document.getElementById('filterTeam');
+  DEPARTMENTS.forEach(d => { const o = document.createElement('option'); o.value = d; o.textContent = d; teamSelect.appendChild(o); });
+
+  const managerSelect = document.getElementById('filterManager');
+  const managers = [...new Set(tasks.map(t => t.manager))];
+  managers.forEach(m => { const o = document.createElement('option'); o.value = m; o.textContent = m; managerSelect.appendChild(o); });
+
+  // Populate add modal selects
+  const addTeam = document.getElementById('add-team');
+  DEPARTMENTS.forEach(d => { const o = document.createElement('option'); o.value = d; o.textContent = d; addTeam.appendChild(o); });
+  const addStatus = document.getElementById('add-status');
+  STATUSES.forEach(s => { const o = document.createElement('option'); o.value = s; o.textContent = s; addStatus.appendChild(o); });
+  addStatus.value = 'PoC';
+
+  render();
+}
+
+init();
+</script>
+</body>
+</html>
