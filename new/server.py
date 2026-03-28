@@ -108,6 +108,12 @@ class StatusChange(BaseModel):
     changed_by: str = "관리자"
 
 
+# 관리자 코드 검증용
+class AdminVerify(BaseModel):
+    admin_code: str
+
+ADMIN_CODE = "AIPMO980306"
+
 # ========== DB 헬퍼 ==========
 # DB 연결 -> 테이블 생성 -> 데이터 다루기 준비
 def get_db():
@@ -163,8 +169,9 @@ def init_db():
         financial_performance REAL,
         process_metric TEXT,
         created_at TEXT,
-        updated_at TEXT
-        )   
+        updated_at TEXT,
+        is_deleted INTEGER DEFAULT 0
+        )
     """)
 
     c.execute("""
@@ -178,6 +185,12 @@ def init_db():
             FOREIGN KEY (project_id) REFERENCES projects(id)
         )
     """)
+
+    # 기존 DB에 is_deleted 컬럼이 없으면 추가
+    try:
+        c.execute("SELECT is_deleted FROM projects LIMIT 1")
+    except sqlite3.OperationalError:
+        c.execute("ALTER TABLE projects ADD COLUMN is_deleted INTEGER DEFAULT 0")
 
     # 샘플 데이터 (테이블이 비어있을 때만)
     c.execute("SELECT COUNT(*) as cnt FROM projects")
@@ -236,11 +249,18 @@ def next_project_id():
 
 # ========== API 엔드포인트 ==========
 
+# 관리자 코드 검증
+@app.post("/api/verify-admin")
+def verify_admin(body: AdminVerify):
+    if body.admin_code != ADMIN_CODE:
+        raise HTTPException(status_code=403, detail="관리자 코드가 올바르지 않습니다")
+    return {"verified": True}
+
 # 전체 과제 조회
 @app.get("/api/projects")
 def get_projects():
     conn = get_db()
-    rows = conn.execute("SELECT * FROM projects ORDER BY created_at DESC").fetchall()
+    rows = conn.execute("SELECT * FROM projects WHERE is_deleted = 0 ORDER BY created_at DESC").fetchall()
     conn.close()
     return [row_to_dict(r) for r in rows]
 
@@ -249,7 +269,7 @@ def get_projects():
 @app.get("/api/projects/{project_id}")
 def get_project(project_id: str):
     conn = get_db()
-    row = conn.execute("SELECT * FROM projects WHERE id = ?", (project_id,)).fetchone()
+    row = conn.execute("SELECT * FROM projects WHERE id = ? AND is_deleted = 0", (project_id,)).fetchone()
     conn.close()
     if not row:
         raise HTTPException(status_code=404, detail="과제를 찾을 수 없습니다")
@@ -410,16 +430,16 @@ def change_status(project_id: str, body: StatusChange):
     conn.close()
     return row_to_dict(row)
 
-# 과제 삭제
+# 과제 삭제 (소프트 삭제 - DB에서 실제 삭제하지 않고 숨김 처리)
 @app.delete("/api/projects/{project_id}")
 def delete_project(project_id: str):
     conn = get_db()
-    existing = conn.execute("SELECT * FROM projects WHERE id = ?", (project_id,)).fetchone()
+    existing = conn.execute("SELECT * FROM projects WHERE id = ? AND is_deleted = 0", (project_id,)).fetchone()
     if not existing:
         conn.close()
         raise HTTPException(status_code=404, detail="과제를 찾을 수 없습니다")
-    conn.execute("DELETE FROM status_history WHERE project_id = ?", (project_id,))
-    conn.execute("DELETE FROM projects WHERE id = ?", (project_id,))
+    now = datetime.now().isoformat()
+    conn.execute("UPDATE projects SET is_deleted = 1, updated_at = ? WHERE id = ?", (now, project_id))
     conn.commit()
     conn.close()
     return {"message": "삭제 완료", "id": project_id}
@@ -438,8 +458,8 @@ def get_history(project_id: str):
 @app.get("/api/summary")
 def get_summary():
     conn = get_db()
-    rows = conn.execute("SELECT status, COUNT(*) as count FROM projects GROUP BY status").fetchall()
-    total = conn.execute("SELECT COUNT(*) as count FROM projects").fetchone()["count"]
+    rows = conn.execute("SELECT status, COUNT(*) as count FROM projects WHERE is_deleted = 0 GROUP BY status").fetchall()
+    total = conn.execute("SELECT COUNT(*) as count FROM projects WHERE is_deleted = 0").fetchone()["count"]
     conn.close()
     counts = {r["status"]: r["count"] for r in rows}
     counts["전체"] = total

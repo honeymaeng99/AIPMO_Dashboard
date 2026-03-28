@@ -1,1247 +1,3270 @@
 <!DOCTYPE html>
 <html lang="ko">
+
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>AI 과제 관리 프로그램</title>
-<script src="https://unpkg.com/vue@3/dist/vue.global.prod.js"></script>
-<script src="https://cdn.sheetjs.com/xlsx-0.20.3/package/dist/xlsx.full.min.js"></script>
-<link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;600;700;800&family=Noto+Sans+KR:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-<style>
-*{box-sizing:border-box;margin:0;padding:0}
-body{font-family:'Noto Sans KR',-apple-system,sans-serif;background:#F8F9FA;min-height:100vh;color:#212529}
-::-webkit-scrollbar{width:6px;height:6px}
-::-webkit-scrollbar-thumb{background:#CED4DA;border-radius:3px}
-[v-cloak]{display:none}
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>MTC AI 과제 관리 플랫폼</title>
+  <script src="https://unpkg.com/vue@3/dist/vue.global.prod.js"></script>
+  <script src="https://cdn.sheetjs.com/xlsx-0.20.3/package/dist/xlsx.full.min.js"></script>
+  <link
+    href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;600;700;800&family=Noto+Sans+KR:wght@400;500;600;700;800&display=swap"
+    rel="stylesheet">
+  <style>
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0
+    }
 
-@keyframes fadeUp{from{opacity:0;transform:translateY(16px)}to{opacity:1;transform:none}}
-@keyframes modalIn{from{opacity:0;transform:translateY(20px) scale(.97)}to{opacity:1;transform:none}}
-@keyframes slideRow{from{opacity:0;transform:translateY(-6px)}to{opacity:1;transform:none}}
-@keyframes spin{to{transform:rotate(360deg)}}
+    body {
+      font-family: 'Noto Sans KR', -apple-system, sans-serif;
+      background: #F8F9FA;
+      min-height: 100vh;
+      color: #212529
+    }
 
-/* ===== Header ===== */
-.header{background:linear-gradient(135deg,#1A1B2E 0%,#2D2B55 50%,#1A1B2E 100%);padding:24px 40px;border-bottom:1px solid rgba(255,255,255,.06)}
-.header-inner{max-width:1320px;margin:0 auto;display:flex;align-items:center;justify-content:space-between}
-.logo{display:flex;align-items:center;gap:14px}
-.logo-icon{width:40px;height:40px;border-radius:12px;display:flex;align-items:center;justify-content:center;background:linear-gradient(135deg,#748FFC,#7048E8);font-size:20px;box-shadow:0 4px 15px rgba(112,72,232,.4)}
-.logo h1{color:#fff;font-size:20px;font-weight:800;letter-spacing:-.03em;font-family:'Outfit',sans-serif}
-.logo .sub{color:rgba(255,255,255,.45);font-size:12px;font-weight:500;margin-top:2px}
-.btn-add{display:flex;align-items:center;gap:8px;padding:10px 22px;background:linear-gradient(135deg,#748FFC,#7048E8);color:#fff;border:none;border-radius:12px;font-size:14px;font-weight:700;cursor:pointer;box-shadow:0 4px 15px rgba(112,72,232,.35);transition:all .2s;font-family:inherit}
-.btn-add:hover{transform:translateY(-1px);box-shadow:0 6px 20px rgba(112,72,232,.45)}
+    ::-webkit-scrollbar {
+      width: 6px;
+      height: 6px
+    }
 
-/* ===== Main ===== */
-.main{max-width:1320px;margin:0 auto;padding:28px 40px 60px}
+    ::-webkit-scrollbar-thumb {
+      background: #CED4DA;
+      border-radius: 3px
+    }
 
-/* ===== Summary ===== */
-.summary{display:flex;gap:10px;margin-bottom:24px;flex-wrap:wrap;animation:fadeUp .5s ease}
-.s-card{flex:1 1 0;min-width:100px;padding:20px 16px;background:#fff;border:1px solid #E9ECEF;border-radius:14px;cursor:pointer;transition:all .25s cubic-bezier(.4,0,.2,1);text-align:center}
-.s-card:hover{transform:translateY(-2px);box-shadow:0 6px 20px rgba(0,0,0,.08)}
-.s-card.active{border:none;transform:translateY(-2px);color:#fff}
-.s-card .num{font-size:28px;font-weight:800;font-family:'Outfit',sans-serif;letter-spacing:-.03em}
-.s-card .lbl{font-size:12px;font-weight:600;margin-top:4px}
-.s-card:not(.active) .num{color:#212529}
-.s-card:not(.active) .lbl{color:#868E96}
-.s-card.active .lbl{color:rgba(255,255,255,.85)}
+    [v-cloak] {
+      display: none
+    }
 
-/* ===== Filter ===== */
-.filter-bar{background:#fff;border-radius:16px;padding:18px 24px;margin-bottom:20px;border:1px solid #E9ECEF;display:flex;gap:12px;align-items:center;flex-wrap:wrap;animation:fadeUp .5s ease .1s both}
-.filter-bar .f-label{font-size:13px;font-weight:700;color:#495057;margin-right:4px}
-.filter-bar select,.filter-bar input{padding:8px 14px;border-radius:10px;border:1px solid #DEE2E6;font-size:13px;color:#495057;background:#fff;outline:none;font-family:inherit}
-.filter-bar select{cursor:pointer;min-width:120px}
-.search-wrap{flex:1;min-width:200px;position:relative}
-.search-wrap .ico{position:absolute;left:12px;top:50%;transform:translateY(-50%);font-size:14px;color:#ADB5BD;pointer-events:none}
-.search-wrap input{width:100%;padding-left:34px}
-.btn-reset{padding:8px 16px;border-radius:10px;border:1px solid #DEE2E6;background:#F8F9FA;font-size:12px;font-weight:600;color:#868E96;cursor:pointer;font-family:inherit}
+    @keyframes fadeUp {
+      from {
+        opacity: 0;
+        transform: translateY(16px)
+      }
 
-.result-count{font-size:13px;color:#868E96;font-weight:600;margin-bottom:12px;padding:0 4px}
-.result-count span{color:#3B5BDB;font-weight:800}
+      to {
+        opacity: 1;
+        transform: none
+      }
+    }
 
-/* ===== Table ===== */
-.table-wrap{background:#fff;border-radius:16px;border:1px solid #E9ECEF;overflow:hidden;animation:fadeUp .5s ease .2s both;box-shadow:0 1px 3px rgba(0,0,0,.03)}
-.table-scroll{overflow-x:auto}
-table{width:100%;border-collapse:collapse;font-size:13px}
-thead tr{background:#F8F9FB}
-th{padding:14px 16px;text-align:left;font-weight:700;color:#868E96;font-size:11px;letter-spacing:.04em;text-transform:uppercase;border-bottom:1px solid #E9ECEF;white-space:nowrap;cursor:pointer;user-select:none}
-th .si{margin-left:4px;transition:color .2s}
-td{padding:14px 16px;border-bottom:1px solid #F1F3F5}
-tbody tr{cursor:pointer;transition:background .15s}
-tbody tr:hover{background:#F8F9FB}
+    @keyframes modalIn {
+      from {
+        opacity: 0;
+        transform: translateY(20px) scale(.97)
+      }
 
-.td-id{font-weight:700;color:#ADB5BD;font-size:12px;font-family:'Outfit',monospace}
-.td-title{font-weight:700;color:#212529;letter-spacing:-.02em}
-.td-text{color:#495057;font-weight:500}
-.td-sub{color:#868E96;font-size:12px;font-weight:500}
-.td-date{color:#868E96;font-size:12px;font-family:'Outfit',monospace}
+      to {
+        opacity: 1;
+        transform: none
+      }
+    }
 
-/* ===== Badge ===== */
-.badge{display:inline-flex;align-items:center;gap:6px;padding:4px 12px;border-radius:20px;font-size:12px;font-weight:600;letter-spacing:-.02em;white-space:nowrap}
-.badge .dot{width:6px;height:6px;border-radius:50%}
+    @keyframes slideRow {
+      from {
+        opacity: 0;
+        transform: translateY(-6px)
+      }
 
-/* ===== Inline select ===== */
-.st-sel{padding:4px 8px;border-radius:8px;border:1px solid #DEE2E6;font-size:11px;color:#495057;background:#F8F9FA;cursor:pointer;outline:none;font-family:inherit}
+      to {
+        opacity: 1;
+        transform: none
+      }
+    }
 
-/* ===== Empty ===== */
-.empty{padding:60px;text-align:center;color:#ADB5BD}
-.empty .icon{font-size:36px;margin-bottom:12px}
-.empty .t{font-weight:700;font-size:15px;margin-bottom:4px}
-.empty .d{font-size:13px}
+    @keyframes spin {
+      to {
+        transform: rotate(360deg)
+      }
+    }
 
-/* ===== Loading ===== */
-.loading{display:flex;flex-direction:column;align-items:center;justify-content:center;padding:80px 20px;color:#868E96}
-.spinner{width:32px;height:32px;border:3px solid #E9ECEF;border-top-color:#7048E8;border-radius:50%;animation:spin .7s linear infinite;margin-bottom:16px}
+    /* ===== Header ===== */
+    .header {
+      background: linear-gradient(135deg, #1A1B2E 0%, #2D2B55 50%, #1A1B2E 100%);
+      padding: 24px 40px;
+      border-bottom: 1px solid rgba(255, 255, 255, .06)
+    }
 
-/* ===== Modal ===== */
-.modal-overlay{position:fixed;inset:0;z-index:1000;display:flex;align-items:center;justify-content:center}
-.modal-bg{position:absolute;inset:0;background:rgba(0,0,0,.45);backdrop-filter:blur(4px)}
-.modal-box{position:relative;background:#fff;border-radius:20px;padding:36px 32px 28px;width:min(600px,92vw);max-height:88vh;overflow-y:auto;box-shadow:0 25px 60px rgba(0,0,0,.2);animation:modalIn .3s ease}
-.modal-box.wide{width:min(880px,94vw)}
+    .header-inner {
+      max-width: 1320px;
+      margin: 0 auto;
+      display: flex;
+      align-items: center;
+      justify-content: space-between
+    }
 
-.modal-header{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:24px}
-.modal-header h2{font-size:22px;font-weight:800;color:#212529;letter-spacing:-.03em}
-.modal-header .tid{font-size:11px;font-weight:700;color:#ADB5BD;letter-spacing:.08em;margin-bottom:6px}
-.btn-close{background:#F1F3F5;border:none;border-radius:10px;width:36px;height:36px;cursor:pointer;font-size:18px;color:#868E96;display:flex;align-items:center;justify-content:center}
+    .logo {
+      display: flex;
+      align-items: center;
+      gap: 14px
+    }
 
-/* ===== Form ===== */
-.form-grid{display:grid;grid-template-columns:1fr 1fr;gap:16px 20px}
-.form-grid .full{grid-column:1/-1}
-.form-grid label{display:block;font-size:11px;font-weight:700;color:#868E96;margin-bottom:6px;letter-spacing:.04em}
-.form-grid input,.form-grid select,.form-grid textarea{width:100%;padding:10px 14px;border-radius:10px;border:1px solid #DEE2E6;font-size:14px;outline:none;font-family:inherit;background:#fff}
-.form-grid textarea{resize:vertical;min-height:60px}
-.form-grid input.err,.form-grid select.err{border:2px solid #FF6B6B}
-.err-msg{font-size:11px;color:#FF6B6B;margin-top:4px;font-weight:600}
+    .logo-icon {
+      width: 40px;
+      height: 40px;
+      border-radius: 12px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: linear-gradient(135deg, #748FFC, #7048E8);
+      font-size: 20px;
+      box-shadow: 0 4px 15px rgba(112, 72, 232, .4)
+    }
 
-/* ===== Form Item Card ===== */
-.f-item{background:#fff;border-radius:10px;padding:14px 16px;border:1px solid rgba(0,0,0,.04)}
-.f-item label{display:block;font-size:10px;font-weight:700;color:#ADB5BD;margin-bottom:6px;letter-spacing:.05em;text-transform:uppercase}
-.f-item input,.f-item select,.f-item textarea{width:100%;padding:9px 12px;border-radius:8px;border:1px solid #E9ECEF;font-size:14px;outline:none;font-family:inherit;background:#FAFBFC;transition:border .2s}
-.f-item input:focus,.f-item select:focus,.f-item textarea:focus{border-color:#748FFC;background:#fff}
-.f-item textarea{resize:vertical;min-height:60px}
-.f-item input.err,.f-item select.err{border:2px solid #FF6B6B}
-.form-strategy-chips{display:flex;gap:10px;flex-wrap:wrap}
-.form-strategy-chip{display:flex;align-items:center;gap:8px;padding:12px 18px;background:#fff;border-radius:10px;border:1px solid rgba(0,0,0,.04);font-size:13px;font-weight:600;color:#495057;flex:1;min-width:140px;cursor:pointer;transition:all .2s}
-.form-strategy-chip:hover{box-shadow:0 2px 8px rgba(0,0,0,.06)}
-.form-strategy-chip .chip-dot{width:10px;height:10px;border-radius:50%;flex-shrink:0;transition:background .2s}
-.form-strategy-chip .chip-status{margin-left:auto;font-weight:700;font-size:12px;min-width:32px;text-align:right}
+    .logo h1 {
+      color: #fff;
+      font-size: 20px;
+      font-weight: 800;
+      letter-spacing: -.03em;
+      font-family: 'Outfit', sans-serif
+    }
 
-/* ===== Form Section Card ===== */
-.form-section-card{grid-column:1/-1;border-radius:14px;padding:20px 22px 12px;margin-bottom:4px;border:1px solid}
-.form-section-card .form-grid-inner{display:grid;grid-template-columns:1fr 1fr;gap:16px 20px}
-.form-section-card .form-grid-inner .full{grid-column:1/-1}
-.form-section-card .form-grid-inner label{display:block;font-size:11px;font-weight:700;color:#868E96;margin-bottom:6px;letter-spacing:.04em}
-.form-section-card .form-grid-inner input,
-.form-section-card .form-grid-inner select,
-.form-section-card .form-grid-inner textarea{width:100%;padding:10px 14px;border-radius:10px;border:1px solid #DEE2E6;font-size:14px;outline:none;font-family:inherit;background:#fff}
-.form-section-card .form-grid-inner textarea{resize:vertical;min-height:60px}
-.form-section-card .form-grid-inner input.err,
-.form-section-card .form-grid-inner select.err{border:2px solid #FF6B6B}
-.form-section-title{display:flex;align-items:center;gap:8px;margin-bottom:16px}
-.form-section-title .sec-icon{width:28px;height:28px;border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:14px}
-.form-section-title .sec-text{font-size:13px;font-weight:800;letter-spacing:-.02em}
+    .logo .sub {
+      color: rgba(255, 255, 255, .45);
+      font-size: 12px;
+      font-weight: 500;
+      margin-top: 2px
+    }
 
-.sec-basic{background:#F6F8FF;border-color:#D4DEFF}
-.sec-basic .sec-text{color:#3B5BDB}
-.sec-org{background:#F8F5FF;border-color:#DDD6FE}
-.sec-org .sec-text{color:#7048E8}
-.sec-schedule{background:#FFF8F0;border-color:#FFE0C2}
-.sec-schedule .sec-text{color:#E8590C}
-.sec-perf{background:#F0FBF2;border-color:#C3E6CB}
-.sec-perf .sec-text{color:#2B8A3E}
-.sec-strategy{background:#FFFBEB;border-color:#FDE68A}
-.sec-strategy .sec-text{color:#B45309}
-.sec-gpu{background:#F4F5F7;border-color:#D5D8DC}
-.sec-gpu .sec-text{color:#495057}
-.sec-etc{background:#EFF8FF;border-color:#BAE0FF}
-.sec-etc .sec-text{color:#1C7ED6}
+    .btn-add {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 10px 22px;
+      background: linear-gradient(135deg, #748FFC, #7048E8);
+      color: #fff;
+      border: none;
+      border-radius: 12px;
+      font-size: 14px;
+      font-weight: 700;
+      cursor: pointer;
+      box-shadow: 0 4px 15px rgba(112, 72, 232, .35);
+      transition: all .2s;
+      font-family: inherit
+    }
 
-/* ===== Checkbox toggle ===== */
-.toggle-row{display:flex;align-items:center;gap:10px;padding:8px 0}
-.toggle-row .tgl-label{font-size:13px;font-weight:600;color:#495057;flex:1}
-.toggle-check{width:18px;height:18px;accent-color:#7048E8;cursor:pointer}
-.toggle-inline{display:flex;align-items:center;gap:28px;padding:4px 0}
-.toggle-inline-item{display:flex;align-items:center;gap:8px;font-size:13px;font-weight:600;color:#495057;cursor:pointer}
+    .btn-add:hover {
+      transform: translateY(-1px);
+      box-shadow: 0 6px 20px rgba(112, 72, 232, .45)
+    }
 
-/* ===== Detail ===== */
-.detail-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px 20px;margin-bottom:8px}
-.detail-grid .d-item{background:#fff;border-radius:10px;padding:12px 14px;border:1px solid rgba(0,0,0,.04)}
-.detail-grid .lb{font-size:10px;font-weight:700;color:#ADB5BD;margin-bottom:5px;letter-spacing:.05em;text-transform:uppercase}
-.detail-grid .vl{font-size:14px;font-weight:600;color:#343A40}
-.detail-sec{margin-bottom:8px}
-.detail-sec .d-item{background:#fff;border-radius:10px;padding:12px 14px;border:1px solid rgba(0,0,0,.04)}
-.detail-sec .lb{font-size:10px;font-weight:700;color:#ADB5BD;margin-bottom:5px;letter-spacing:.05em;text-transform:uppercase}
-.detail-sec .vl{font-size:14px;color:#495057;line-height:1.7;font-weight:500}
-.detail-header-bar{display:flex;align-items:center;gap:12px;margin-bottom:20px;padding:16px 18px;background:#fff;border-radius:12px;border:1px solid rgba(0,0,0,.04)}
-.detail-header-bar .dh-id{font-family:'Outfit',monospace;font-size:12px;font-weight:700;color:#ADB5BD;letter-spacing:.06em}
-.detail-header-bar .dh-name{font-size:18px;font-weight:800;color:#212529;letter-spacing:-.02em;flex:1}
-.detail-strategy-inline{display:flex;gap:10px;flex-wrap:wrap}
-.detail-strategy-chip{display:flex;align-items:center;gap:8px;padding:10px 18px;background:#fff;border-radius:10px;border:1px solid rgba(0,0,0,.04);font-size:13px;font-weight:600;color:#495057;flex:1;min-width:140px}
-.detail-strategy-chip .chip-dot{width:10px;height:10px;border-radius:50%;flex-shrink:0}
-.detail-strategy-chip strong{min-width:32px;text-align:right}
+    /* ===== Main ===== */
+    .main {
+      max-width: 1320px;
+      margin: 0 auto;
+      padding: 28px 40px 60px
+    }
 
-/* ===== History ===== */
-.history-section{margin-top:16px;padding:16px 18px;background:#FAFBFC;border-radius:12px;border:1px solid #E9ECEF}
-.history-section h4{font-size:12px;font-weight:700;color:#868E96;margin-bottom:12px;letter-spacing:.03em}
-.history-item{display:flex;align-items:center;gap:10px;padding:8px 0;font-size:12px;color:#495057;border-bottom:1px solid #F1F3F5}
-.history-item:last-child{border-bottom:none}
-.history-item .arrow{color:#ADB5BD}
-.history-item .time{color:#ADB5BD;font-size:11px;margin-left:auto;font-family:'Outfit',monospace}
+    /* ===== Summary ===== */
+    .summary {
+      display: flex;
+      gap: 10px;
+      margin-bottom: 24px;
+      flex-wrap: wrap;
+      animation: fadeUp .5s ease
+    }
 
-/* ===== Status bar ===== */
-.status-bar{display:flex;align-items:center;gap:12px;padding:16px 18px;background:#FAFBFC;border-radius:12px;border:1px solid #E9ECEF;flex-wrap:wrap;margin-top:12px}
-.status-bar .tit{font-size:12px;font-weight:700;color:#868E96}
-.status-btns{display:flex;gap:6px;flex-wrap:wrap}
-.s-btn{padding:6px 14px;border-radius:20px;font-size:12px;font-weight:600;cursor:pointer;transition:all .2s;font-family:inherit}
+    .s-card {
+      flex: 1 1 0;
+      min-width: 100px;
+      padding: 20px 16px;
+      background: #fff;
+      border: 1px solid #E9ECEF;
+      border-radius: 14px;
+      cursor: pointer;
+      transition: all .25s cubic-bezier(.4, 0, .2, 1);
+      text-align: center
+    }
 
-.modal-footer{display:flex;gap:10px;justify-content:flex-end;margin-top:28px}
-.btn-cancel{padding:10px 24px;border-radius:10px;border:1px solid #DEE2E6;background:#fff;font-size:14px;font-weight:600;color:#868E96;cursor:pointer;font-family:inherit}
-.btn-submit{padding:10px 28px;border-radius:10px;border:none;background:linear-gradient(135deg,#748FFC,#7048E8);color:#fff;font-size:14px;font-weight:700;cursor:pointer;box-shadow:0 4px 15px rgba(112,72,232,.3);font-family:inherit}
-.btn-submit:hover{box-shadow:0 6px 20px rgba(112,72,232,.4)}
-.btn-delete{padding:10px 20px;border-radius:10px;border:1px solid #FF6B6B;background:#fff;font-size:13px;font-weight:600;color:#FF6B6B;cursor:pointer;font-family:inherit;margin-right:auto}
-.btn-delete:hover{background:#FFF5F5}
-.btn-edit{padding:8px 18px;border-radius:10px;border:1px solid #748FFC;background:#F0F4FF;font-size:13px;font-weight:700;color:#3B5BDB;cursor:pointer;font-family:inherit;display:flex;align-items:center;gap:6px;transition:all .2s}
-.btn-edit:hover{background:#DCE4FF}
-.btn-save{padding:8px 18px;border-radius:10px;border:none;background:linear-gradient(135deg,#748FFC,#7048E8);font-size:13px;font-weight:700;color:#fff;cursor:pointer;font-family:inherit;display:flex;align-items:center;gap:6px;transition:all .2s;box-shadow:0 4px 12px rgba(112,72,232,.3)}
-.btn-save:hover{box-shadow:0 6px 16px rgba(112,72,232,.4)}
-.btn-edit-cancel{padding:8px 18px;border-radius:10px;border:1px solid #DEE2E6;background:#fff;font-size:13px;font-weight:600;color:#868E96;cursor:pointer;font-family:inherit;transition:all .2s}
-.edit-input{width:100%;padding:8px 12px;border-radius:8px;border:1px solid #E9ECEF;font-size:14px;outline:none;font-family:inherit;background:#FAFBFC;transition:border .2s}
-.edit-input:focus{border-color:#748FFC;background:#fff}
-.edit-select{width:100%;padding:8px 12px;border-radius:8px;border:1px solid #E9ECEF;font-size:14px;outline:none;font-family:inherit;background:#FAFBFC;cursor:pointer}
-.edit-textarea{width:100%;padding:8px 12px;border-radius:8px;border:1px solid #E9ECEF;font-size:14px;outline:none;font-family:inherit;background:#FAFBFC;resize:vertical;min-height:60px}
-.edit-checkbox-wrap{display:flex;align-items:center;gap:6px;cursor:pointer;margin-top:4px}
+    .s-card:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 6px 20px rgba(0, 0, 0, .08)
+    }
 
-/* ===== AI Chat ===== */
-.chat-fab{position:fixed;bottom:28px;right:28px;z-index:900;width:56px;height:56px;border-radius:50%;border:none;background:linear-gradient(135deg,#748FFC,#7048E8);color:#fff;font-size:24px;cursor:pointer;box-shadow:0 6px 24px rgba(112,72,232,.4);display:flex;align-items:center;justify-content:center;transition:all .25s}
-.chat-fab:hover{transform:scale(1.08);box-shadow:0 8px 30px rgba(112,72,232,.5)}
-.chat-window{position:fixed;bottom:96px;right:28px;z-index:1100;width:380px;height:520px;background:#fff;border-radius:20px;box-shadow:0 16px 50px rgba(0,0,0,.18);display:flex;flex-direction:column;overflow:hidden;animation:modalIn .25s ease}
-.chat-header{padding:16px 20px;background:linear-gradient(135deg,#1A1B2E,#2D2B55);color:#fff;display:flex;align-items:center;gap:10px}
-.chat-header .ch-icon{width:32px;height:32px;border-radius:10px;background:linear-gradient(135deg,#748FFC,#7048E8);display:flex;align-items:center;justify-content:center;font-size:16px}
-.chat-header .ch-title{flex:1;font-size:14px;font-weight:700}
-.chat-header .ch-sub{font-size:11px;color:rgba(255,255,255,.5);margin-top:1px}
-.chat-header .ch-close{background:none;border:none;color:rgba(255,255,255,.6);font-size:18px;cursor:pointer;padding:4px}
-.chat-header .ch-close:hover{color:#fff}
-.chat-body{flex:1;overflow-y:auto;padding:16px;display:flex;flex-direction:column;gap:10px;background:#F8F9FA}
-.chat-msg{max-width:85%;padding:10px 14px;border-radius:14px;font-size:13px;line-height:1.6;font-weight:500}
-.chat-msg.ai{background:#fff;color:#343A40;border:1px solid #E9ECEF;align-self:flex-start;border-bottom-left-radius:4px}
-.chat-msg.user{background:linear-gradient(135deg,#748FFC,#7048E8);color:#fff;align-self:flex-end;border-bottom-right-radius:4px}
-.chat-input-wrap{padding:12px 16px;border-top:1px solid #E9ECEF;display:flex;gap:8px;background:#fff}
-.chat-input-wrap input{flex:1;padding:10px 14px;border-radius:12px;border:1px solid #DEE2E6;font-size:13px;outline:none;font-family:inherit;background:#F8F9FA}
-.chat-input-wrap input:focus{border-color:#748FFC;background:#fff}
-.chat-send{width:38px;height:38px;border-radius:10px;border:none;background:linear-gradient(135deg,#748FFC,#7048E8);color:#fff;font-size:16px;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:all .2s}
-.chat-send:hover{box-shadow:0 4px 12px rgba(112,72,232,.3)}
-@media(max-width:480px){.chat-window{width:calc(100vw - 24px);right:12px;bottom:84px;height:60vh}}
+    .s-card.active {
+      border: none;
+      transform: translateY(-2px);
+      color: #fff
+    }
 
-/* ===== Toast ===== */
-.toast{position:fixed;top:24px;right:24px;z-index:2000;padding:14px 24px;border-radius:12px;color:#fff;font-size:14px;font-weight:600;box-shadow:0 8px 30px rgba(0,0,0,.15);animation:fadeUp .3s ease}
-.toast.success{background:#2B8A3E}
-.toast.error{background:#E03131}
+    .s-card .num {
+      font-size: 28px;
+      font-weight: 800;
+      font-family: 'Outfit', sans-serif;
+      letter-spacing: -.03em
+    }
 
-@media(max-width:768px){
-  .header{padding:16px 20px}
-  .main{padding:20px 16px 40px}
-  .summary{gap:6px}
-  .s-card{min-width:70px;padding:14px 8px}
-  .s-card .num{font-size:20px}
-  .filter-bar{padding:14px 16px}
-}
-</style>
+    .s-card .lbl {
+      font-size: 12px;
+      font-weight: 600;
+      margin-top: 4px
+    }
+
+    .s-card:not(.active) .num {
+      color: #212529
+    }
+
+    .s-card:not(.active) .lbl {
+      color: #868E96
+    }
+
+    .s-card.active .lbl {
+      color: rgba(255, 255, 255, .85)
+    }
+
+    /* ===== Filter ===== */
+    .filter-bar {
+      background: #fff;
+      border-radius: 16px;
+      padding: 18px 24px;
+      margin-bottom: 20px;
+      border: 1px solid #E9ECEF;
+      display: flex;
+      gap: 12px;
+      align-items: center;
+      flex-wrap: wrap;
+      animation: fadeUp .5s ease .1s both;
+      position: relative;
+      z-index: 100
+    }
+
+    .filter-bar .f-label {
+      font-size: 13px;
+      font-weight: 700;
+      color: #495057;
+      margin-right: 4px
+    }
+
+    .filter-bar select,
+    .filter-bar input {
+      padding: 8px 14px;
+      border-radius: 10px;
+      border: 1px solid #DEE2E6;
+      font-size: 13px;
+      color: #495057;
+      background: #fff;
+      outline: none;
+      font-family: inherit
+    }
+
+    .filter-bar select {
+      cursor: pointer;
+      min-width: 120px
+    }
+
+    .search-wrap {
+      flex: 1;
+      min-width: 200px;
+      position: relative
+    }
+
+    .search-wrap .ico {
+      position: absolute;
+      left: 12px;
+      top: 50%;
+      transform: translateY(-50%);
+      font-size: 14px;
+      color: #ADB5BD;
+      pointer-events: none
+    }
+
+    .search-wrap input {
+      width: 100%;
+      padding-left: 34px
+    }
+
+    .btn-reset {
+      padding: 8px 16px;
+      border-radius: 10px;
+      border: 1px solid #DEE2E6;
+      background: #F8F9FA;
+      font-size: 12px;
+      font-weight: 600;
+      color: #868E96;
+      cursor: pointer;
+      font-family: inherit
+    }
+
+    .result-count {
+      font-size: 13px;
+      color: #868E96;
+      font-weight: 600;
+      margin-bottom: 12px;
+      padding: 0 4px
+    }
+
+    .result-count span {
+      color: #3B5BDB;
+      font-weight: 800
+    }
+
+    /* ===== Table ===== */
+    .table-wrap {
+      background: #fff;
+      border-radius: 16px;
+      border: 1px solid #E9ECEF;
+      overflow: hidden;
+      animation: fadeUp .5s ease .2s both;
+      box-shadow: 0 1px 3px rgba(0, 0, 0, .03)
+    }
+
+    .table-scroll {
+      overflow-x: auto
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 13px
+    }
+
+    thead tr {
+      background: #F8F9FB
+    }
+
+    th {
+      padding: 14px 16px;
+      text-align: left;
+      font-weight: 700;
+      color: #868E96;
+      font-size: 11px;
+      letter-spacing: .04em;
+      text-transform: uppercase;
+      border-bottom: 1px solid #E9ECEF;
+      white-space: nowrap;
+      cursor: pointer;
+      user-select: none
+    }
+
+    th .si {
+      margin-left: 4px;
+      transition: color .2s
+    }
+
+    td {
+      padding: 14px 16px;
+      border-bottom: 1px solid #F1F3F5
+    }
+
+    tbody tr {
+      cursor: pointer;
+      transition: background .15s
+    }
+
+    tbody tr:hover {
+      background: #F8F9FB
+    }
+
+    .td-id {
+      font-weight: 700;
+      color: #ADB5BD;
+      font-size: 12px;
+      font-family: 'Outfit', monospace
+    }
+
+    .td-title {
+      font-weight: 700;
+      color: #212529;
+      letter-spacing: -.02em
+    }
+
+    .td-text {
+      color: #495057;
+      font-weight: 500
+    }
+
+    .td-sub {
+      color: #868E96;
+      font-size: 12px;
+      font-weight: 500
+    }
+
+    .td-date {
+      color: #868E96;
+      font-size: 12px;
+      font-family: 'Outfit', monospace
+    }
+
+    /* ===== Badge ===== */
+    .badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 4px 12px;
+      border-radius: 20px;
+      font-size: 12px;
+      font-weight: 600;
+      letter-spacing: -.02em;
+      white-space: nowrap
+    }
+
+    .badge .dot {
+      width: 6px;
+      height: 6px;
+      border-radius: 50%
+    }
+
+    /* ===== Inline select ===== */
+    .st-sel {
+      padding: 4px 8px;
+      border-radius: 8px;
+      border: 1px solid #DEE2E6;
+      font-size: 11px;
+      color: #495057;
+      background: #F8F9FA;
+      cursor: pointer;
+      outline: none;
+      font-family: inherit
+    }
+
+    /* ===== Empty ===== */
+    .empty {
+      padding: 60px;
+      text-align: center;
+      color: #ADB5BD
+    }
+
+    .empty .icon {
+      font-size: 36px;
+      margin-bottom: 12px
+    }
+
+    .empty .t {
+      font-weight: 700;
+      font-size: 15px;
+      margin-bottom: 4px
+    }
+
+    .empty .d {
+      font-size: 13px
+    }
+
+    /* ===== Loading ===== */
+    .loading {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 80px 20px;
+      color: #868E96
+    }
+
+    .spinner {
+      width: 32px;
+      height: 32px;
+      border: 3px solid #E9ECEF;
+      border-top-color: #7048E8;
+      border-radius: 50%;
+      animation: spin .7s linear infinite;
+      margin-bottom: 16px
+    }
+
+    /* ===== Modal ===== */
+    .modal-overlay {
+      position: fixed;
+      inset: 0;
+      z-index: 1000;
+      display: flex;
+      align-items: center;
+      justify-content: center
+    }
+
+    .modal-bg {
+      position: absolute;
+      inset: 0;
+      background: rgba(0, 0, 0, .45);
+      backdrop-filter: blur(4px)
+    }
+
+    .modal-box {
+      position: relative;
+      background: #fff;
+      border-radius: 20px;
+      padding: 36px 32px 28px;
+      width: min(600px, 92vw);
+      max-height: 88vh;
+      overflow-y: auto;
+      box-shadow: 0 25px 60px rgba(0, 0, 0, .2);
+      animation: modalIn .3s ease
+    }
+
+    .modal-box.wide {
+      width: min(880px, 94vw)
+    }
+
+    .modal-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      margin-bottom: 24px
+    }
+
+    .modal-header h2 {
+      font-size: 22px;
+      font-weight: 800;
+      color: #212529;
+      letter-spacing: -.03em
+    }
+
+    .modal-header .tid {
+      font-size: 11px;
+      font-weight: 700;
+      color: #ADB5BD;
+      letter-spacing: .08em;
+      margin-bottom: 6px
+    }
+
+    .btn-close {
+      background: #F1F3F5;
+      border: none;
+      border-radius: 10px;
+      width: 36px;
+      height: 36px;
+      cursor: pointer;
+      font-size: 18px;
+      color: #868E96;
+      display: flex;
+      align-items: center;
+      justify-content: center
+    }
+
+    /* ===== Form ===== */
+    .form-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 16px 20px
+    }
+
+    .form-grid .full {
+      grid-column: 1/-1
+    }
+
+    .form-grid label {
+      display: block;
+      font-size: 11px;
+      font-weight: 700;
+      color: #868E96;
+      margin-bottom: 6px;
+      letter-spacing: .04em
+    }
+
+    .form-grid input,
+    .form-grid select,
+    .form-grid textarea {
+      width: 100%;
+      padding: 10px 14px;
+      border-radius: 10px;
+      border: 1px solid #DEE2E6;
+      font-size: 14px;
+      outline: none;
+      font-family: inherit;
+      background: #fff
+    }
+
+    .form-grid textarea {
+      resize: vertical;
+      min-height: 60px
+    }
+
+    .form-grid input.err,
+    .form-grid select.err {
+      border: 2px solid #FF6B6B
+    }
+
+    .err-msg {
+      font-size: 11px;
+      color: #FF6B6B;
+      margin-top: 4px;
+      font-weight: 600
+    }
+
+    /* ===== Form Item Card ===== */
+    .f-item {
+      background: #fff;
+      border-radius: 10px;
+      padding: 14px 16px;
+      border: 1px solid rgba(0, 0, 0, .04)
+    }
+
+    .f-item label {
+      display: block;
+      font-size: 10px;
+      font-weight: 700;
+      color: #ADB5BD;
+      margin-bottom: 6px;
+      letter-spacing: .05em;
+      text-transform: uppercase
+    }
+
+    .f-item input,
+    .f-item select,
+    .f-item textarea {
+      width: 100%;
+      padding: 9px 12px;
+      border-radius: 8px;
+      border: 1px solid #E9ECEF;
+      font-size: 14px;
+      outline: none;
+      font-family: inherit;
+      background: #FAFBFC;
+      transition: border .2s
+    }
+
+    .f-item input:focus,
+    .f-item select:focus,
+    .f-item textarea:focus {
+      border-color: #748FFC;
+      background: #fff
+    }
+
+    .f-item textarea {
+      resize: vertical;
+      min-height: 60px
+    }
+
+    .f-item input.err,
+    .f-item select.err {
+      border: 2px solid #FF6B6B
+    }
+
+    .form-strategy-chips {
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap
+    }
+
+    .form-strategy-chip {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 12px 18px;
+      background: #fff;
+      border-radius: 10px;
+      border: 1px solid rgba(0, 0, 0, .04);
+      font-size: 13px;
+      font-weight: 600;
+      color: #495057;
+      flex: 1;
+      min-width: 140px;
+      cursor: pointer;
+      transition: all .2s
+    }
+
+    .form-strategy-chip:hover {
+      box-shadow: 0 2px 8px rgba(0, 0, 0, .06)
+    }
+
+    .form-strategy-chip .chip-dot {
+      width: 10px;
+      height: 10px;
+      border-radius: 50%;
+      flex-shrink: 0;
+      transition: background .2s
+    }
+
+    .form-strategy-chip .chip-status {
+      margin-left: auto;
+      font-weight: 700;
+      font-size: 12px;
+      min-width: 32px;
+      text-align: right
+    }
+
+    /* ===== Form Section Card ===== */
+    .form-section-card {
+      grid-column: 1/-1;
+      border-radius: 14px;
+      padding: 20px 22px 12px;
+      margin-bottom: 4px;
+      border: 1px solid
+    }
+
+    .form-section-card .form-grid-inner {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 16px 20px
+    }
+
+    .form-section-card .form-grid-inner .full {
+      grid-column: 1/-1
+    }
+
+    .form-section-card .form-grid-inner label {
+      display: block;
+      font-size: 11px;
+      font-weight: 700;
+      color: #868E96;
+      margin-bottom: 6px;
+      letter-spacing: .04em
+    }
+
+    .form-section-card .form-grid-inner input,
+    .form-section-card .form-grid-inner select,
+    .form-section-card .form-grid-inner textarea {
+      width: 100%;
+      padding: 10px 14px;
+      border-radius: 10px;
+      border: 1px solid #DEE2E6;
+      font-size: 14px;
+      outline: none;
+      font-family: inherit;
+      background: #fff
+    }
+
+    .form-section-card .form-grid-inner textarea {
+      resize: vertical;
+      min-height: 60px
+    }
+
+    .form-section-card .form-grid-inner input.err,
+    .form-section-card .form-grid-inner select.err {
+      border: 2px solid #FF6B6B
+    }
+
+    .form-section-title {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      margin-bottom: 16px
+    }
+
+    .form-section-title .sec-icon {
+      width: 28px;
+      height: 28px;
+      border-radius: 8px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 14px
+    }
+
+    .form-section-title .sec-text {
+      font-size: 13px;
+      font-weight: 800;
+      letter-spacing: -.02em
+    }
+
+    .form-section-card {
+      transition: background .2s, border-color .2s, box-shadow .2s
+    }
+
+    .sec-basic {
+      background: #F6F8FF;
+      border-color: #D4DEFF
+    }
+
+    .sec-basic:hover {
+      background: #ECF0FF;
+      border-color: #B8CAFF;
+      box-shadow: 0 2px 8px rgba(59, 91, 219, .08)
+    }
+
+    .sec-basic .sec-text {
+      color: #3B5BDB
+    }
+
+    .sec-org {
+      background: #F8F5FF;
+      border-color: #DDD6FE
+    }
+
+    .sec-org:hover {
+      background: #F0EBFF;
+      border-color: #C4B5FD;
+      box-shadow: 0 2px 8px rgba(112, 72, 232, .08)
+    }
+
+    .sec-org .sec-text {
+      color: #7048E8
+    }
+
+    .sec-schedule {
+      background: #FFF8F0;
+      border-color: #FFE0C2
+    }
+
+    .sec-schedule:hover {
+      background: #FFF0E0;
+      border-color: #FFCFA0;
+      box-shadow: 0 2px 8px rgba(232, 89, 12, .08)
+    }
+
+    .sec-schedule .sec-text {
+      color: #E8590C
+    }
+
+    .sec-perf {
+      background: #F0FBF2;
+      border-color: #C3E6CB
+    }
+
+    .sec-perf:hover {
+      background: #E4F7E8;
+      border-color: #A3D9AE;
+      box-shadow: 0 2px 8px rgba(43, 138, 62, .08)
+    }
+
+    .sec-perf .sec-text {
+      color: #2B8A3E
+    }
+
+    .sec-strategy {
+      background: #FFFBEB;
+      border-color: #FDE68A
+    }
+
+    .sec-strategy:hover {
+      background: #FFF6D4;
+      border-color: #FCD34D;
+      box-shadow: 0 2px 8px rgba(180, 83, 9, .08)
+    }
+
+    .sec-strategy .sec-text {
+      color: #B45309
+    }
+
+    .sec-gpu {
+      background: #F4F5F7;
+      border-color: #D5D8DC
+    }
+
+    .sec-gpu:hover {
+      background: #EAECEF;
+      border-color: #BEC3C9;
+      box-shadow: 0 2px 8px rgba(73, 80, 87, .08)
+    }
+
+    .sec-gpu .sec-text {
+      color: #495057
+    }
+
+    .sec-etc {
+      background: #EFF8FF;
+      border-color: #BAE0FF
+    }
+
+    .sec-etc:hover {
+      background: #E0F0FF;
+      border-color: #91CFFF;
+      box-shadow: 0 2px 8px rgba(28, 126, 214, .08)
+    }
+
+    .sec-etc .sec-text {
+      color: #1C7ED6
+    }
+
+    /* ===== Checkbox toggle ===== */
+    .toggle-row {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 8px 0
+    }
+
+    .toggle-row .tgl-label {
+      font-size: 13px;
+      font-weight: 600;
+      color: #495057;
+      flex: 1
+    }
+
+    .toggle-check {
+      width: 18px;
+      height: 18px;
+      accent-color: #7048E8;
+      cursor: pointer
+    }
+
+    .toggle-inline {
+      display: flex;
+      align-items: center;
+      gap: 28px;
+      padding: 4px 0
+    }
+
+    .toggle-inline-item {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 13px;
+      font-weight: 600;
+      color: #495057;
+      cursor: pointer
+    }
+
+    /* ===== Detail ===== */
+    .detail-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px 20px;
+      margin-bottom: 8px
+    }
+
+    .detail-grid .d-item {
+      background: #fff;
+      border-radius: 10px;
+      padding: 12px 14px;
+      border: 1px solid rgba(0, 0, 0, .04)
+    }
+
+    .detail-grid .lb {
+      font-size: 10px;
+      font-weight: 700;
+      color: #ADB5BD;
+      margin-bottom: 5px;
+      letter-spacing: .05em;
+      text-transform: uppercase
+    }
+
+    .detail-grid .vl {
+      font-size: 14px;
+      font-weight: 600;
+      color: #343A40
+    }
+
+    .detail-sec {
+      margin-bottom: 8px
+    }
+
+    .detail-sec .d-item {
+      background: #fff;
+      border-radius: 10px;
+      padding: 12px 14px;
+      border: 1px solid rgba(0, 0, 0, .04)
+    }
+
+    .detail-sec .lb {
+      font-size: 10px;
+      font-weight: 700;
+      color: #ADB5BD;
+      margin-bottom: 5px;
+      letter-spacing: .05em;
+      text-transform: uppercase
+    }
+
+    .detail-sec .vl {
+      font-size: 14px;
+      color: #495057;
+      line-height: 1.7;
+      font-weight: 500
+    }
+
+    .detail-header-bar {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 20px;
+      padding: 16px 18px;
+      background: #fff;
+      border-radius: 12px;
+      border: 1px solid rgba(0, 0, 0, .04)
+    }
+
+    .detail-header-bar .dh-id {
+      font-family: 'Outfit', monospace;
+      font-size: 12px;
+      font-weight: 700;
+      color: #ADB5BD;
+      letter-spacing: .06em
+    }
+
+    .detail-header-bar .dh-name {
+      font-size: 18px;
+      font-weight: 800;
+      color: #212529;
+      letter-spacing: -.02em;
+      flex: 1
+    }
+
+    .detail-strategy-inline {
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap
+    }
+
+    .detail-strategy-chip {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 10px 18px;
+      background: #fff;
+      border-radius: 10px;
+      border: 1px solid rgba(0, 0, 0, .04);
+      font-size: 13px;
+      font-weight: 600;
+      color: #495057;
+      flex: 1;
+      min-width: 140px
+    }
+
+    .detail-strategy-chip .chip-dot {
+      width: 10px;
+      height: 10px;
+      border-radius: 50%;
+      flex-shrink: 0
+    }
+
+    .detail-strategy-chip strong {
+      min-width: 32px;
+      text-align: right
+    }
+
+    /* ===== History ===== */
+    .history-section {
+      margin-top: 16px;
+      padding: 16px 18px;
+      background: #FAFBFC;
+      border-radius: 12px;
+      border: 1px solid #E9ECEF
+    }
+
+    .history-section h4 {
+      font-size: 12px;
+      font-weight: 700;
+      color: #868E96;
+      margin-bottom: 12px;
+      letter-spacing: .03em
+    }
+
+    .history-item {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 8px 0;
+      font-size: 12px;
+      color: #495057;
+      border-bottom: 1px solid #F1F3F5
+    }
+
+    .history-item:last-child {
+      border-bottom: none
+    }
+
+    .history-item .arrow {
+      color: #ADB5BD
+    }
+
+    .history-item .time {
+      color: #ADB5BD;
+      font-size: 11px;
+      margin-left: auto;
+      font-family: 'Outfit', monospace
+    }
+
+    /* ===== Status bar ===== */
+    .status-bar {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 16px 18px;
+      background: #FAFBFC;
+      border-radius: 12px;
+      border: 1px solid #E9ECEF;
+      flex-wrap: wrap;
+      margin-top: 12px
+    }
+
+    .status-bar .tit {
+      font-size: 12px;
+      font-weight: 700;
+      color: #868E96
+    }
+
+    .status-btns {
+      display: flex;
+      gap: 6px;
+      flex-wrap: wrap
+    }
+
+    .s-btn {
+      padding: 6px 14px;
+      border-radius: 20px;
+      font-size: 12px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all .2s;
+      font-family: inherit
+    }
+
+    .modal-footer {
+      display: flex;
+      gap: 10px;
+      justify-content: flex-end;
+      margin-top: 28px
+    }
+
+    .btn-cancel {
+      padding: 10px 24px;
+      border-radius: 10px;
+      border: 1px solid #DEE2E6;
+      background: #fff;
+      font-size: 14px;
+      font-weight: 600;
+      color: #868E96;
+      cursor: pointer;
+      font-family: inherit
+    }
+
+    .btn-submit {
+      padding: 10px 28px;
+      border-radius: 10px;
+      border: none;
+      background: linear-gradient(135deg, #748FFC, #7048E8);
+      color: #fff;
+      font-size: 14px;
+      font-weight: 700;
+      cursor: pointer;
+      box-shadow: 0 4px 15px rgba(112, 72, 232, .3);
+      font-family: inherit
+    }
+
+    .btn-submit:hover {
+      box-shadow: 0 6px 20px rgba(112, 72, 232, .4)
+    }
+
+    .btn-delete {
+      padding: 10px 20px;
+      border-radius: 10px;
+      border: 1px solid #FF6B6B;
+      background: #fff;
+      font-size: 13px;
+      font-weight: 600;
+      color: #FF6B6B;
+      cursor: pointer;
+      font-family: inherit;
+      margin-right: auto
+    }
+
+    .btn-delete:hover {
+      background: #FFF5F5
+    }
+
+    .btn-edit {
+      padding: 8px 18px;
+      border-radius: 10px;
+      border: 1px solid #748FFC;
+      background: #F0F4FF;
+      font-size: 13px;
+      font-weight: 700;
+      color: #3B5BDB;
+      cursor: pointer;
+      font-family: inherit;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      transition: all .2s
+    }
+
+    .btn-edit:hover {
+      background: #DCE4FF
+    }
+
+    .btn-save {
+      padding: 8px 18px;
+      border-radius: 10px;
+      border: none;
+      background: linear-gradient(135deg, #748FFC, #7048E8);
+      font-size: 13px;
+      font-weight: 700;
+      color: #fff;
+      cursor: pointer;
+      font-family: inherit;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      transition: all .2s;
+      box-shadow: 0 4px 12px rgba(112, 72, 232, .3)
+    }
+
+    .btn-save:hover {
+      box-shadow: 0 6px 16px rgba(112, 72, 232, .4)
+    }
+
+    .btn-edit-cancel {
+      padding: 8px 18px;
+      border-radius: 10px;
+      border: 1px solid #DEE2E6;
+      background: #fff;
+      font-size: 13px;
+      font-weight: 600;
+      color: #868E96;
+      cursor: pointer;
+      font-family: inherit;
+      transition: all .2s
+    }
+
+    .edit-input {
+      width: 100%;
+      padding: 8px 12px;
+      border-radius: 8px;
+      border: 1px solid #E9ECEF;
+      font-size: 14px;
+      outline: none;
+      font-family: inherit;
+      background: #FAFBFC;
+      transition: border .2s
+    }
+
+    .edit-input:focus {
+      border-color: #748FFC;
+      background: #fff
+    }
+
+    .edit-select {
+      width: 100%;
+      padding: 8px 12px;
+      border-radius: 8px;
+      border: 1px solid #E9ECEF;
+      font-size: 14px;
+      outline: none;
+      font-family: inherit;
+      background: #FAFBFC;
+      cursor: pointer
+    }
+
+    .edit-textarea {
+      width: 100%;
+      padding: 8px 12px;
+      border-radius: 8px;
+      border: 1px solid #E9ECEF;
+      font-size: 14px;
+      outline: none;
+      font-family: inherit;
+      background: #FAFBFC;
+      resize: vertical;
+      min-height: 60px
+    }
+
+    .edit-checkbox-wrap {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      cursor: pointer;
+      margin-top: 4px
+    }
+
+    /* ===== Multi Select Filter ===== */
+    .multi-select {
+      position: relative;
+      min-width: 130px
+    }
+
+    .multi-select .ms-btn {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      padding: 8px 14px;
+      border-radius: 10px;
+      border: 1px solid #DEE2E6;
+      font-size: 13px;
+      color: #495057;
+      background: #fff;
+      cursor: pointer;
+      font-family: inherit;
+      white-space: nowrap;
+      width: 100%
+    }
+
+    .multi-select .ms-btn:hover {
+      border-color: #ADB5BD
+    }
+
+    .multi-select .ms-btn .ms-count {
+      background: #748FFC;
+      color: #fff;
+      font-size: 10px;
+      font-weight: 700;
+      padding: 1px 6px;
+      border-radius: 8px;
+      margin-left: auto
+    }
+
+    .multi-select .ms-btn .ms-arrow {
+      margin-left: 4px;
+      font-size: 10px;
+      color: #ADB5BD
+    }
+
+    .ms-dropdown {
+      position: absolute;
+      top: calc(100% + 4px);
+      left: 0;
+      min-width: 100%;
+      background: #fff;
+      border: 1px solid #DEE2E6;
+      border-radius: 12px;
+      box-shadow: 0 8px 24px rgba(0, 0, 0, .12);
+      z-index: 9999;
+      padding: 6px 0;
+      animation: fadeUp .15s ease
+    }
+
+    .ms-dropdown .ms-item {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 8px 14px;
+      cursor: pointer;
+      font-size: 13px;
+      font-weight: 500;
+      color: #495057;
+      transition: background .1s
+    }
+
+    .ms-dropdown .ms-item:hover {
+      background: #F8F9FB
+    }
+
+    .ms-dropdown .ms-item .ms-check {
+      width: 16px;
+      height: 16px;
+      border-radius: 4px;
+      border: 2px solid #CED4DA;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 10px;
+      color: #fff;
+      flex-shrink: 0;
+      transition: all .15s
+    }
+
+    .ms-dropdown .ms-item.checked .ms-check {
+      background: #748FFC;
+      border-color: #748FFC
+    }
+
+    /* ===== Column Picker ===== */
+    .table-toolbar {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 12px
+    }
+
+    .btn-col-edit {
+      padding: 7px 16px;
+      border-radius: 10px;
+      border: 1px solid #DEE2E6;
+      background: #fff;
+      font-size: 12px;
+      font-weight: 600;
+      color: #495057;
+      cursor: pointer;
+      font-family: inherit;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      transition: all .2s
+    }
+
+    .btn-col-edit:hover {
+      background: #F8F9FA;
+      border-color: #ADB5BD
+    }
+
+    .col-picker-overlay {
+      position: fixed;
+      inset: 0;
+      z-index: 1000;
+      display: flex;
+      align-items: center;
+      justify-content: center
+    }
+
+    .col-picker-bg {
+      position: absolute;
+      inset: 0;
+      background: rgba(0, 0, 0, .3);
+      backdrop-filter: blur(2px)
+    }
+
+    .col-picker {
+      position: relative;
+      background: #fff;
+      border-radius: 16px;
+      padding: 24px;
+      width: min(480px, 90vw);
+      max-height: 70vh;
+      overflow-y: auto;
+      box-shadow: 0 20px 50px rgba(0, 0, 0, .18);
+      animation: modalIn .25s ease
+    }
+
+    .col-picker h3 {
+      font-size: 16px;
+      font-weight: 800;
+      color: #212529;
+      margin-bottom: 16px
+    }
+
+    .col-picker-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 8px
+    }
+
+    .col-picker-item {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 10px 14px;
+      border-radius: 10px;
+      border: 1px solid #E9ECEF;
+      cursor: pointer;
+      transition: all .15s;
+      font-size: 13px;
+      font-weight: 600;
+      color: #495057
+    }
+
+    .col-picker-item:hover {
+      background: #F8F9FB
+    }
+
+    .col-picker-item.active {
+      background: #F0F4FF;
+      border-color: #748FFC;
+      color: #3B5BDB
+    }
+
+    .col-picker-item .cp-check {
+      width: 18px;
+      height: 18px;
+      border-radius: 5px;
+      border: 2px solid #CED4DA;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 11px;
+      color: #fff;
+      transition: all .15s;
+      flex-shrink: 0
+    }
+
+    .col-picker-item.active .cp-check {
+      background: #748FFC;
+      border-color: #748FFC
+    }
+
+    .col-picker-footer {
+      display: flex;
+      justify-content: flex-end;
+      gap: 8px;
+      margin-top: 20px
+    }
+
+    /* ===== AI Chat ===== */
+    .chat-fab {
+      position: fixed;
+      bottom: 28px;
+      right: 28px;
+      z-index: 900;
+      width: 56px;
+      height: 56px;
+      border-radius: 50%;
+      border: none;
+      background: linear-gradient(135deg, #748FFC, #7048E8);
+      color: #fff;
+      font-size: 24px;
+      cursor: pointer;
+      box-shadow: 0 6px 24px rgba(112, 72, 232, .4);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: all .25s
+    }
+
+    .chat-fab:hover {
+      transform: scale(1.08);
+      box-shadow: 0 8px 30px rgba(112, 72, 232, .5)
+    }
+
+    .chat-window {
+      position: fixed;
+      bottom: 96px;
+      right: 28px;
+      z-index: 1100;
+      width: 380px;
+      height: 520px;
+      background: #fff;
+      border-radius: 20px;
+      box-shadow: 0 16px 50px rgba(0, 0, 0, .18);
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+      animation: modalIn .25s ease
+    }
+
+    .chat-header {
+      padding: 16px 20px;
+      background: linear-gradient(135deg, #1A1B2E, #2D2B55);
+      color: #fff;
+      display: flex;
+      align-items: center;
+      gap: 10px
+    }
+
+    .chat-header .ch-icon {
+      width: 32px;
+      height: 32px;
+      border-radius: 10px;
+      background: linear-gradient(135deg, #748FFC, #7048E8);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 16px
+    }
+
+    .chat-header .ch-title {
+      flex: 1;
+      font-size: 14px;
+      font-weight: 700
+    }
+
+    .chat-header .ch-sub {
+      font-size: 11px;
+      color: rgba(255, 255, 255, .5);
+      margin-top: 1px
+    }
+
+    .chat-header .ch-close {
+      background: none;
+      border: none;
+      color: rgba(255, 255, 255, .6);
+      font-size: 18px;
+      cursor: pointer;
+      padding: 4px
+    }
+
+    .chat-header .ch-close:hover {
+      color: #fff
+    }
+
+    .chat-body {
+      flex: 1;
+      overflow-y: auto;
+      padding: 16px;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      background: #F8F9FA
+    }
+
+    .chat-msg {
+      max-width: 85%;
+      padding: 10px 14px;
+      border-radius: 14px;
+      font-size: 13px;
+      line-height: 1.6;
+      font-weight: 500
+    }
+
+    .chat-msg.ai {
+      background: #fff;
+      color: #343A40;
+      border: 1px solid #E9ECEF;
+      align-self: flex-start;
+      border-bottom-left-radius: 4px
+    }
+
+    .chat-msg.user {
+      background: linear-gradient(135deg, #748FFC, #7048E8);
+      color: #fff;
+      align-self: flex-end;
+      border-bottom-right-radius: 4px
+    }
+
+    .chat-input-wrap {
+      padding: 12px 16px;
+      border-top: 1px solid #E9ECEF;
+      display: flex;
+      gap: 8px;
+      background: #fff
+    }
+
+    .chat-input-wrap input {
+      flex: 1;
+      padding: 10px 14px;
+      border-radius: 12px;
+      border: 1px solid #DEE2E6;
+      font-size: 13px;
+      outline: none;
+      font-family: inherit;
+      background: #F8F9FA
+    }
+
+    .chat-input-wrap input:focus {
+      border-color: #748FFC;
+      background: #fff
+    }
+
+    .chat-send {
+      width: 38px;
+      height: 38px;
+      border-radius: 10px;
+      border: none;
+      background: linear-gradient(135deg, #748FFC, #7048E8);
+      color: #fff;
+      font-size: 16px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: all .2s
+    }
+
+    .chat-send:hover {
+      box-shadow: 0 4px 12px rgba(112, 72, 232, .3)
+    }
+
+    @media(max-width:480px) {
+      .chat-window {
+        width: calc(100vw - 24px);
+        right: 12px;
+        bottom: 84px;
+        height: 60vh
+      }
+    }
+
+    /* ===== Toast ===== */
+    .toast {
+      position: fixed;
+      top: 24px;
+      right: 24px;
+      z-index: 2000;
+      padding: 14px 24px;
+      border-radius: 12px;
+      color: #fff;
+      font-size: 14px;
+      font-weight: 600;
+      box-shadow: 0 8px 30px rgba(0, 0, 0, .15);
+      animation: fadeUp .3s ease
+    }
+
+    .toast.success {
+      background: #2B8A3E
+    }
+
+    .toast.error {
+      background: #E03131
+    }
+
+    @media(max-width:768px) {
+      .header {
+        padding: 16px 20px
+      }
+
+      .main {
+        padding: 20px 16px 40px
+      }
+
+      .summary {
+        gap: 6px
+      }
+
+      .s-card {
+        min-width: 70px;
+        padding: 14px 8px
+      }
+
+      .s-card .num {
+        font-size: 20px
+      }
+
+      .filter-bar {
+        padding: 14px 16px
+      }
+    }
+  </style>
 </head>
+
 <body>
 
-<div id="app" v-cloak>
+  <div id="app" v-cloak>
 
-  <!-- Header -->
-  <header class="header">
-    <div class="header-inner">
-      <div class="logo">
-        <div class="logo-icon">⚡</div>
-        <div>
-          <h1>AI 과제 관리</h1>
-          <div class="sub">Project Management Platform</div>
+    <!-- Header -->
+    <header class="header">
+      <div class="header-inner">
+        <div class="logo">
+          <div class="logo-icon">⚡</div>
+          <div>
+            <h1>MTC AI 과제 관리 플랫폼</h1>
+            <div class="sub">MTC AI Project Management Platform</div>
+          </div>
+        </div>
+        <div style="display:flex;gap:10px;align-items:center">
+          <button class="btn-add"
+            style="background:linear-gradient(135deg,#2B8A3E,#20C997);box-shadow:0 4px 15px rgba(43,138,62,.35)"
+            @click="exportExcel">
+            <span style="font-size:16px;line-height:1">📥</span> 엑셀 다운로드
+          </button>
+
+          <button class="btn-add" @click="showAdd = true">
+            <span style="font-size:18px;line-height:1">+</span> 과제 추가
+          </button>
         </div>
       </div>
-      <div style="display:flex;gap:10px;align-items:center">
-        <button class="btn-add" style="background:linear-gradient(135deg,#2B8A3E,#20C997);box-shadow:0 4px 15px rgba(43,138,62,.35)" @click="exportExcel">
-          <span style="font-size:16px;line-height:1">📥</span> 엑셀 다운로드
-        </button>
-        <button class="btn-add" @click="showAdd = true">
-          <span style="font-size:18px;line-height:1">+</span> 과제 추가
-        </button>
-      </div>
-    </div>
-  </header>
+    </header>
 
-  <div class="main">
+    <div class="main">
 
-    <!-- Loading -->
-    <div v-if="loading" class="loading">
-      <div class="spinner"></div>
-      <div>데이터를 불러오는 중...</div>
-    </div>
-
-    <template v-else>
-
-      <!-- Summary Cards -->
-      <div class="summary">
-        <div class="s-card" :class="{active: !filterStatus}"
-             :style="!filterStatus ? 'background:#343A40;box-shadow:0 8px 25px #343A4044' : ''"
-             @click="filterStatus = null">
-          <div class="num">{{ projects.length }}</div>
-          <div class="lbl">전체 과제</div>
-        </div>
-        <div v-for="(s, i) in statuses" :key="s"
-             class="s-card" :class="{active: filterStatus === s}"
-             :style="filterStatus === s ? `background:${summaryColors[i+1]};box-shadow:0 8px 25px ${summaryColors[i+1]}44` : ''"
-             @click="filterStatus = filterStatus === s ? null : s">
-          <div class="num">{{ countByStatus(s) }}</div>
-          <div class="lbl">{{ s }}</div>
-        </div>
+      <!-- Loading -->
+      <div v-if="loading" class="loading">
+        <div class="spinner"></div>
+        <div>데이터를 불러오는 중...</div>
       </div>
 
-      <!-- Filter -->
-      <div class="filter-bar">
-        <div class="f-label">필터</div>
-        <select v-model="filterStatus">
-          <option :value="null">전체 상태</option>
-          <option v-for="s in statuses" :key="s" :value="s">{{ s }}</option>
-        </select>
-        <select v-model="filterDomain">
-          <option value="">전체 도메인</option>
-          <option v-for="d in domains" :key="d" :value="d">{{ d }}</option>
-        </select>
-        <select v-model="filterTeam">
-          <option value="">전체 실행/대표팀</option>
-          <option v-for="d in teams" :key="d" :value="d">{{ d }}</option>
-        </select>
-        <div class="search-wrap">
-          <span class="ico">🔍</span>
-          <input v-model="keyword" placeholder="과제명, ID, 키워드 검색...">
+      <template v-else>
+
+        <!-- Summary Cards -->
+        <div class="summary">
+          <div class="s-card" :class="{active: !filterStatuses.length}"
+            :style="!filterStatuses.length ? 'background:#343A40;box-shadow:0 8px 25px #343A4044' : ''"
+            @click="filterStatuses = []">
+            <div class="num">{{ projects.length }}</div>
+            <div class="lbl">전체 과제</div>
+          </div>
+          <div v-for="(s, i) in statuses" :key="s" class="s-card" :class="{active: filterStatuses.includes(s)}"
+            :style="filterStatuses.includes(s) ? `background:${summaryColors[i+1]};box-shadow:0 8px 25px ${summaryColors[i+1]}44` : ''"
+            @click="toggleFilter('status', s)">
+            <div class="num">{{ countByStatus(s) }}</div>
+            <div class="lbl">{{ s }}</div>
+          </div>
         </div>
-        <button v-if="hasFilter" class="btn-reset" @click="clearFilters">초기화</button>
-      </div>
 
-      <!-- Count -->
-      <div class="result-count">총 <span>{{ filtered.length }}</span>건</div>
+        <!-- Filter -->
+        <div class="filter-bar" @click.self="openFilter = null">
+          <div class="f-label">필터</div>
 
-      <!-- Table -->
-      <div class="table-wrap">
-        <div class="table-scroll">
-          <table>
-            <thead>
-              <tr>
-                <th style="width:90px" @click="toggleSort('id')">ID <span class="si" :style="{color: sortCol==='id'?'#3B5BDB':'', opacity: sortCol==='id'?1:0.25}">{{ sortIcon('id') }}</span></th>
-                <th style="width:130px" @click="toggleSort('current_status')">상태 <span class="si" :style="{color: sortCol==='current_status'?'#3B5BDB':'', opacity: sortCol==='current_status'?1:0.25}">{{ sortIcon('current_status') }}</span></th>
-                <th @click="toggleSort('project_name')">과제명 <span class="si" :style="{color: sortCol==='project_name'?'#3B5BDB':'', opacity: sortCol==='project_name'?1:0.25}">{{ sortIcon('project_name') }}</span></th>
-                <th style="width:100px" @click="toggleSort('domain')">도메인 <span class="si" :style="{color: sortCol==='domain'?'#3B5BDB':'', opacity: sortCol==='domain'?1:0.25}">{{ sortIcon('domain') }}</span></th>
-                <th style="width:110px" @click="toggleSort('owner_team')">실행/대표팀 <span class="si" :style="{color: sortCol==='owner_team'?'#3B5BDB':'', opacity: sortCol==='owner_team'?1:0.25}">{{ sortIcon('owner_team') }}</span></th>
-                <th style="width:90px" @click="toggleSort('executive_owner')">대표 임원 <span class="si" :style="{color: sortCol==='executive_owner'?'#3B5BDB':'', opacity: sortCol==='executive_owner'?1:0.25}">{{ sortIcon('executive_owner') }}</span></th>
-                <th style="width:90px" @click="toggleSort('project_leader')">실무 리더 <span class="si" :style="{color: sortCol==='project_leader'?'#3B5BDB':'', opacity: sortCol==='project_leader'?1:0.25}">{{ sortIcon('project_leader') }}</span></th>
-                <th style="width:120px" @click="toggleSort('projects_type')">과제 유형 <span class="si" :style="{color: sortCol==='projects_type'?'#3B5BDB':'', opacity: sortCol==='projects_type'?1:0.25}">{{ sortIcon('projects_type') }}</span></th>
-                <th style="width:100px" @click="toggleSort('planning_date')">기획일 <span class="si" :style="{color: sortCol==='planning_date'?'#3B5BDB':'', opacity: sortCol==='planning_date'?1:0.25}">{{ sortIcon('planning_date') }}</span></th>
-              </tr>
-            </thead>
-            <tbody>
-              <tr v-if="filtered.length === 0">
-                <td colspan="9">
-                  <div class="empty">
-                    <div class="icon">📋</div>
-                    <div class="t">결과가 없습니다</div>
-                    <div class="d">필터 조건을 변경해 보세요</div>
-                  </div>
-                </td>
-              </tr>
-              <tr v-for="(p, i) in filtered" :key="p.id" @click="openDetail(p)"
+          <!-- 상태 -->
+          <div class="multi-select">
+            <div class="ms-btn" @click.stop="openFilter = openFilter==='status' ? null : 'status'">
+              전체 상태
+              <span v-if="filterStatuses.length" class="ms-count">{{ filterStatuses.length }}</span>
+              <span class="ms-arrow">▼</span>
+            </div>
+            <div v-if="openFilter==='status'" class="ms-dropdown" @click.stop>
+              <div v-for="s in statuses" :key="s" class="ms-item" :class="{checked: filterStatuses.includes(s)}"
+                @click="toggleFilter('status', s)">
+                <div class="ms-check">{{ filterStatuses.includes(s) ? '✓' : '' }}</div>
+                {{ s }}
+              </div>
+            </div>
+          </div>
+
+          <!-- 도메인 -->
+          <div class="multi-select">
+            <div class="ms-btn" @click.stop="openFilter = openFilter==='domain' ? null : 'domain'">
+              전체 도메인
+              <span v-if="filterDomains.length" class="ms-count">{{ filterDomains.length }}</span>
+              <span class="ms-arrow">▼</span>
+            </div>
+            <div v-if="openFilter==='domain'" class="ms-dropdown" @click.stop>
+              <div v-for="d in domains" :key="d" class="ms-item" :class="{checked: filterDomains.includes(d)}"
+                @click="toggleFilter('domain', d)">
+                <div class="ms-check">{{ filterDomains.includes(d) ? '✓' : '' }}</div>
+                {{ d }}
+              </div>
+            </div>
+          </div>
+
+          <!-- 실행/대표팀 -->
+          <div class="multi-select">
+            <div class="ms-btn" @click.stop="openFilter = openFilter==='team' ? null : 'team'">
+              전체 실행/대표팀
+              <span v-if="filterTeams.length" class="ms-count">{{ filterTeams.length }}</span>
+              <span class="ms-arrow">▼</span>
+            </div>
+            <div v-if="openFilter==='team'" class="ms-dropdown" @click.stop>
+              <div v-for="d in teams" :key="d" class="ms-item" :class="{checked: filterTeams.includes(d)}"
+                @click="toggleFilter('team', d)">
+                <div class="ms-check">{{ filterTeams.includes(d) ? '✓' : '' }}</div>
+                {{ d }}
+              </div>
+            </div>
+          </div>
+
+          <div class="search-wrap">
+            <span class="ico">🔍</span>
+            <input v-model="keyword" placeholder="과제명, ID, 키워드 검색..." @click.stop>
+          </div>
+          <button v-if="hasFilter" class="btn-reset" @click="clearFilters">초기화</button>
+        </div>
+
+        <!-- Count + Column Edit -->
+        <div class="table-toolbar">
+          <div class="result-count" style="margin-bottom:0">총 <span>{{ filtered.length }}</span>건</div>
+          <button class="btn-col-edit" @click="showColPicker = true">⚙️ Column 수정</button>
+        </div>
+
+        <!-- Column Picker Modal -->
+        <div v-if="showColPicker" class="col-picker-overlay" @click.self="showColPicker = false">
+          <div class="col-picker-bg" @click="showColPicker = false"></div>
+          <div class="col-picker">
+            <h3>표시할 컬럼 선택</h3>
+            <div class="col-picker-grid">
+              <div v-for="col in allColumns" :key="col.key" class="col-picker-item"
+                :class="{active: visibleCols.includes(col.key)}"
+                :style="fixedCols.includes(col.key) ? {opacity:0.6, cursor:'default'} : {}" @click="toggleCol(col.key)">
+                <div class="cp-check"
+                  :style="fixedCols.includes(col.key) ? {background:'#ADB5BD',borderColor:'#ADB5BD'} : {}">
+                  {{ visibleCols.includes(col.key) ? '✓' : '' }}</div>
+                {{ col.label }}
+              </div>
+            </div>
+            <div class="col-picker-footer">
+              <button class="btn-cancel" style="padding:8px 16px;font-size:13px" @click="toggleAllCols">전체 선택</button>
+              <button class="btn-submit" style="padding:8px 20px;font-size:13px"
+                @click="showColPicker = false">확인</button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Table -->
+        <div class="table-wrap">
+          <div class="table-scroll">
+            <table :style="{minWidth: visibleCols.length > 7 ? visibleCols.length * 130 + 'px' : ''}">
+              <thead>
+                <tr>
+                  <th v-for="col in activeColumns" :key="col.key" :style="{width: col.width||'', whiteSpace:'nowrap'}"
+                    @click="toggleSort(col.key)">
+                    {{ col.label }} <span class="si"
+                      :style="{color: sortCol===col.key?'#3B5BDB':'', opacity: sortCol===col.key?1:0.25}">{{ sortIcon(col.key) }}</span>
+                  </th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr v-if="filtered.length === 0">
+                  <td :colspan="activeColumns.length">
+                    <div class="empty">
+                      <div class="icon">📋</div>
+                      <div class="t">결과가 없습니다</div>
+                      <div class="d">필터 조건을 변경해 보세요</div>
+                    </div>
+                  </td>
+                </tr>
+                <tr v-for="(p, i) in filtered" :key="p.id" @click="openDetail(p)"
                   :style="{animation: `slideRow .3s ease ${i*0.03}s both`}">
-                <td class="td-id">{{ p.id }}</td>
-                <td><span class="badge" :style="{background: sc(p.current_status).bg, color: sc(p.current_status).text}"><span class="dot" :style="{background: sc(p.current_status).dot}"></span>{{ p.current_status }}</span></td>
-                <td class="td-title">{{ p.project_name }}</td>
-                <td class="td-text">{{ p.domain }}</td>
-                <td class="td-text">{{ p.owner_team }}</td>
-                <td class="td-text">{{ p.executive_owner }}</td>
-                <td class="td-text">{{ p.project_leader }}</td>
-                <td class="td-sub">{{ p.projects_type || '-' }}</td>
-                <td class="td-date">{{ p.planning_date || '-' }}</td>
-              </tr>
-            </tbody>
-          </table>
+                  <td v-for="col in activeColumns" :key="col.key" :class="col.tdClass || ''">
+                    <span v-if="col.key==='current_status'" class="badge"
+                      :style="{background: sc(p.current_status).bg, color: sc(p.current_status).text}"><span class="dot"
+                        :style="{background: sc(p.current_status).dot}"></span>{{ p.current_status }}</span>
+                    <template v-else-if="col.bool">{{ p[col.key] ? 'YES' : 'NO' }}</template>
+                    <template v-else>{{ p[col.key] ?? '-' }}</template>
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+      </template>
+    </div>
+
+    <!-- ===== Add Modal ===== -->
+    <div v-if="showAdd" class="modal-overlay" @click.self="showAdd = false">
+      <div class="modal-bg" @click="showAdd = false"></div>
+      <div class="modal-box wide">
+        <div class="modal-header">
+          <h2>새 과제 등록</h2>
+          <button class="btn-close" @click="showAdd = false">✕</button>
+        </div>
+        <div class="form-grid">
+
+          <!-- ── 기본 정보 ── -->
+          <div class="form-section-card sec-basic">
+            <div class="form-section-title">
+              <div class="sec-icon" style="background:#DCE4FF;color:#3B5BDB">📋</div>
+              <span class="sec-text">기본 정보</span>
+            </div>
+            <div class="form-grid-inner">
+              <div class="full f-item">
+                <label>과제명 *</label>
+                <input v-model="form.project_name" :class="{err: errors.project_name}" placeholder="과제명을 입력하세요">
+                <div v-if="errors.project_name" class="err-msg">필수 입력</div>
+              </div>
+              <div class="f-item">
+                <label>도메인 *</label>
+                <select v-model="form.domain" :class="{err: errors.domain}">
+                  <option value="">선택하세요</option>
+                  <option v-for="d in domains" :key="d" :value="d">{{ d }}</option>
+                </select>
+                <div v-if="errors.domain" class="err-msg">필수 입력</div>
+              </div>
+              <div class="f-item">
+                <label>과제 유형</label>
+                <input v-model="form.projects_type" placeholder="예: 예측 분석, 컴퓨터 비전">
+              </div>
+              <div class="f-item">
+                <label>현재 상태</label>
+                <select v-model="form.current_status">
+                  <option v-for="s in statuses" :key="s" :value="s">{{ s }}</option>
+                </select>
+              </div>
+              <div class="f-item">
+                <label>협업 부서</label>
+                <input v-model="form.collaboration_dept" placeholder="협업 부서">
+              </div>
+              <div class="full f-item">
+                <label>과제 설명</label>
+                <textarea v-model="form.project_description" placeholder="과제에 대한 설명"></textarea>
+              </div>
+            </div>
+          </div>
+
+          <!-- ── 조직 정보 ── -->
+          <div class="form-section-card sec-org">
+            <div class="form-section-title">
+              <div class="sec-icon" style="background:#EDE5FF;color:#7048E8">👥</div>
+              <span class="sec-text">조직 정보</span>
+            </div>
+            <div class="form-grid-inner" style="grid-template-columns:1fr 1fr 1fr">
+              <div class="f-item">
+                <label>실행/대표팀 *</label>
+                <input v-model="form.owner_team" :class="{err: errors.owner_team}" placeholder="실행/대표팀">
+                <div v-if="errors.owner_team" class="err-msg">필수 입력</div>
+              </div>
+              <div class="f-item">
+                <label>대표 임원 *</label>
+                <input v-model="form.executive_owner" :class="{err: errors.executive_owner}" placeholder="대표 임원">
+                <div v-if="errors.executive_owner" class="err-msg">필수 입력</div>
+              </div>
+              <div class="f-item">
+                <label>과제 리더 *</label>
+                <input v-model="form.project_leader" :class="{err: errors.project_leader}" placeholder="과제 리더">
+                <div v-if="errors.project_leader" class="err-msg">필수 입력</div>
+              </div>
+            </div>
+          </div>
+
+          <!-- ── 일정 ── -->
+          <div class="form-section-card sec-schedule">
+            <div class="form-section-title">
+              <div class="sec-icon" style="background:#FFE0C2;color:#E8590C">📅</div>
+              <span class="sec-text">일정</span>
+            </div>
+            <div class="form-grid-inner" style="grid-template-columns:1fr 1fr 1fr">
+              <div class="f-item">
+                <label>기획일</label>
+                <input type="date" v-model="form.planning_date">
+              </div>
+              <div class="f-item">
+                <label>Data 확보일</label>
+                <input type="date" v-model="form.data_ready_date">
+              </div>
+              <div class="f-item">
+                <label>PoC 일자</label>
+                <input type="date" v-model="form.poc_date">
+              </div>
+              <div class="f-item">
+                <label>MVP/Pilot 일자</label>
+                <input type="date" v-model="form.mvp_pilot_date">
+              </div>
+              <div class="f-item">
+                <label>전면적용일</label>
+                <input type="date" v-model="form.full_deployment_date">
+              </div>
+            </div>
+          </div>
+
+          <!-- ── 성과 지표 ── -->
+          <div class="form-section-card sec-perf">
+            <div class="form-section-title">
+              <div class="sec-icon" style="background:#C3E6CB;color:#2B8A3E">📊</div>
+              <span class="sec-text">성과 지표</span>
+            </div>
+            <div class="form-grid-inner" style="grid-template-columns:repeat(4,1fr)">
+              <div class="f-item">
+                <label>성과지표 Y1</label>
+                <input type="text" inputmode="decimal" v-model="form.performance_y1" placeholder="숫자 입력">
+              </div>
+              <div class="f-item">
+                <label>성과지표 Y2</label>
+                <input type="text" inputmode="decimal" v-model="form.performance_y2" placeholder="숫자 입력">
+              </div>
+              <div class="f-item">
+                <label>성과지표 X1</label>
+                <input type="text" inputmode="decimal" v-model="form.performance_x1" placeholder="숫자 입력">
+              </div>
+              <div class="f-item">
+                <label>성과지표 X2</label>
+                <input type="text" inputmode="decimal" v-model="form.performance_x2" placeholder="숫자 입력">
+              </div>
+            </div>
+            <div class="form-grid-inner" style="margin-top:10px">
+              <div class="full f-item">
+                <label>기대효과</label>
+                <input v-model="form.expected_impact" placeholder="기대효과">
+              </div>
+              <div class="f-item">
+                <label>KPI</label>
+                <input v-model="form.kpi" placeholder="KPI">
+              </div>
+              <div class="f-item">
+                <label>재무 성과 (억 원)</label>
+                <input type="text" inputmode="decimal" v-model="form.financial_performance" placeholder="예: 1.5">
+              </div>
+              <div class="full f-item">
+                <label>프로세스 지표</label>
+                <input v-model="form.process_metric" placeholder="프로세스 지표">
+              </div>
+            </div>
+          </div>
+
+          <!-- ── 전략 과제 ── -->
+          <div class="form-section-card sec-strategy">
+            <div class="form-section-title">
+              <div class="sec-icon" style="background:#FDE68A;color:#B45309">⭐</div>
+              <span class="sec-text">전략 과제 여부</span>
+            </div>
+            <div class="form-grid-inner" style="grid-template-columns:1fr 1fr 1fr">
+              <label class="form-strategy-chip"
+                style="margin:0;display:flex;align-items:center;justify-content:center;height:100%">
+                <span class="chip-dot" :style="{background: form.mtc_strategic_project ? '#2B8A3E' : '#CED4DA'}"></span>
+                <input type="checkbox" class="toggle-check" v-model="form.mtc_strategic_project" :true-value="1"
+                  :false-value="0" style="display:none">
+                MTC 전략 과제
+                <span class="chip-status"
+                  :style="{color: form.mtc_strategic_project ? '#2B8A3E' : '#ADB5BD'}">{{ form.mtc_strategic_project ? 'YES' : 'NO' }}</span>
+              </label>
+              <label class="form-strategy-chip"
+                style="margin:0;display:flex;align-items:center;justify-content:center;height:100%">
+                <span class="chip-dot" :style="{background: form.aic_strategic_project ? '#2B8A3E' : '#CED4DA'}"></span>
+                <input type="checkbox" class="toggle-check" v-model="form.aic_strategic_project" :true-value="1"
+                  :false-value="0" style="display:none">
+                AIC 전략 과제
+                <span class="chip-status"
+                  :style="{color: form.aic_strategic_project ? '#2B8A3E' : '#ADB5BD'}">{{ form.aic_strategic_project ? 'YES' : 'NO' }}</span>
+              </label>
+              <label class="form-strategy-chip"
+                style="margin:0;display:flex;align-items:center;justify-content:center;height:100%">
+                <span class="chip-dot" :style="{background: form.dtc_strategic_project ? '#2B8A3E' : '#CED4DA'}"></span>
+                <input type="checkbox" class="toggle-check" v-model="form.dtc_strategic_project" :true-value="1"
+                  :false-value="0" style="display:none">
+                DTC 전략 과제
+                <span class="chip-status"
+                  :style="{color: form.dtc_strategic_project ? '#2B8A3E' : '#ADB5BD'}">{{ form.dtc_strategic_project ? 'YES' : 'NO' }}</span>
+              </label>
+            </div>
+          </div>
+
+          <!-- ── GPU 자원 ── -->
+          <div class="form-section-card sec-gpu">
+            <div class="form-section-title">
+              <div class="sec-icon" style="background:#D5D8DC;color:#495057">🖥️</div>
+              <span class="sec-text">GPU 자원</span>
+            </div>
+            <div class="form-grid-inner" style="grid-template-columns:1fr 1fr 1fr">
+              <div class="f-item">
+                <label>현재 GPU 수량</label>
+                <input type="text" inputmode="numeric" v-model="form.current_gpu_count" placeholder="숫자 입력">
+              </div>
+              <div class="f-item">
+                <label>현재 GPU 사양</label>
+                <input v-model="form.current_gpu_spec" placeholder="예: A100, H100">
+              </div>
+              <div class="f-item">
+                <label>필요 GPU 수량</label>
+                <input type="text" inputmode="numeric" v-model="form.required_gpu_count" placeholder="숫자 입력">
+              </div>
+              <div class="f-item">
+                <label>필요 GPU 사양</label>
+                <input v-model="form.required_gpu_spec" placeholder="예: B300">
+              </div>
+              <div class="f-item">
+                <label>GPU 요청 B300 환산</label>
+                <input type="text" inputmode="decimal" v-model="form.gpu_request_b300_equivalent" placeholder="숫자 입력">
+              </div>
+              <label class="f-item" style="cursor:pointer">
+                <div class="lb" style="text-transform:uppercase">GPU 요청 승인</div>
+                <input type="checkbox" v-model="form.gpu_request_approved" :true-value="1" :false-value="0"
+                  style="display:none">
+                <div style="display:flex;align-items:center;gap:6px;margin-top:8px">
+                  <span
+                    :style="{width:'10px',height:'10px',borderRadius:'50%',display:'inline-block',background: form.gpu_request_approved ? '#2B8A3E' : '#CED4DA'}"></span>
+                  <span
+                    :style="{color: form.gpu_request_approved ? '#2B8A3E' : '#ADB5BD', fontWeight:700, fontSize:'14px'}">{{ form.gpu_request_approved ? 'YES' : 'NO' }}</span>
+                </div>
+              </label>
+            </div>
+          </div>
+
+          <!-- ── 기타 ── -->
+          <div class="form-section-card sec-etc">
+            <div class="form-section-title">
+              <div class="sec-icon" style="background:#BAE0FF;color:#1C7ED6">💬</div>
+              <span class="sec-text">기타</span>
+            </div>
+            <div class="f-item">
+              <label>추가 지원 요청 사항</label>
+              <textarea v-model="form.additional_support_request" placeholder="추가 지원이 필요한 사항을 입력하세요"></textarea>
+            </div>
+          </div>
+
+        </div>
+        <div class="modal-footer">
+          <button class="btn-cancel" @click="showAdd = false">취소</button>
+          <button class="btn-submit" @click="submitProject">등록</button>
         </div>
       </div>
+    </div>
 
-    </template>
-  </div>
-
-  <!-- ===== Add Modal ===== -->
-  <div v-if="showAdd" class="modal-overlay" @click.self="showAdd = false">
-    <div class="modal-bg" @click="showAdd = false"></div>
-    <div class="modal-box wide">
-      <div class="modal-header">
-        <h2>새 과제 등록</h2>
-        <button class="btn-close" @click="showAdd = false">✕</button>
-      </div>
-      <div class="form-grid">
+    <!-- ===== Detail Modal ===== -->
+    <div v-if="detail" class="modal-overlay" @click.self="detail = null">
+      <div class="modal-bg" @click="detail = null"></div>
+      <div class="modal-box wide" style="padding-top:20px">
+        <!-- 헤더 바 -->
+        <div class="detail-header-bar" style="position:relative">
+          <span class="badge"
+            :style="{background: sc(detail.current_status).bg, color: sc(detail.current_status).text, padding:'6px 14px', fontSize:'13px'}">
+            <span class="dot" :style="{background: sc(detail.current_status).dot}"></span>{{ detail.current_status }}
+          </span>
+          <div style="flex:1">
+            <div class="dh-id">{{ detail.id }}</div>
+            <div class="dh-name">{{ editing ? '' : detail.project_name }}</div>
+            <input v-if="editing" v-model="editForm.project_name" class="edit-input"
+              style="font-size:18px;font-weight:800;margin-top:4px">
+          </div>
+          <div style="display:flex;gap:8px;align-items:center">
+            <button v-if="!editing" class="btn-edit" @click="startEdit">✏️ 수정</button>
+            <template v-if="editing">
+              <button class="btn-save" @click="updateProject">💾 저장</button>
+              <button class="btn-edit-cancel" @click="cancelEdit">취소</button>
+            </template>
+            <button class="btn-close" style="background:#495057;color:#fff;flex-shrink:0"
+              @click="detail = null; editing = false">✕</button>
+          </div>
+        </div>
 
         <!-- ── 기본 정보 ── -->
-        <div class="form-section-card sec-basic">
+        <div class="form-section-card sec-basic" style="margin-bottom:12px">
           <div class="form-section-title">
             <div class="sec-icon" style="background:#DCE4FF;color:#3B5BDB">📋</div>
             <span class="sec-text">기본 정보</span>
           </div>
-          <div class="form-grid-inner">
-            <div class="full f-item">
-              <label>과제명 *</label>
-              <input v-model="form.project_name" :class="{err: errors.project_name}" placeholder="과제명을 입력하세요">
-              <div v-if="errors.project_name" class="err-msg">필수 입력</div>
-            </div>
-            <div class="f-item">
-              <label>도메인 *</label>
-              <select v-model="form.domain" :class="{err: errors.domain}">
-                <option value="">선택하세요</option>
+          <div class="detail-grid">
+            <div class="d-item">
+              <div class="lb">도메인</div>
+              <div v-if="!editing" class="vl">{{ detail.domain || '-' }}</div>
+              <select v-else v-model="editForm.domain" class="edit-select">
                 <option v-for="d in domains" :key="d" :value="d">{{ d }}</option>
               </select>
-              <div v-if="errors.domain" class="err-msg">필수 입력</div>
             </div>
-            <div class="f-item">
-              <label>과제 유형</label>
-              <input v-model="form.projects_type" placeholder="예: 예측 분석, 컴퓨터 비전">
+            <div class="d-item">
+              <div class="lb">과제 유형</div>
+              <div v-if="!editing" class="vl">{{ detail.projects_type || '-' }}</div>
+              <input v-else v-model="editForm.projects_type" class="edit-input" placeholder="과제 유형">
             </div>
-            <div class="f-item">
-              <label>현재 상태</label>
-              <select v-model="form.current_status">
+            <div class="d-item">
+              <div class="lb">현재 상태</div>
+              <div v-if="!editing" class="vl">{{ detail.current_status || '-' }}</div>
+              <select v-else v-model="editForm.current_status" class="edit-select">
                 <option v-for="s in statuses" :key="s" :value="s">{{ s }}</option>
               </select>
             </div>
-            <div class="f-item">
-              <label>협업 부서</label>
-              <input v-model="form.collaboration_dept" placeholder="협업 부서">
+            <div class="d-item">
+              <div class="lb">협업 부서</div>
+              <div v-if="!editing" class="vl">{{ detail.collaboration_dept || '-' }}</div>
+              <input v-else v-model="editForm.collaboration_dept" class="edit-input" placeholder="협업 부서">
             </div>
-            <div class="full f-item">
-              <label>과제 설명</label>
-              <textarea v-model="form.project_description" placeholder="과제에 대한 설명"></textarea>
+            <div class="d-item">
+              <div class="lb">등록일</div>
+              <div class="vl">{{ detail.created_at?.split('T')[0] || '-' }}</div>
+            </div>
+          </div>
+          <div class="detail-sec" style="margin-top:4px">
+            <div class="d-item">
+              <div class="lb">과제 설명</div>
+              <div v-if="!editing" class="vl">{{ detail.project_description || '-' }}</div>
+              <textarea v-else v-model="editForm.project_description" class="edit-textarea"
+                placeholder="과제 설명"></textarea>
             </div>
           </div>
         </div>
 
         <!-- ── 조직 정보 ── -->
-        <div class="form-section-card sec-org">
+        <div class="form-section-card sec-org" style="margin-bottom:12px">
           <div class="form-section-title">
             <div class="sec-icon" style="background:#EDE5FF;color:#7048E8">👥</div>
             <span class="sec-text">조직 정보</span>
           </div>
-          <div class="form-grid-inner" style="grid-template-columns:1fr 1fr 1fr">
-            <div class="f-item">
-              <label>실행/대표팀 *</label>
-              <input v-model="form.owner_team" :class="{err: errors.owner_team}" placeholder="실행/대표팀">
-              <div v-if="errors.owner_team" class="err-msg">필수 입력</div>
+          <div class="detail-grid" style="grid-template-columns:1fr 1fr 1fr">
+            <div class="d-item">
+              <div class="lb">실행/대표팀</div>
+              <div v-if="!editing" class="vl">{{ detail.owner_team || '-' }}</div>
+              <input v-else v-model="editForm.owner_team" class="edit-input" placeholder="실행/대표팀">
             </div>
-            <div class="f-item">
-              <label>대표 임원 *</label>
-              <input v-model="form.executive_owner" :class="{err: errors.executive_owner}" placeholder="대표 임원">
-              <div v-if="errors.executive_owner" class="err-msg">필수 입력</div>
+            <div class="d-item">
+              <div class="lb">대표 임원</div>
+              <div v-if="!editing" class="vl">{{ detail.executive_owner || '-' }}</div>
+              <input v-else v-model="editForm.executive_owner" class="edit-input" placeholder="대표 임원">
             </div>
-            <div class="f-item">
-              <label>과제 리더 *</label>
-              <input v-model="form.project_leader" :class="{err: errors.project_leader}" placeholder="과제 리더">
-              <div v-if="errors.project_leader" class="err-msg">필수 입력</div>
+            <div class="d-item">
+              <div class="lb">과제 리더</div>
+              <div v-if="!editing" class="vl">{{ detail.project_leader || '-' }}</div>
+              <input v-else v-model="editForm.project_leader" class="edit-input" placeholder="과제 리더">
             </div>
           </div>
         </div>
 
         <!-- ── 일정 ── -->
-        <div class="form-section-card sec-schedule">
+        <div class="form-section-card sec-schedule" style="margin-bottom:12px">
           <div class="form-section-title">
             <div class="sec-icon" style="background:#FFE0C2;color:#E8590C">📅</div>
-            <span class="sec-text">일정</span>
+            <span class="sec-text">일정 목표</span>
           </div>
-          <div class="form-grid-inner" style="grid-template-columns:1fr 1fr 1fr">
-            <div class="f-item">
-              <label>기획일</label>
-              <input type="date" v-model="form.planning_date">
+          <div class="detail-grid" style="grid-template-columns:repeat(3,1fr)">
+            <div class="d-item">
+              <div class="lb">기획일</div>
+              <div v-if="!editing" class="vl">{{ detail.planning_date || '-' }}</div>
+              <input v-else type="date" v-model="editForm.planning_date" class="edit-input">
             </div>
-            <div class="f-item">
-              <label>Data 확보일</label>
-              <input type="date" v-model="form.data_ready_date">
+            <div class="d-item">
+              <div class="lb">Data 확보일</div>
+              <div v-if="!editing" class="vl">{{ detail.data_ready_date || '-' }}</div>
+              <input v-else type="date" v-model="editForm.data_ready_date" class="edit-input">
             </div>
-            <div class="f-item">
-              <label>PoC 일자</label>
-              <input type="date" v-model="form.poc_date">
+            <div class="d-item">
+              <div class="lb">PoC 일자</div>
+              <div v-if="!editing" class="vl">{{ detail.poc_date || '-' }}</div>
+              <input v-else type="date" v-model="editForm.poc_date" class="edit-input">
             </div>
-            <div class="f-item">
-              <label>MVP/Pilot 일자</label>
-              <input type="date" v-model="form.mvp_pilot_date">
+            <div class="d-item">
+              <div class="lb">MVP/Pilot 일자</div>
+              <div v-if="!editing" class="vl">{{ detail.mvp_pilot_date || '-' }}</div>
+              <input v-else type="date" v-model="editForm.mvp_pilot_date" class="edit-input">
             </div>
-            <div class="f-item">
-              <label>전면적용일</label>
-              <input type="date" v-model="form.full_deployment_date">
+            <div class="d-item">
+              <div class="lb">전면적용일</div>
+              <div v-if="!editing" class="vl">{{ detail.full_deployment_date || '-' }}</div>
+              <input v-else type="date" v-model="editForm.full_deployment_date" class="edit-input">
             </div>
           </div>
         </div>
 
         <!-- ── 성과 지표 ── -->
-        <div class="form-section-card sec-perf">
+        <div class="form-section-card sec-perf" style="margin-bottom:12px">
           <div class="form-section-title">
             <div class="sec-icon" style="background:#C3E6CB;color:#2B8A3E">📊</div>
             <span class="sec-text">성과 지표</span>
           </div>
-          <div class="form-grid-inner" style="grid-template-columns:repeat(4,1fr)">
-            <div class="f-item">
-              <label>성과지표 Y1</label>
-              <input type="text" inputmode="decimal" v-model="form.performance_y1" placeholder="숫자 입력">
+          <div class="detail-grid" style="grid-template-columns:repeat(4,1fr)">
+            <div class="d-item">
+              <div class="lb">성과지표 Y1</div>
+              <div v-if="!editing" class="vl">{{ detail.performance_y1 ?? '-' }}</div>
+              <input v-else type="text" inputmode="decimal" v-model="editForm.performance_y1" class="edit-input"
+                placeholder="숫자 입력">
             </div>
-            <div class="f-item">
-              <label>성과지표 Y2</label>
-              <input type="text" inputmode="decimal" v-model="form.performance_y2" placeholder="숫자 입력">
+            <div class="d-item">
+              <div class="lb">성과지표 Y2</div>
+              <div v-if="!editing" class="vl">{{ detail.performance_y2 ?? '-' }}</div>
+              <input v-else type="text" inputmode="decimal" v-model="editForm.performance_y2" class="edit-input"
+                placeholder="숫자 입력">
             </div>
-            <div class="f-item">
-              <label>성과지표 X1</label>
-              <input type="text" inputmode="decimal" v-model="form.performance_x1" placeholder="숫자 입력">
+            <div class="d-item">
+              <div class="lb">성과지표 X1</div>
+              <div v-if="!editing" class="vl">{{ detail.performance_x1 ?? '-' }}</div>
+              <input v-else type="text" inputmode="decimal" v-model="editForm.performance_x1" class="edit-input"
+                placeholder="숫자 입력">
             </div>
-            <div class="f-item">
-              <label>성과지표 X2</label>
-              <input type="text" inputmode="decimal" v-model="form.performance_x2" placeholder="숫자 입력">
+            <div class="d-item">
+              <div class="lb">성과지표 X2</div>
+              <div v-if="!editing" class="vl">{{ detail.performance_x2 ?? '-' }}</div>
+              <input v-else type="text" inputmode="decimal" v-model="editForm.performance_x2" class="edit-input"
+                placeholder="숫자 입력">
             </div>
           </div>
-          <div class="form-grid-inner" style="margin-top:10px">
-            <div class="full f-item">
-              <label>기대효과</label>
-              <input v-model="form.expected_impact" placeholder="기대효과">
+          <div class="detail-grid" style="margin-top:8px">
+            <div class="d-item">
+              <div class="lb">KPI</div>
+              <div v-if="!editing" class="vl">{{ detail.kpi || '-' }}</div>
+              <input v-else v-model="editForm.kpi" class="edit-input" placeholder="KPI">
             </div>
-            <div class="f-item">
-              <label>KPI</label>
-              <input v-model="form.kpi" placeholder="KPI">
+            <div class="d-item">
+              <div class="lb">재무 성과 (억 원)</div>
+              <div v-if="!editing" class="vl">{{ detail.financial_performance ?? '-' }}</div>
+              <input v-else type="text" inputmode="decimal" v-model="editForm.financial_performance" class="edit-input"
+                placeholder="예: 1.5">
             </div>
-            <div class="f-item">
-              <label>재무 성과 (억 원)</label>
-              <input type="text" inputmode="decimal" v-model="form.financial_performance" placeholder="예: 1.5">
+          </div>
+          <div class="detail-sec" style="margin-top:8px">
+            <div class="d-item">
+              <div class="lb">기대효과</div>
+              <div v-if="!editing" class="vl">{{ detail.expected_impact || '-' }}</div>
+              <input v-else v-model="editForm.expected_impact" class="edit-input" placeholder="기대효과">
             </div>
-            <div class="full f-item">
-              <label>프로세스 지표</label>
-              <input v-model="form.process_metric" placeholder="프로세스 지표">
+          </div>
+          <div class="detail-sec">
+            <div class="d-item">
+              <div class="lb">프로세스 지표</div>
+              <div v-if="!editing" class="vl">{{ detail.process_metric || '-' }}</div>
+              <input v-else v-model="editForm.process_metric" class="edit-input" placeholder="프로세스 지표">
             </div>
           </div>
         </div>
 
         <!-- ── 전략 과제 ── -->
-        <div class="form-section-card sec-strategy">
+        <div class="form-section-card sec-strategy" style="margin-bottom:12px">
           <div class="form-section-title">
             <div class="sec-icon" style="background:#FDE68A;color:#B45309">⭐</div>
             <span class="sec-text">전략 과제 여부</span>
           </div>
-          <div class="form-grid-inner" style="grid-template-columns:1fr 1fr 1fr">
-            <label class="form-strategy-chip" style="margin:0;display:flex;align-items:center;justify-content:center;height:100%">
-              <span class="chip-dot" :style="{background: form.mtc_strategic_project ? '#2B8A3E' : '#CED4DA'}"></span>
-              <input type="checkbox" class="toggle-check" v-model="form.mtc_strategic_project" :true-value="1" :false-value="0" style="display:none">
+          <div class="detail-strategy-inline">
+            <label v-if="editing" class="form-strategy-chip" style="margin:0;cursor:pointer">
+              <span class="chip-dot"
+                :style="{background: editForm.mtc_strategic_project ? '#2B8A3E' : '#CED4DA'}"></span>
+              <input type="checkbox" v-model="editForm.mtc_strategic_project" :true-value="1" :false-value="0"
+                style="display:none">
               MTC 전략 과제
-              <span class="chip-status" :style="{color: form.mtc_strategic_project ? '#2B8A3E' : '#ADB5BD'}">{{ form.mtc_strategic_project ? 'YES' : 'NO' }}</span>
+              <span class="chip-status"
+                :style="{color: editForm.mtc_strategic_project ? '#2B8A3E' : '#ADB5BD'}">{{ editForm.mtc_strategic_project ? 'YES' : 'NO' }}</span>
             </label>
-            <label class="form-strategy-chip" style="margin:0;display:flex;align-items:center;justify-content:center;height:100%">
-              <span class="chip-dot" :style="{background: form.aic_strategic_project ? '#2B8A3E' : '#CED4DA'}"></span>
-              <input type="checkbox" class="toggle-check" v-model="form.aic_strategic_project" :true-value="1" :false-value="0" style="display:none">
+            <div v-else class="detail-strategy-chip">
+              <span class="chip-dot" :style="{background: detail.mtc_strategic_project ? '#2B8A3E' : '#CED4DA'}"></span>
+              MTC 전략 과제
+              <strong
+                :style="{marginLeft:'auto', color: detail.mtc_strategic_project ? '#2B8A3E' : '#ADB5BD'}">{{ detail.mtc_strategic_project ? 'YES' : 'NO' }}</strong>
+            </div>
+            <label v-if="editing" class="form-strategy-chip" style="margin:0;cursor:pointer">
+              <span class="chip-dot"
+                :style="{background: editForm.aic_strategic_project ? '#2B8A3E' : '#CED4DA'}"></span>
+              <input type="checkbox" v-model="editForm.aic_strategic_project" :true-value="1" :false-value="0"
+                style="display:none">
               AIC 전략 과제
-              <span class="chip-status" :style="{color: form.aic_strategic_project ? '#2B8A3E' : '#ADB5BD'}">{{ form.aic_strategic_project ? 'YES' : 'NO' }}</span>
+              <span class="chip-status"
+                :style="{color: editForm.aic_strategic_project ? '#2B8A3E' : '#ADB5BD'}">{{ editForm.aic_strategic_project ? 'YES' : 'NO' }}</span>
             </label>
-            <label class="form-strategy-chip" style="margin:0;display:flex;align-items:center;justify-content:center;height:100%">
-              <span class="chip-dot" :style="{background: form.dtc_strategic_project ? '#2B8A3E' : '#CED4DA'}"></span>
-              <input type="checkbox" class="toggle-check" v-model="form.dtc_strategic_project" :true-value="1" :false-value="0" style="display:none">
+            <div v-else class="detail-strategy-chip">
+              <span class="chip-dot" :style="{background: detail.aic_strategic_project ? '#2B8A3E' : '#CED4DA'}"></span>
+              AIC 전략 과제
+              <strong
+                :style="{marginLeft:'auto', color: detail.aic_strategic_project ? '#2B8A3E' : '#ADB5BD'}">{{ detail.aic_strategic_project ? 'YES' : 'NO' }}</strong>
+            </div>
+            <label v-if="editing" class="form-strategy-chip" style="margin:0;cursor:pointer">
+              <span class="chip-dot"
+                :style="{background: editForm.dtc_strategic_project ? '#2B8A3E' : '#CED4DA'}"></span>
+              <input type="checkbox" v-model="editForm.dtc_strategic_project" :true-value="1" :false-value="0"
+                style="display:none">
               DTC 전략 과제
-              <span class="chip-status" :style="{color: form.dtc_strategic_project ? '#2B8A3E' : '#ADB5BD'}">{{ form.dtc_strategic_project ? 'YES' : 'NO' }}</span>
+              <span class="chip-status"
+                :style="{color: editForm.dtc_strategic_project ? '#2B8A3E' : '#ADB5BD'}">{{ editForm.dtc_strategic_project ? 'YES' : 'NO' }}</span>
             </label>
+            <div v-else class="detail-strategy-chip">
+              <span class="chip-dot" :style="{background: detail.dtc_strategic_project ? '#2B8A3E' : '#CED4DA'}"></span>
+              DTC 전략 과제
+              <strong
+                :style="{marginLeft:'auto', color: detail.dtc_strategic_project ? '#2B8A3E' : '#ADB5BD'}">{{ detail.dtc_strategic_project ? 'YES' : 'NO' }}</strong>
+            </div>
           </div>
         </div>
 
         <!-- ── GPU 자원 ── -->
-        <div class="form-section-card sec-gpu">
+        <div class="form-section-card sec-gpu" style="margin-bottom:12px">
           <div class="form-section-title">
             <div class="sec-icon" style="background:#D5D8DC;color:#495057">🖥️</div>
             <span class="sec-text">GPU 자원</span>
           </div>
-          <div class="form-grid-inner" style="grid-template-columns:1fr 1fr 1fr">
-            <div class="f-item">
-              <label>현재 GPU 수량</label>
-              <input type="text" inputmode="numeric" v-model="form.current_gpu_count" placeholder="숫자 입력">
+          <div class="detail-grid" style="grid-template-columns:repeat(3,1fr)">
+            <div class="d-item">
+              <div class="lb">현재 GPU 수량</div>
+              <div v-if="!editing" class="vl">{{ detail.current_gpu_count ?? '-' }}</div>
+              <input v-else type="text" inputmode="numeric" v-model="editForm.current_gpu_count" class="edit-input"
+                placeholder="숫자 입력">
             </div>
-            <div class="f-item">
-              <label>현재 GPU 사양</label>
-              <input v-model="form.current_gpu_spec" placeholder="예: A100, H100">
+            <div class="d-item">
+              <div class="lb">현재 GPU 사양</div>
+              <div v-if="!editing" class="vl">{{ detail.current_gpu_spec || '-' }}</div>
+              <input v-else v-model="editForm.current_gpu_spec" class="edit-input" placeholder="예: A100, H100">
             </div>
-            <div class="f-item">
-              <label>필요 GPU 수량</label>
-              <input type="text" inputmode="numeric" v-model="form.required_gpu_count" placeholder="숫자 입력">
+            <div class="d-item">
+              <div class="lb">필요 GPU 수량</div>
+              <div v-if="!editing" class="vl">{{ detail.required_gpu_count ?? '-' }}</div>
+              <input v-else type="text" inputmode="numeric" v-model="editForm.required_gpu_count" class="edit-input"
+                placeholder="숫자 입력">
             </div>
-            <div class="f-item">
-              <label>필요 GPU 사양</label>
-              <input v-model="form.required_gpu_spec" placeholder="예: B300">
+            <div class="d-item">
+              <div class="lb">필요 GPU 사양</div>
+              <div v-if="!editing" class="vl">{{ detail.required_gpu_spec || '-' }}</div>
+              <input v-else v-model="editForm.required_gpu_spec" class="edit-input" placeholder="예: B300">
             </div>
-            <div class="f-item">
-              <label>GPU 요청 B300 환산</label>
-              <input type="text" inputmode="decimal" v-model="form.gpu_request_b300_equivalent" placeholder="숫자 입력">
+            <div class="d-item">
+              <div class="lb">GPU 요청 B300 환산</div>
+              <div v-if="!editing" class="vl">{{ detail.gpu_request_b300_equivalent ?? '-' }}</div>
+              <input v-else type="text" inputmode="decimal" v-model="editForm.gpu_request_b300_equivalent"
+                class="edit-input" placeholder="숫자 입력">
             </div>
-            <label class="f-item" style="cursor:pointer">
-              <div class="lb" style="text-transform:uppercase">GPU 요청 승인</div>
-              <input type="checkbox" v-model="form.gpu_request_approved" :true-value="1" :false-value="0" style="display:none">
-              <div style="display:flex;align-items:center;gap:6px;margin-top:8px">
-                <span :style="{width:'10px',height:'10px',borderRadius:'50%',display:'inline-block',background: form.gpu_request_approved ? '#2B8A3E' : '#CED4DA'}"></span>
-                <span :style="{color: form.gpu_request_approved ? '#2B8A3E' : '#ADB5BD', fontWeight:700, fontSize:'14px'}">{{ form.gpu_request_approved ? 'YES' : 'NO' }}</span>
+            <div class="d-item">
+              <div class="lb">GPU 요청 승인</div>
+              <div v-if="!editing" class="vl" style="display:flex;align-items:center;gap:6px">
+                <span
+                  :style="{width:'10px',height:'10px',borderRadius:'50%',display:'inline-block',background: detail.gpu_request_approved ? '#2B8A3E' : '#CED4DA'}"></span>
+                <span
+                  :style="{color: detail.gpu_request_approved ? '#2B8A3E' : '#ADB5BD', fontWeight:700}">{{ detail.gpu_request_approved ? 'YES' : 'NO' }}</span>
               </div>
-            </label>
+              <label v-else class="edit-checkbox-wrap">
+                <input type="checkbox" v-model="editForm.gpu_request_approved" :true-value="1" :false-value="0"
+                  style="display:none">
+                <span
+                  :style="{width:'10px',height:'10px',borderRadius:'50%',display:'inline-block',background: editForm.gpu_request_approved ? '#2B8A3E' : '#CED4DA'}"></span>
+                <span
+                  :style="{color: editForm.gpu_request_approved ? '#2B8A3E' : '#ADB5BD', fontWeight:700, fontSize:'14px'}">{{ editForm.gpu_request_approved ? 'YES' : 'NO' }}</span>
+              </label>
+            </div>
           </div>
         </div>
 
         <!-- ── 기타 ── -->
-        <div class="form-section-card sec-etc">
+        <div class="form-section-card sec-etc" style="margin-bottom:12px">
           <div class="form-section-title">
             <div class="sec-icon" style="background:#BAE0FF;color:#1C7ED6">💬</div>
             <span class="sec-text">기타</span>
           </div>
-          <div class="f-item">
-            <label>추가 지원 요청 사항</label>
-            <textarea v-model="form.additional_support_request" placeholder="추가 지원이 필요한 사항을 입력하세요"></textarea>
-          </div>
-        </div>
-
-      </div>
-      <div class="modal-footer">
-        <button class="btn-cancel" @click="showAdd = false">취소</button>
-        <button class="btn-submit" @click="submitProject">등록</button>
-      </div>
-    </div>
-  </div>
-
-  <!-- ===== Detail Modal ===== -->
-  <div v-if="detail" class="modal-overlay" @click.self="detail = null">
-    <div class="modal-bg" @click="detail = null"></div>
-    <div class="modal-box wide">
-      <div style="display:flex;justify-content:flex-end;margin-bottom:-8px">
-        <button class="btn-close" @click="detail = null; editing = false">✕</button>
-      </div>
-
-      <!-- 헤더 바 -->
-      <div class="detail-header-bar">
-        <span class="badge" :style="{background: sc(detail.current_status).bg, color: sc(detail.current_status).text, padding:'6px 14px', fontSize:'13px'}">
-          <span class="dot" :style="{background: sc(detail.current_status).dot}"></span>{{ detail.current_status }}
-        </span>
-        <div style="flex:1">
-          <div class="dh-id">{{ detail.id }}</div>
-          <div class="dh-name">{{ editing ? '' : detail.project_name }}</div>
-          <input v-if="editing" v-model="editForm.project_name" class="edit-input" style="font-size:18px;font-weight:800;margin-top:4px">
-        </div>
-        <div style="display:flex;gap:8px;align-items:center">
-          <button v-if="!editing" class="btn-edit" @click="startEdit">✏️ 수정</button>
-          <template v-if="editing">
-            <button class="btn-save" @click="updateProject">💾 저장</button>
-            <button class="btn-edit-cancel" @click="cancelEdit">취소</button>
-          </template>
-        </div>
-      </div>
-
-      <!-- ── 기본 정보 ── -->
-      <div class="form-section-card sec-basic" style="margin-bottom:12px">
-        <div class="form-section-title">
-          <div class="sec-icon" style="background:#DCE4FF;color:#3B5BDB">📋</div>
-          <span class="sec-text">기본 정보</span>
-        </div>
-        <div class="detail-grid">
-          <div class="d-item"><div class="lb">도메인</div>
-            <div v-if="!editing" class="vl">{{ detail.domain || '-' }}</div>
-            <select v-else v-model="editForm.domain" class="edit-select"><option v-for="d in domains" :key="d" :value="d">{{ d }}</option></select>
-          </div>
-          <div class="d-item"><div class="lb">과제 유형</div>
-            <div v-if="!editing" class="vl">{{ detail.projects_type || '-' }}</div>
-            <input v-else v-model="editForm.projects_type" class="edit-input" placeholder="과제 유형">
-          </div>
-          <div class="d-item"><div class="lb">현재 상태</div>
-            <div v-if="!editing" class="vl">{{ detail.current_status || '-' }}</div>
-            <select v-else v-model="editForm.current_status" class="edit-select"><option v-for="s in statuses" :key="s" :value="s">{{ s }}</option></select>
-          </div>
-          <div class="d-item"><div class="lb">협업 부서</div>
-            <div v-if="!editing" class="vl">{{ detail.collaboration_dept || '-' }}</div>
-            <input v-else v-model="editForm.collaboration_dept" class="edit-input" placeholder="협업 부서">
-          </div>
-          <div class="d-item"><div class="lb">등록일</div><div class="vl">{{ detail.created_at?.split('T')[0] || '-' }}</div></div>
-        </div>
-        <div class="detail-sec" style="margin-top:4px">
-          <div class="d-item"><div class="lb">과제 설명</div>
-            <div v-if="!editing" class="vl">{{ detail.project_description || '-' }}</div>
-            <textarea v-else v-model="editForm.project_description" class="edit-textarea" placeholder="과제 설명"></textarea>
-          </div>
-        </div>
-      </div>
-
-      <!-- ── 조직 정보 ── -->
-      <div class="form-section-card sec-org" style="margin-bottom:12px">
-        <div class="form-section-title">
-          <div class="sec-icon" style="background:#EDE5FF;color:#7048E8">👥</div>
-          <span class="sec-text">조직 정보</span>
-        </div>
-        <div class="detail-grid" style="grid-template-columns:1fr 1fr 1fr">
-          <div class="d-item"><div class="lb">실행/대표팀</div>
-            <div v-if="!editing" class="vl">{{ detail.owner_team || '-' }}</div>
-            <input v-else v-model="editForm.owner_team" class="edit-input" placeholder="실행/대표팀">
-          </div>
-          <div class="d-item"><div class="lb">대표 임원</div>
-            <div v-if="!editing" class="vl">{{ detail.executive_owner || '-' }}</div>
-            <input v-else v-model="editForm.executive_owner" class="edit-input" placeholder="대표 임원">
-          </div>
-          <div class="d-item"><div class="lb">과제 리더</div>
-            <div v-if="!editing" class="vl">{{ detail.project_leader || '-' }}</div>
-            <input v-else v-model="editForm.project_leader" class="edit-input" placeholder="과제 리더">
-          </div>
-        </div>
-      </div>
-
-      <!-- ── 일정 ── -->
-      <div class="form-section-card sec-schedule" style="margin-bottom:12px">
-        <div class="form-section-title">
-          <div class="sec-icon" style="background:#FFE0C2;color:#E8590C">📅</div>
-          <span class="sec-text">일정 목표</span>
-        </div>
-        <div class="detail-grid" style="grid-template-columns:repeat(3,1fr)">
-          <div class="d-item"><div class="lb">기획일</div>
-            <div v-if="!editing" class="vl">{{ detail.planning_date || '-' }}</div>
-            <input v-else type="date" v-model="editForm.planning_date" class="edit-input">
-          </div>
-          <div class="d-item"><div class="lb">Data 확보일</div>
-            <div v-if="!editing" class="vl">{{ detail.data_ready_date || '-' }}</div>
-            <input v-else type="date" v-model="editForm.data_ready_date" class="edit-input">
-          </div>
-          <div class="d-item"><div class="lb">PoC 일자</div>
-            <div v-if="!editing" class="vl">{{ detail.poc_date || '-' }}</div>
-            <input v-else type="date" v-model="editForm.poc_date" class="edit-input">
-          </div>
-          <div class="d-item"><div class="lb">MVP/Pilot 일자</div>
-            <div v-if="!editing" class="vl">{{ detail.mvp_pilot_date || '-' }}</div>
-            <input v-else type="date" v-model="editForm.mvp_pilot_date" class="edit-input">
-          </div>
-          <div class="d-item"><div class="lb">전면적용일</div>
-            <div v-if="!editing" class="vl">{{ detail.full_deployment_date || '-' }}</div>
-            <input v-else type="date" v-model="editForm.full_deployment_date" class="edit-input">
-          </div>
-        </div>
-      </div>
-
-      <!-- ── 성과 지표 ── -->
-      <div class="form-section-card sec-perf" style="margin-bottom:12px">
-        <div class="form-section-title">
-          <div class="sec-icon" style="background:#C3E6CB;color:#2B8A3E">📊</div>
-          <span class="sec-text">성과 지표</span>
-        </div>
-        <div class="detail-grid" style="grid-template-columns:repeat(4,1fr)">
-          <div class="d-item"><div class="lb">성과지표 Y1</div>
-            <div v-if="!editing" class="vl">{{ detail.performance_y1 ?? '-' }}</div>
-            <input v-else type="text" inputmode="decimal" v-model="editForm.performance_y1" class="edit-input" placeholder="숫자 입력">
-          </div>
-          <div class="d-item"><div class="lb">성과지표 Y2</div>
-            <div v-if="!editing" class="vl">{{ detail.performance_y2 ?? '-' }}</div>
-            <input v-else type="text" inputmode="decimal" v-model="editForm.performance_y2" class="edit-input" placeholder="숫자 입력">
-          </div>
-          <div class="d-item"><div class="lb">성과지표 X1</div>
-            <div v-if="!editing" class="vl">{{ detail.performance_x1 ?? '-' }}</div>
-            <input v-else type="text" inputmode="decimal" v-model="editForm.performance_x1" class="edit-input" placeholder="숫자 입력">
-          </div>
-          <div class="d-item"><div class="lb">성과지표 X2</div>
-            <div v-if="!editing" class="vl">{{ detail.performance_x2 ?? '-' }}</div>
-            <input v-else type="text" inputmode="decimal" v-model="editForm.performance_x2" class="edit-input" placeholder="숫자 입력">
-          </div>
-        </div>
-        <div class="detail-grid" style="margin-top:8px">
-          <div class="d-item"><div class="lb">KPI</div>
-            <div v-if="!editing" class="vl">{{ detail.kpi || '-' }}</div>
-            <input v-else v-model="editForm.kpi" class="edit-input" placeholder="KPI">
-          </div>
-          <div class="d-item"><div class="lb">재무 성과 (억 원)</div>
-            <div v-if="!editing" class="vl">{{ detail.financial_performance ?? '-' }}</div>
-            <input v-else type="text" inputmode="decimal" v-model="editForm.financial_performance" class="edit-input" placeholder="예: 1.5">
-          </div>
-        </div>
-        <div class="detail-sec" style="margin-top:8px">
-          <div class="d-item"><div class="lb">기대효과</div>
-            <div v-if="!editing" class="vl">{{ detail.expected_impact || '-' }}</div>
-            <input v-else v-model="editForm.expected_impact" class="edit-input" placeholder="기대효과">
-          </div>
-        </div>
-        <div class="detail-sec">
-          <div class="d-item"><div class="lb">프로세스 지표</div>
-            <div v-if="!editing" class="vl">{{ detail.process_metric || '-' }}</div>
-            <input v-else v-model="editForm.process_metric" class="edit-input" placeholder="프로세스 지표">
-          </div>
-        </div>
-      </div>
-
-      <!-- ── 전략 과제 ── -->
-      <div class="form-section-card sec-strategy" style="margin-bottom:12px">
-        <div class="form-section-title">
-          <div class="sec-icon" style="background:#FDE68A;color:#B45309">⭐</div>
-          <span class="sec-text">전략 과제 여부</span>
-        </div>
-        <div class="detail-strategy-inline">
-          <label v-if="editing" class="form-strategy-chip" style="margin:0;cursor:pointer">
-            <span class="chip-dot" :style="{background: editForm.mtc_strategic_project ? '#2B8A3E' : '#CED4DA'}"></span>
-            <input type="checkbox" v-model="editForm.mtc_strategic_project" :true-value="1" :false-value="0" style="display:none">
-            MTC 전략 과제
-            <span class="chip-status" :style="{color: editForm.mtc_strategic_project ? '#2B8A3E' : '#ADB5BD'}">{{ editForm.mtc_strategic_project ? 'YES' : 'NO' }}</span>
-          </label>
-          <div v-else class="detail-strategy-chip">
-            <span class="chip-dot" :style="{background: detail.mtc_strategic_project ? '#2B8A3E' : '#CED4DA'}"></span>
-            MTC 전략 과제
-            <strong :style="{marginLeft:'auto', color: detail.mtc_strategic_project ? '#2B8A3E' : '#ADB5BD'}">{{ detail.mtc_strategic_project ? 'YES' : 'NO' }}</strong>
-          </div>
-          <label v-if="editing" class="form-strategy-chip" style="margin:0;cursor:pointer">
-            <span class="chip-dot" :style="{background: editForm.aic_strategic_project ? '#2B8A3E' : '#CED4DA'}"></span>
-            <input type="checkbox" v-model="editForm.aic_strategic_project" :true-value="1" :false-value="0" style="display:none">
-            AIC 전략 과제
-            <span class="chip-status" :style="{color: editForm.aic_strategic_project ? '#2B8A3E' : '#ADB5BD'}">{{ editForm.aic_strategic_project ? 'YES' : 'NO' }}</span>
-          </label>
-          <div v-else class="detail-strategy-chip">
-            <span class="chip-dot" :style="{background: detail.aic_strategic_project ? '#2B8A3E' : '#CED4DA'}"></span>
-            AIC 전략 과제
-            <strong :style="{marginLeft:'auto', color: detail.aic_strategic_project ? '#2B8A3E' : '#ADB5BD'}">{{ detail.aic_strategic_project ? 'YES' : 'NO' }}</strong>
-          </div>
-          <label v-if="editing" class="form-strategy-chip" style="margin:0;cursor:pointer">
-            <span class="chip-dot" :style="{background: editForm.dtc_strategic_project ? '#2B8A3E' : '#CED4DA'}"></span>
-            <input type="checkbox" v-model="editForm.dtc_strategic_project" :true-value="1" :false-value="0" style="display:none">
-            DTC 전략 과제
-            <span class="chip-status" :style="{color: editForm.dtc_strategic_project ? '#2B8A3E' : '#ADB5BD'}">{{ editForm.dtc_strategic_project ? 'YES' : 'NO' }}</span>
-          </label>
-          <div v-else class="detail-strategy-chip">
-            <span class="chip-dot" :style="{background: detail.dtc_strategic_project ? '#2B8A3E' : '#CED4DA'}"></span>
-            DTC 전략 과제
-            <strong :style="{marginLeft:'auto', color: detail.dtc_strategic_project ? '#2B8A3E' : '#ADB5BD'}">{{ detail.dtc_strategic_project ? 'YES' : 'NO' }}</strong>
-          </div>
-        </div>
-      </div>
-
-      <!-- ── GPU 자원 ── -->
-      <div class="form-section-card sec-gpu" style="margin-bottom:12px">
-        <div class="form-section-title">
-          <div class="sec-icon" style="background:#D5D8DC;color:#495057">🖥️</div>
-          <span class="sec-text">GPU 자원</span>
-        </div>
-        <div class="detail-grid" style="grid-template-columns:repeat(3,1fr)">
-          <div class="d-item"><div class="lb">현재 GPU 수량</div>
-            <div v-if="!editing" class="vl">{{ detail.current_gpu_count ?? '-' }}</div>
-            <input v-else type="text" inputmode="numeric" v-model="editForm.current_gpu_count" class="edit-input" placeholder="숫자 입력">
-          </div>
-          <div class="d-item"><div class="lb">현재 GPU 사양</div>
-            <div v-if="!editing" class="vl">{{ detail.current_gpu_spec || '-' }}</div>
-            <input v-else v-model="editForm.current_gpu_spec" class="edit-input" placeholder="예: A100, H100">
-          </div>
-          <div class="d-item"><div class="lb">필요 GPU 수량</div>
-            <div v-if="!editing" class="vl">{{ detail.required_gpu_count ?? '-' }}</div>
-            <input v-else type="text" inputmode="numeric" v-model="editForm.required_gpu_count" class="edit-input" placeholder="숫자 입력">
-          </div>
-          <div class="d-item"><div class="lb">필요 GPU 사양</div>
-            <div v-if="!editing" class="vl">{{ detail.required_gpu_spec || '-' }}</div>
-            <input v-else v-model="editForm.required_gpu_spec" class="edit-input" placeholder="예: B300">
-          </div>
-          <div class="d-item"><div class="lb">GPU 요청 B300 환산</div>
-            <div v-if="!editing" class="vl">{{ detail.gpu_request_b300_equivalent ?? '-' }}</div>
-            <input v-else type="text" inputmode="decimal" v-model="editForm.gpu_request_b300_equivalent" class="edit-input" placeholder="숫자 입력">
-          </div>
-          <div class="d-item">
-            <div class="lb">GPU 요청 승인</div>
-            <div v-if="!editing" class="vl" style="display:flex;align-items:center;gap:6px">
-              <span :style="{width:'10px',height:'10px',borderRadius:'50%',display:'inline-block',background: detail.gpu_request_approved ? '#2B8A3E' : '#CED4DA'}"></span>
-              <span :style="{color: detail.gpu_request_approved ? '#2B8A3E' : '#ADB5BD', fontWeight:700}">{{ detail.gpu_request_approved ? 'YES' : 'NO' }}</span>
+          <div class="detail-sec">
+            <div class="d-item">
+              <div class="lb">추가 지원 요청 사항</div>
+              <div v-if="!editing" class="vl">{{ detail.additional_support_request || '-' }}</div>
+              <textarea v-else v-model="editForm.additional_support_request" class="edit-textarea"
+                placeholder="추가 지원 요청 사항"></textarea>
             </div>
-            <label v-else class="edit-checkbox-wrap">
-              <input type="checkbox" v-model="editForm.gpu_request_approved" :true-value="1" :false-value="0" style="display:none">
-              <span :style="{width:'10px',height:'10px',borderRadius:'50%',display:'inline-block',background: editForm.gpu_request_approved ? '#2B8A3E' : '#CED4DA'}"></span>
-              <span :style="{color: editForm.gpu_request_approved ? '#2B8A3E' : '#ADB5BD', fontWeight:700, fontSize:'14px'}">{{ editForm.gpu_request_approved ? 'YES' : 'NO' }}</span>
-            </label>
           </div>
         </div>
-      </div>
 
-      <!-- ── 기타 ── -->
-      <div class="form-section-card sec-etc" style="margin-bottom:12px">
-        <div class="form-section-title">
-          <div class="sec-icon" style="background:#BAE0FF;color:#1C7ED6">💬</div>
-          <span class="sec-text">기타</span>
-        </div>
-        <div class="detail-sec">
-          <div class="d-item"><div class="lb">추가 지원 요청 사항</div>
-            <div v-if="!editing" class="vl">{{ detail.additional_support_request || '-' }}</div>
-            <textarea v-else v-model="editForm.additional_support_request" class="edit-textarea" placeholder="추가 지원 요청 사항"></textarea>
+        <!-- ── 상태 변경 ── -->
+        <div class="status-bar">
+          <span class="tit">상태 변경</span>
+          <div class="status-btns">
+            <button v-for="s in statuses" :key="s" class="s-btn"
+              :style="{border: s===detail.current_status ? '2px solid '+sc(s).dot : '1px solid #DEE2E6', background: s===detail.current_status ? sc(s).bg : '#fff', color: s===detail.current_status ? sc(s).text : '#868E96'}"
+              @click="changeStatus(detail, s)">{{ s }}</button>
           </div>
         </div>
-      </div>
 
-      <!-- ── 상태 변경 ── -->
-      <div class="status-bar">
-        <span class="tit">상태 변경</span>
-        <div class="status-btns">
-          <button v-for="s in statuses" :key="s" class="s-btn"
-                  :style="{border: s===detail.current_status ? '2px solid '+sc(s).dot : '1px solid #DEE2E6', background: s===detail.current_status ? sc(s).bg : '#fff', color: s===detail.current_status ? sc(s).text : '#868E96'}"
-                  @click="changeStatus(detail, s)">{{ s }}</button>
+        <!-- 변경 이력 -->
+        <div v-if="history.length" class="history-section">
+          <h4>변경 이력</h4>
+          <div v-for="h in history" :key="h.id" class="history-item">
+            <span class="badge"
+              :style="{background: sc(h.before_status).bg, color: sc(h.before_status).text, padding:'2px 8px', fontSize:'11px'}"><span
+                class="dot"
+                :style="{background: sc(h.before_status).dot, width:'5px',height:'5px'}"></span>{{ h.before_status }}</span>
+            <span class="arrow">→</span>
+            <span class="badge"
+              :style="{background: sc(h.after_status).bg, color: sc(h.after_status).text, padding:'2px 8px', fontSize:'11px'}"><span
+                class="dot"
+                :style="{background: sc(h.after_status).dot, width:'5px',height:'5px'}"></span>{{ h.after_status }}</span>
+            <span style="font-size:11px;color:#868E96">{{ h.changed_by }}</span>
+            <span class="time">{{ h.changed_at?.split('T')[0] }}</span>
+          </div>
+        </div>
+
+        <div class="modal-footer" style="margin-top:24px">
+          <button class="btn-delete" @click="deleteProject(detail.id)">삭제</button>
+          <button class="btn-cancel" @click="detail = null">닫기</button>
         </div>
       </div>
+    </div>
 
-      <!-- 변경 이력 -->
-      <div v-if="history.length" class="history-section">
-        <h4>변경 이력</h4>
-        <div v-for="h in history" :key="h.id" class="history-item">
-          <span class="badge" :style="{background: sc(h.before_status).bg, color: sc(h.before_status).text, padding:'2px 8px', fontSize:'11px'}"><span class="dot" :style="{background: sc(h.before_status).dot, width:'5px',height:'5px'}"></span>{{ h.before_status }}</span>
-          <span class="arrow">→</span>
-          <span class="badge" :style="{background: sc(h.after_status).bg, color: sc(h.after_status).text, padding:'2px 8px', fontSize:'11px'}"><span class="dot" :style="{background: sc(h.after_status).dot, width:'5px',height:'5px'}"></span>{{ h.after_status }}</span>
-          <span style="font-size:11px;color:#868E96">{{ h.changed_by }}</span>
-          <span class="time">{{ h.changed_at?.split('T')[0] }}</span>
+    <!-- AI Chat FAB -->
+    <button class="chat-fab" @click="showChat = !showChat" :title="showChat ? '채팅 닫기' : 'AI 어시스턴트'">
+      {{ showChat ? '✕' : '🤖' }}
+    </button>
+
+    <!-- AI Chat Window -->
+    <div v-if="showChat" class="chat-window">
+      <div class="chat-header">
+        <div class="ch-icon">🤖</div>
+        <div>
+          <div class="ch-title">AI 어시스턴트</div>
+          <div class="ch-sub">과제에 대해 물어보세요</div>
         </div>
+        <button class="ch-close" @click="showChat = false">✕</button>
       </div>
-
-      <div class="modal-footer" style="margin-top:24px">
-        <button class="btn-delete" @click="deleteProject(detail.id)">삭제</button>
-        <button class="btn-cancel" @click="detail = null">닫기</button>
+      <div class="chat-body" ref="chatBodyRef">
+        <div v-for="(m, i) in chatMessages" :key="i" class="chat-msg" :class="m.role">{{ m.text }}</div>
+      </div>
+      <div class="chat-input-wrap">
+        <input v-model="chatInput" placeholder="질문을 입력하세요..." @keyup.enter="sendChat">
+        <button class="chat-send" @click="sendChat">➤</button>
       </div>
     </div>
+
+    <!-- Toast -->
+    <div v-if="toast.show" class="toast" :class="toast.type">{{ toast.msg }}</div>
+
   </div>
 
-  <!-- AI Chat FAB -->
-  <button class="chat-fab" @click="showChat = !showChat" :title="showChat ? '채팅 닫기' : 'AI 어시스턴트'">
-    {{ showChat ? '✕' : '🤖' }}
-  </button>
+  <script>
+    const {
+      createApp,
+      ref,
+      computed,
+      onMounted
+    } = Vue;
 
-  <!-- AI Chat Window -->
-  <div v-if="showChat" class="chat-window">
-    <div class="chat-header">
-      <div class="ch-icon">🤖</div>
-      <div>
-        <div class="ch-title">AI 어시스턴트</div>
-        <div class="ch-sub">과제에 대해 물어보세요</div>
-      </div>
-      <button class="ch-close" @click="showChat = false">✕</button>
-    </div>
-    <div class="chat-body" ref="chatBodyRef">
-      <div v-for="(m, i) in chatMessages" :key="i" class="chat-msg" :class="m.role">{{ m.text }}</div>
-    </div>
-    <div class="chat-input-wrap">
-      <input v-model="chatInput" placeholder="질문을 입력하세요..." @keyup.enter="sendChat">
-      <button class="chat-send" @click="sendChat">➤</button>
-    </div>
-  </div>
+    const API = '/api';
 
-  <!-- Toast -->
-  <div v-if="toast.show" class="toast" :class="toast.type">{{ toast.msg }}</div>
+    const STATUS_COLORS = {
+      "기획": {
+        bg: "#F0F4FF",
+        text: "#3B5BDB",
+        dot: "#3B5BDB"
+      },
+      "Data 확보": {
+        bg: "#FFF9DB",
+        text: "#E67700",
+        dot: "#E67700"
+      },
+      "PoC": {
+        bg: "#FFF4E6",
+        text: "#E8590C",
+        dot: "#E8590C"
+      },
+      "MVP/Pilot": {
+        bg: "#F3F0FF",
+        text: "#7048E8",
+        dot: "#7048E8"
+      },
+      "전면적용": {
+        bg: "#EBFBEE",
+        text: "#2B8A3E",
+        dot: "#2B8A3E"
+      },
+      "Pending/Drop": {
+        bg: "#F1F3F5",
+        text: "#868E96",
+        dot: "#868E96"
+      },
+    };
 
-</div>
+    createApp({
+      setup() {
+        const statuses = ["기획", "Data 확보", "PoC", "MVP/Pilot", "전면적용", "Pending/Drop"];
+        const domains = ["생산", "설비", "수율/품질"];
+        const summaryColors = ["#343A40", "#3B5BDB", "#E67700", "#E8590C", "#7048E8", "#2B8A3E", "#868E96"];
 
-<script>
-const { createApp, ref, computed, onMounted } = Vue;
+        const projects = ref([]);
+        const loading = ref(true);
+        const filterStatuses = ref([]);
+        const filterDomains = ref([]);
+        const filterTeams = ref([]);
+        const keyword = ref("");
+        const openFilter = ref(null);
+        const sortCol = ref(null);
+        const sortDir = ref("asc");
 
-const API = '/api';
+        // ===== 컬럼 설정 =====
+        const allColumns = [{
+            key: 'id',
+            label: 'ID',
+            width: '90px',
+            tdClass: 'td-id'
+          },
+          {
+            key: 'current_status',
+            label: '상태',
+            width: '130px'
+          },
+          {
+            key: 'project_name',
+            label: '과제명',
+            width: '',
+            tdClass: 'td-title'
+          },
+          {
+            key: 'domain',
+            label: '도메인',
+            width: '100px',
+            tdClass: 'td-text'
+          },
+          {
+            key: 'projects_type',
+            label: '과제 유형',
+            width: '120px',
+            tdClass: 'td-sub'
+          },
+          {
+            key: 'owner_team',
+            label: '실행/대표팀',
+            width: '110px',
+            tdClass: 'td-text'
+          },
+          {
+            key: 'executive_owner',
+            label: '대표 임원',
+            width: '90px',
+            tdClass: 'td-text'
+          },
+          {
+            key: 'project_leader',
+            label: '실무 리더',
+            width: '90px',
+            tdClass: 'td-text'
+          },
+          {
+            key: 'collaboration_dept',
+            label: '협업 부서',
+            width: '100px',
+            tdClass: 'td-text'
+          },
+          {
+            key: 'planning_date',
+            label: '기획일',
+            width: '100px',
+            tdClass: 'td-date'
+          },
+          {
+            key: 'data_ready_date',
+            label: 'Data 확보일',
+            width: '110px',
+            tdClass: 'td-date'
+          },
+          {
+            key: 'poc_date',
+            label: 'PoC 일자',
+            width: '100px',
+            tdClass: 'td-date'
+          },
+          {
+            key: 'mvp_pilot_date',
+            label: 'MVP/Pilot 일자',
+            width: '120px',
+            tdClass: 'td-date'
+          },
+          {
+            key: 'full_deployment_date',
+            label: '전면적용일',
+            width: '110px',
+            tdClass: 'td-date'
+          },
+          {
+            key: 'performance_y1',
+            label: '성과지표 Y1',
+            width: '100px',
+            tdClass: 'td-text'
+          },
+          {
+            key: 'performance_y2',
+            label: '성과지표 Y2',
+            width: '100px',
+            tdClass: 'td-text'
+          },
+          {
+            key: 'performance_x1',
+            label: '성과지표 X1',
+            width: '100px',
+            tdClass: 'td-text'
+          },
+          {
+            key: 'performance_x2',
+            label: '성과지표 X2',
+            width: '100px',
+            tdClass: 'td-text'
+          },
+          {
+            key: 'expected_impact',
+            label: '기대효과',
+            width: '140px',
+            tdClass: 'td-text'
+          },
+          {
+            key: 'kpi',
+            label: 'KPI',
+            width: '100px',
+            tdClass: 'td-text'
+          },
+          {
+            key: 'financial_performance',
+            label: '재무 성과 (억 원)',
+            width: '140px',
+            tdClass: 'td-text'
+          },
+          {
+            key: 'process_metric',
+            label: '프로세스 지표',
+            width: '120px',
+            tdClass: 'td-text'
+          },
+          {
+            key: 'mtc_strategic_project',
+            label: 'MTC 전략 과제',
+            width: '120px',
+            tdClass: 'td-text',
+            bool: true
+          },
+          {
+            key: 'aic_strategic_project',
+            label: 'AIC 전략 과제',
+            width: '120px',
+            tdClass: 'td-text',
+            bool: true
+          },
+          {
+            key: 'dtc_strategic_project',
+            label: 'DTC 전략 과제',
+            width: '120px',
+            tdClass: 'td-text',
+            bool: true
+          },
+          {
+            key: 'current_gpu_count',
+            label: '현재 GPU 수량',
+            width: '120px',
+            tdClass: 'td-text'
+          },
+          {
+            key: 'current_gpu_spec',
+            label: '현재 GPU 사양',
+            width: '120px',
+            tdClass: 'td-text'
+          },
+          {
+            key: 'required_gpu_count',
+            label: '필요 GPU 수량',
+            width: '120px',
+            tdClass: 'td-text'
+          },
+          {
+            key: 'required_gpu_spec',
+            label: '필요 GPU 사양',
+            width: '120px',
+            tdClass: 'td-text'
+          },
+          {
+            key: 'gpu_request_approved',
+            label: 'GPU 요청 승인',
+            width: '120px',
+            tdClass: 'td-text',
+            bool: true
+          },
+          {
+            key: 'gpu_request_b300_equivalent',
+            label: 'GPU B300 환산',
+            width: '120px',
+            tdClass: 'td-text'
+          },
+          {
+            key: 'additional_support_request',
+            label: '추가 지원 요청',
+            width: '140px',
+            tdClass: 'td-text'
+          },
+          {
+            key: 'created_at',
+            label: '등록일',
+            width: '100px',
+            tdClass: 'td-date'
+          },
+          {
+            key: 'updated_at',
+            label: '수정일',
+            width: '100px',
+            tdClass: 'td-date'
+          },
+        ];
+        const defaultVisibleCols = ['id', 'current_status', 'project_name', 'domain', 'owner_team',
+          'executive_owner', 'project_leader', 'projects_type', 'planning_date'
+        ];
+        const showColPicker = ref(false);
+        const visibleCols = ref([...defaultVisibleCols]);
+        const activeColumns = computed(() => allColumns.filter(c => visibleCols.value.includes(c.key)));
 
-const STATUS_COLORS = {
-  "기획":          { bg:"#F0F4FF", text:"#3B5BDB", dot:"#3B5BDB" },
-  "Data 확보":     { bg:"#FFF9DB", text:"#E67700", dot:"#E67700" },
-  "PoC":           { bg:"#FFF4E6", text:"#E8590C", dot:"#E8590C" },
-  "MVP/Pilot":     { bg:"#F3F0FF", text:"#7048E8", dot:"#7048E8" },
-  "전면적용":      { bg:"#EBFBEE", text:"#2B8A3E", dot:"#2B8A3E" },
-  "Pending/Drop":  { bg:"#F1F3F5", text:"#868E96", dot:"#868E96" },
-};
+        const fixedCols = ['id', 'current_status', 'project_name'];
 
-createApp({
-  setup() {
-    const statuses = ["기획","Data 확보","PoC","MVP/Pilot","전면적용","Pending/Drop"];
-    const domains = ["생산","설비","수율/품질"];
-    const summaryColors = ["#343A40","#3B5BDB","#E67700","#E8590C","#7048E8","#2B8A3E","#868E96"];
+        function toggleCol(key) {
+          if (fixedCols.includes(key)) return;
+          const idx = visibleCols.value.indexOf(key);
+          if (idx !== -1) visibleCols.value.splice(idx, 1);
+          else visibleCols.value.push(key);
+        }
 
-    const projects = ref([]);
-    const loading = ref(true);
-    const filterStatus = ref(null);
-    const filterDomain = ref("");
-    const filterTeam = ref("");
-    const filterLeader = ref("");
-    const keyword = ref("");
-    const sortCol = ref(null);
-    const sortDir = ref("asc");
+        function toggleAllCols() {
+          const optional = allColumns.filter(c => !fixedCols.includes(c.key)).map(c => c.key);
+          const allOn = optional.every(k => visibleCols.value.includes(k));
+          if (allOn) visibleCols.value = [...fixedCols];
+          else visibleCols.value = allColumns.map(c => c.key);
+        }
 
-    const showAdd = ref(false);
-    const defaultForm = () => ({
-      project_name:"", domain:"", projects_type:"", owner_team:"", executive_owner:"",
-      project_leader:"", project_description:"", current_status:"기획",
-      performance_y1:"", performance_y2:"", performance_x1:"", performance_x2:"",
-      planning_date:"", data_ready_date:"", poc_date:"", mvp_pilot_date:"",
-      full_deployment_date:"", collaboration_dept:"",
-      mtc_strategic_project:0, aic_strategic_project:0, dtc_strategic_project:0,
-      current_gpu_count:"", current_gpu_spec:"", required_gpu_count:"", required_gpu_spec:"",
-      gpu_request_approved:0, gpu_request_b300_equivalent:"",
-      additional_support_request:"", expected_impact:"",
-      kpi:"", financial_performance:"", process_metric:""
-    });
-    const form = ref(defaultForm());
-    const errors = ref({});
+        const showAdd = ref(false);
+        const defaultForm = () => ({
+          project_name: "",
+          domain: "",
+          projects_type: "",
+          owner_team: "",
+          executive_owner: "",
+          project_leader: "",
+          project_description: "",
+          current_status: "기획",
+          performance_y1: "",
+          performance_y2: "",
+          performance_x1: "",
+          performance_x2: "",
+          planning_date: "",
+          data_ready_date: "",
+          poc_date: "",
+          mvp_pilot_date: "",
+          full_deployment_date: "",
+          collaboration_dept: "",
+          mtc_strategic_project: 0,
+          aic_strategic_project: 0,
+          dtc_strategic_project: 0,
+          current_gpu_count: "",
+          current_gpu_spec: "",
+          required_gpu_count: "",
+          required_gpu_spec: "",
+          gpu_request_approved: 0,
+          gpu_request_b300_equivalent: "",
+          additional_support_request: "",
+          expected_impact: "",
+          kpi: "",
+          financial_performance: "",
+          process_metric: ""
+        });
+        const form = ref(defaultForm());
+        const errors = ref({});
 
-    const detail = ref(null);
-    const history = ref([]);
-    const editing = ref(false);
-    const editForm = ref({});
+        const detail = ref(null);
+        const history = ref([]);
+        const editing = ref(false);
+        const editForm = ref({});
 
-    const toast = ref({ show:false, msg:"", type:"success" });
+        const toast = ref({
+          show: false,
+          msg: "",
+          type: "success"
+        });
 
-    const showChat = ref(false);
-    const chatInput = ref("");
-    const chatBodyRef = ref(null);
-    const chatMessages = ref([
-      { role:"ai", text:"안녕하세요! AI 어시스턴트입니다. 과제에 대해 궁금한 점을 물어보세요." }
-    ]);
+        const showChat = ref(false);
+        const chatInput = ref("");
+        const chatBodyRef = ref(null);
+        const chatMessages = ref([{
+          role: "ai",
+          text: "안녕하세요! AI 어시스턴트입니다. 과제에 대해 궁금한 점을 물어보세요."
+        }]);
 
-    function showToast(msg, type="success") {
-      toast.value = { show:true, msg, type };
-      setTimeout(() => toast.value.show = false, 2500);
-    }
+        function showToast(msg, type = "success") {
+          toast.value = {
+            show: true,
+            msg,
+            type
+          };
+          setTimeout(() => toast.value.show = false, 2500);
+        }
 
-    // ===== API 호출 =====
-    async function fetchProjects() {
-      try {
-        const res = await fetch(`${API}/projects`);
-        projects.value = await res.json();
-      } catch(e) {
-        showToast("서버 연결 실패. server.py가 실행 중인지 확인하세요.", "error");
-      } finally {
-        loading.value = false;
-      }
-    }
-
-    async function fetchHistory(projectId) {
-      try {
-        const res = await fetch(`${API}/projects/${projectId}/history`);
-        history.value = await res.json();
-      } catch(e) { history.value = []; }
-    }
-
-    // ===== Computed =====
-    const teams = computed(() => [...new Set(projects.value.map(p => p.owner_team).filter(Boolean))]);
-    const leaders = computed(() => [...new Set(projects.value.map(p => p.project_leader).filter(Boolean))]);
-    const hasFilter = computed(() => !!(filterStatus.value || filterDomain.value || filterTeam.value || filterLeader.value || keyword.value));
-
-    const filtered = computed(() => {
-      let r = [...projects.value];
-      if (filterStatus.value) r = r.filter(p => p.current_status === filterStatus.value);
-      if (filterDomain.value) r = r.filter(p => p.domain === filterDomain.value);
-      if (filterTeam.value) r = r.filter(p => p.owner_team === filterTeam.value);
-      if (filterLeader.value) r = r.filter(p => p.project_leader === filterLeader.value);
-      if (keyword.value) {
-        const kw = keyword.value;
-        r = r.filter(p =>
-          (p.project_name||'').includes(kw) ||
-          (p.id||'').includes(kw) ||
-          (p.project_description||'').includes(kw) ||
-          (p.projects_type||'').includes(kw) ||
-          (p.expected_impact||'').includes(kw)
-        );
-      }
-      if (sortCol.value) {
-        const statusOrder = {"기획":0,"Data 확보":1,"PoC":2,"MVP/Pilot":3,"전면적용":4,"Pending/Drop":5};
-        r.sort((a, b) => {
-          let av, bv;
-          if (sortCol.value === 'current_status') {
-            av = statusOrder[a.current_status] ?? 99;
-            bv = statusOrder[b.current_status] ?? 99;
-            return sortDir.value === "asc" ? av - bv : bv - av;
+        // ===== API 호출 =====
+        async function fetchProjects() {
+          try {
+            const res = await fetch(`${API}/projects`);
+            projects.value = await res.json();
+          } catch (e) {
+            showToast("서버 연결 실패. server.py가 실행 중인지 확인하세요.", "error");
+          } finally {
+            loading.value = false;
           }
-          av = (a[sortCol.value]||"").toString();
-          bv = (b[sortCol.value]||"").toString();
-          return sortDir.value === "asc" ? av.localeCompare(bv) : bv.localeCompare(av);
+        }
+
+        async function fetchHistory(projectId) {
+          try {
+            const res = await fetch(`${API}/projects/${projectId}/history`);
+            history.value = await res.json();
+          } catch (e) {
+            history.value = [];
+          }
+        }
+
+        // ===== Computed =====
+        const teams = computed(() => [...new Set(projects.value.map(p => p.owner_team).filter(Boolean))]);
+        const leaders = computed(() => [...new Set(projects.value.map(p => p.project_leader).filter(Boolean))]);
+        const hasFilter = computed(() => !!(filterStatuses.value.length || filterDomains.value.length || filterTeams
+          .value.length || keyword.value));
+
+        const filtered = computed(() => {
+          let r = [...projects.value];
+          if (filterStatuses.value.length) r = r.filter(p => filterStatuses.value.includes(p.current_status));
+          if (filterDomains.value.length) r = r.filter(p => filterDomains.value.includes(p.domain));
+          if (filterTeams.value.length) r = r.filter(p => filterTeams.value.includes(p.owner_team));
+          if (keyword.value) {
+            const kw = keyword.value;
+            r = r.filter(p =>
+              (p.project_name || '').includes(kw) ||
+              (p.id || '').includes(kw) ||
+              (p.project_description || '').includes(kw) ||
+              (p.projects_type || '').includes(kw) ||
+              (p.expected_impact || '').includes(kw) ||
+              (p.owner_team || '').includes(kw) ||
+              (p.executive_owner || '').includes(kw) ||
+              (p.project_leader || '').includes(kw)
+            );
+          }
+          if (sortCol.value) {
+            const statusOrder = {
+              "기획": 0,
+              "Data 확보": 1,
+              "PoC": 2,
+              "MVP/Pilot": 3,
+              "전면적용": 4,
+              "Pending/Drop": 5
+            };
+            r.sort((a, b) => {
+              let av, bv;
+              if (sortCol.value === 'current_status') {
+                av = statusOrder[a.current_status] ? ? 99;
+                bv = statusOrder[b.current_status] ? ? 99;
+                return sortDir.value === "asc" ? av - bv : bv - av;
+              }
+              av = (a[sortCol.value] || "").toString();
+              bv = (b[sortCol.value] || "").toString();
+              return sortDir.value === "asc" ? av.localeCompare(bv) : bv.localeCompare(av);
+            });
+          }
+          return r;
         });
-      }
-      return r;
-    });
 
-    function countByStatus(s) { return projects.value.filter(p => p.current_status === s).length; }
-    function sc(status) { return STATUS_COLORS[status] || STATUS_COLORS["Pending/Drop"]; }
-    function clearFilters() { filterStatus.value=null; filterDomain.value=""; filterTeam.value=""; filterLeader.value=""; keyword.value=""; }
+        function countByStatus(s) {
+          return projects.value.filter(p => p.current_status === s).length;
+        }
 
-    function toggleSort(col) {
-      if (sortCol.value===col) sortDir.value = sortDir.value==="asc"?"desc":"asc";
-      else { sortCol.value=col; sortDir.value="asc"; }
-    }
-    function sortIcon(col) { return sortCol.value===col ? (sortDir.value==="asc"?"↑":"↓") : "↕"; }
+        function sc(status) {
+          return STATUS_COLORS[status] || STATUS_COLORS["Pending/Drop"];
+        }
 
-    // ===== 과제 등록 =====
-    async function submitProject() {
-      const errs = {};
-      if (!form.value.project_name.trim()) errs.project_name = true;
-      if (!form.value.domain) errs.domain = true;
-      if (!form.value.owner_team?.trim()) errs.owner_team = true;
-      if (!form.value.executive_owner?.trim()) errs.executive_owner = true;
-      if (!form.value.project_leader?.trim()) errs.project_leader = true;
-      errors.value = errs;
-      if (Object.keys(errs).length) return;
+        function clearFilters() {
+          filterStatuses.value = [];
+          filterDomains.value = [];
+          filterTeams.value = [];
+          keyword.value = "";
+          openFilter.value = null;
+        }
 
-      // null 처리: 빈 문자열은 null로 변환
-      const payload = {};
-      for (const [k, v] of Object.entries(form.value)) {
-        payload[k] = (v === "" || v === null) ? null : v;
-      }
-      // 숫자 필드 변환 (REAL)
-      ['financial_performance','performance_y1','performance_y2','performance_x1','performance_x2','gpu_request_b300_equivalent'].forEach(k => {
-        if (payload[k] != null) payload[k] = parseFloat(payload[k]) || null;
-      });
-      // 정수 필드 변환 (INTEGER)
-      ['current_gpu_count','required_gpu_count'].forEach(k => {
-        if (payload[k] != null) payload[k] = parseInt(payload[k]) || null;
-      });
-      // domain과 project_name은 반드시 포함
-      payload.domain = form.value.domain;
-      payload.project_name = form.value.project_name;
+        function toggleFilter(type, val) {
+          const map = {
+            status: filterStatuses,
+            domain: filterDomains,
+            team: filterTeams
+          };
+          const arr = map[type];
+          const idx = arr.value.indexOf(val);
+          if (idx !== -1) arr.value.splice(idx, 1);
+          else arr.value.push(val);
+        }
 
-      try {
-        const res = await fetch(`${API}/projects`, {
-          method:"POST",
-          headers:{"Content-Type":"application/json"},
-          body: JSON.stringify(payload)
-        });
-        if (!res.ok) throw new Error();
-        await fetchProjects();
-        showAdd.value = false;
-        form.value = defaultForm();
-        errors.value = {};
-        showToast("과제가 등록되었습니다");
-      } catch(e) { showToast("등록 실패", "error"); }
-    }
+        function toggleSort(col) {
+          if (sortCol.value === col) sortDir.value = sortDir.value === "asc" ? "desc" : "asc";
+          else {
+            sortCol.value = col;
+            sortDir.value = "asc";
+          }
+        }
 
-    // ===== 상태 변경 =====
-    async function changeStatus(project, newStatus) {
-      if (project.current_status === newStatus) return;
-      try {
-        const res = await fetch(`${API}/projects/${project.id}/status`, {
-          method:"PATCH",
-          headers:{"Content-Type":"application/json"},
-          body: JSON.stringify({ status: newStatus, changed_by: "관리자" })
-        });
-        if (!res.ok) throw new Error();
-        const updated = await res.json();
-        const idx = projects.value.findIndex(p => p.id === project.id);
-        if (idx !== -1) projects.value[idx] = updated;
-        if (detail.value && detail.value.id === project.id) {
-          detail.value = updated;
+        function sortIcon(col) {
+          return sortCol.value === col ? (sortDir.value === "asc" ? "↑" : "↓") : "↕";
+        }
+
+        // ===== 과제 등록 =====
+        async function submitProject() {
+          const errs = {};
+          if (!form.value.project_name.trim()) errs.project_name = true;
+          if (!form.value.domain) errs.domain = true;
+          if (!form.value.owner_team ? .trim()) errs.owner_team = true;
+          if (!form.value.executive_owner ? .trim()) errs.executive_owner = true;
+          if (!form.value.project_leader ? .trim()) errs.project_leader = true;
+          errors.value = errs;
+          if (Object.keys(errs).length) return;
+
+          // null 처리: 빈 문자열은 null로 변환
+          const payload = {};
+          for (const [k, v] of Object.entries(form.value)) {
+            payload[k] = (v === "" || v === null) ? null : v;
+          }
+          // 숫자 필드 변환 (REAL)
+          ['financial_performance', 'performance_y1', 'performance_y2', 'performance_x1', 'performance_x2',
+            'gpu_request_b300_equivalent'
+          ].forEach(k => {
+            if (payload[k] != null) payload[k] = parseFloat(payload[k]) || null;
+          });
+          // 정수 필드 변환 (INTEGER)
+          ['current_gpu_count', 'required_gpu_count'].forEach(k => {
+            if (payload[k] != null) payload[k] = parseInt(payload[k]) || null;
+          });
+          // domain과 project_name은 반드시 포함
+          payload.domain = form.value.domain;
+          payload.project_name = form.value.project_name;
+
+          try {
+            const res = await fetch(`${API}/projects`, {
+              method: "POST",
+              headers: {
+                "Content-Type": "application/json"
+              },
+              body: JSON.stringify(payload)
+            });
+            if (!res.ok) throw new Error();
+            await fetchProjects();
+            showAdd.value = false;
+            form.value = defaultForm();
+            errors.value = {};
+            showToast("과제가 등록되었습니다");
+          } catch (e) {
+            showToast("등록 실패", "error");
+          }
+        }
+
+        // ===== 상태 변경 =====
+        async function changeStatus(project, newStatus) {
+          if (project.current_status === newStatus) return;
+          try {
+            const res = await fetch(`${API}/projects/${project.id}/status`, {
+              method: "PATCH",
+              headers: {
+                "Content-Type": "application/json"
+              },
+              body: JSON.stringify({
+                status: newStatus,
+                changed_by: "관리자"
+              })
+            });
+            if (!res.ok) throw new Error();
+            const updated = await res.json();
+            const idx = projects.value.findIndex(p => p.id === project.id);
+            if (idx !== -1) projects.value[idx] = updated;
+            if (detail.value && detail.value.id === project.id) {
+              detail.value = updated;
+              fetchHistory(project.id);
+            }
+            showToast(`상태 변경: ${newStatus}`);
+          } catch (e) {
+            showToast("상태 변경 실패", "error");
+          }
+        }
+
+        // ===== AI 채팅 =====
+        function sendChat() {
+          const msg = chatInput.value.trim();
+          if (!msg) return;
+          chatMessages.value.push({
+            role: "user",
+            text: msg
+          });
+          chatInput.value = "";
+          // TODO: 실제 AI API 연동
+          setTimeout(() => {
+            chatMessages.value.push({
+              role: "ai",
+              text: "AI 기능은 현재 준비 중입니다. 곧 과제에 대한 질문에 답변할 수 있도록 업데이트될 예정입니다."
+            });
+            if (chatBodyRef.value) chatBodyRef.value.scrollTop = chatBodyRef.value.scrollHeight;
+          }, 500);
+          setTimeout(() => {
+            if (chatBodyRef.value) chatBodyRef.value.scrollTop = chatBodyRef.value.scrollHeight;
+          }, 50);
+        }
+
+        // ===== 엑셀 다운로드 =====
+        function exportExcel() {
+          const headers = {
+            id: 'ID',
+            current_status: '상태',
+            project_name: '과제명',
+            domain: '도메인',
+            projects_type: '과제 유형',
+            owner_team: '실행/대표팀',
+            executive_owner: '대표 임원',
+            project_leader: '실무 리더',
+            project_description: '과제 설명',
+            collaboration_dept: '협업 부서',
+            planning_date: '기획일',
+            data_ready_date: 'Data 확보일',
+            poc_date: 'PoC 일자',
+            mvp_pilot_date: 'MVP/Pilot 일자',
+            full_deployment_date: '전면적용일',
+            performance_y1: '성과지표 Y1',
+            performance_y2: '성과지표 Y2',
+            performance_x1: '성과지표 X1',
+            performance_x2: '성과지표 X2',
+            expected_impact: '기대효과',
+            kpi: 'KPI',
+            financial_performance: '재무 성과 (억 원)',
+            process_metric: '프로세스 지표',
+            mtc_strategic_project: 'MTC 전략 과제',
+            aic_strategic_project: 'AIC 전략 과제',
+            dtc_strategic_project: 'DTC 전략 과제',
+            current_gpu_count: '현재 GPU 수량',
+            current_gpu_spec: '현재 GPU 사양',
+            required_gpu_count: '필요 GPU 수량',
+            required_gpu_spec: '필요 GPU 사양',
+            gpu_request_approved: 'GPU 요청 승인',
+            gpu_request_b300_equivalent: 'GPU 요청 B300 환산',
+            additional_support_request: '추가 지원 요청 사항',
+            created_at: '등록일',
+            updated_at: '수정일'
+          };
+          const cols = Object.keys(headers);
+          const rows = filtered.value.map(p => {
+            const row = {};
+            cols.forEach(k => {
+              let v = p[k];
+              if (['mtc_strategic_project', 'aic_strategic_project', 'dtc_strategic_project',
+                  'gpu_request_approved'
+                ].includes(k)) v = v ? 'YES' : 'NO';
+              row[headers[k]] = v ? ? '';
+            });
+            return row;
+          });
+          const ws = XLSX.utils.json_to_sheet(rows);
+          const wb = XLSX.utils.book_new();
+          XLSX.utils.book_append_sheet(wb, ws, '과제 목록');
+          XLSX.writeFile(wb, `과제목록_${new Date().toISOString().slice(0,10)}.xlsx`);
+          showToast(`${rows.length}건 엑셀 다운로드 완료`);
+        }
+
+        // ===== 상세 보기 =====
+        function openDetail(project) {
+          detail.value = {
+            ...project
+          };
+          editing.value = false;
+          editForm.value = {};
           fetchHistory(project.id);
         }
-        showToast(`상태 변경: ${newStatus}`);
-      } catch(e) { showToast("상태 변경 실패", "error"); }
-    }
 
-    // ===== AI 채팅 =====
-    function sendChat() {
-      const msg = chatInput.value.trim();
-      if (!msg) return;
-      chatMessages.value.push({ role:"user", text: msg });
-      chatInput.value = "";
-      // TODO: 실제 AI API 연동
-      setTimeout(() => {
-        chatMessages.value.push({ role:"ai", text:"AI 기능은 현재 준비 중입니다. 곧 과제에 대한 질문에 답변할 수 있도록 업데이트될 예정입니다." });
-        if (chatBodyRef.value) chatBodyRef.value.scrollTop = chatBodyRef.value.scrollHeight;
-      }, 500);
-      setTimeout(() => { if (chatBodyRef.value) chatBodyRef.value.scrollTop = chatBodyRef.value.scrollHeight; }, 50);
-    }
+        // ===== 수정 =====
+        async function startEdit() {
+          const code = prompt("수정하려면 관리자 코드를 입력하세요:");
+          if (!code) return;
+          try {
+            const res = await fetch(`${API}/verify-admin`, { method:"POST", headers:{"Content-Type":"application/json"}, body: JSON.stringify({ admin_code: code }) });
+            if (!res.ok) { showToast("관리자 코드가 올바르지 않습니다", "error"); return; }
+          } catch(e) { showToast("서버 연결 실패", "error"); return; }
+          editForm.value = { ...detail.value };
+          editing.value = true;
+        }
 
-    // ===== 엑셀 다운로드 =====
-    function exportExcel() {
-      const headers = {
-        id:'ID', current_status:'상태', project_name:'과제명', domain:'도메인',
-        projects_type:'과제 유형', owner_team:'실행/대표팀', executive_owner:'대표 임원',
-        project_leader:'실무 리더', project_description:'과제 설명', collaboration_dept:'협업 부서',
-        planning_date:'기획일', data_ready_date:'Data 확보일', poc_date:'PoC 일자',
-        mvp_pilot_date:'MVP/Pilot 일자', full_deployment_date:'전면적용일',
-        performance_y1:'성과지표 Y1', performance_y2:'성과지표 Y2',
-        performance_x1:'성과지표 X1', performance_x2:'성과지표 X2',
-        expected_impact:'기대효과', kpi:'KPI', financial_performance:'재무 성과 (억 원)',
-        process_metric:'프로세스 지표',
-        mtc_strategic_project:'MTC 전략 과제', aic_strategic_project:'AIC 전략 과제',
-        dtc_strategic_project:'DTC 전략 과제',
-        current_gpu_count:'현재 GPU 수량', current_gpu_spec:'현재 GPU 사양',
-        required_gpu_count:'필요 GPU 수량', required_gpu_spec:'필요 GPU 사양',
-        gpu_request_approved:'GPU 요청 승인', gpu_request_b300_equivalent:'GPU 요청 B300 환산',
-        additional_support_request:'추가 지원 요청 사항',
-        created_at:'등록일', updated_at:'수정일'
-      };
-      const cols = Object.keys(headers);
-      const rows = filtered.value.map(p => {
-        const row = {};
-        cols.forEach(k => {
-          let v = p[k];
-          if (['mtc_strategic_project','aic_strategic_project','dtc_strategic_project','gpu_request_approved'].includes(k)) v = v ? 'YES' : 'NO';
-          row[headers[k]] = v ?? '';
+        function cancelEdit() {
+          editing.value = false;
+          editForm.value = {};
+        }
+
+        async function updateProject() {
+          const payload = {};
+          for (const [k, v] of Object.entries(editForm.value)) {
+            if (k === 'id' || k === 'created_at' || k === 'updated_at') continue;
+            payload[k] = (v === "" || v === null) ? null : v;
+          }
+          ['financial_performance', 'performance_y1', 'performance_y2', 'performance_x1', 'performance_x2',
+            'gpu_request_b300_equivalent'
+          ].forEach(k => {
+            if (payload[k] != null) payload[k] = parseFloat(payload[k]) || null;
+          });
+          ['current_gpu_count', 'required_gpu_count'].forEach(k => {
+            if (payload[k] != null) payload[k] = parseInt(payload[k]) || null;
+          });
+          try {
+            const res = await fetch(`${API}/projects/${detail.value.id}`, {
+              method: "PUT",
+              headers: {
+                "Content-Type": "application/json"
+              },
+              body: JSON.stringify(payload)
+            });
+            if (!res.ok) throw new Error();
+            const updated = await res.json();
+            detail.value = updated;
+            const idx = projects.value.findIndex(p => p.id === updated.id);
+            if (idx !== -1) projects.value[idx] = updated;
+            editing.value = false;
+            editForm.value = {};
+            showToast("과제가 수정되었습니다");
+          } catch (e) {
+            showToast("수정 실패", "error");
+          }
+        }
+
+        // ===== 삭제 =====
+        async function deleteProject(projectId) {
+          const code = prompt("삭제하려면 관리자 코드를 입력하세요:");
+          if (!code) return;
+          try {
+            const res = await fetch(`${API}/verify-admin`, { method:"POST", headers:{"Content-Type":"application/json"}, body: JSON.stringify({ admin_code: code }) });
+            if (!res.ok) { showToast("관리자 코드가 올바르지 않습니다", "error"); return; }
+          } catch(e) { showToast("서버 연결 실패", "error"); return; }
+          if (!confirm("정말 삭제하시겠습니까?")) return;
+          try {
+            const res = await fetch(`${API}/projects/${projectId}`, {
+              method: "DELETE"
+            });
+            if (!res.ok) throw new Error();
+            await fetchProjects();
+            detail.value = null;
+            showToast("삭제 완료");
+          } catch (e) {
+            showToast("삭제 실패", "error");
+          }
+        }
+
+        onMounted(() => {
+          fetchProjects();
+          document.addEventListener('click', () => {
+            openFilter.value = null;
+          });
         });
-        return row;
-      });
-      const ws = XLSX.utils.json_to_sheet(rows);
-      const wb = XLSX.utils.book_new();
-      XLSX.utils.book_append_sheet(wb, ws, '과제 목록');
-      XLSX.writeFile(wb, `과제목록_${new Date().toISOString().slice(0,10)}.xlsx`);
-      showToast(`${rows.length}건 엑셀 다운로드 완료`);
-    }
 
-    // ===== 상세 보기 =====
-    function openDetail(project) {
-      detail.value = { ...project };
-      editing.value = false;
-      editForm.value = {};
-      fetchHistory(project.id);
-    }
-
-    // ===== 수정 =====
-    function startEdit() {
-      editForm.value = { ...detail.value };
-      editing.value = true;
-    }
-
-    function cancelEdit() {
-      editing.value = false;
-      editForm.value = {};
-    }
-
-    async function updateProject() {
-      const payload = {};
-      for (const [k, v] of Object.entries(editForm.value)) {
-        if (k === 'id' || k === 'created_at' || k === 'updated_at') continue;
-        payload[k] = (v === "" || v === null) ? null : v;
+        return {
+          statuses,
+          domains,
+          summaryColors,
+          projects,
+          loading,
+          filterStatuses,
+          filterDomains,
+          filterTeams,
+          keyword,
+          openFilter,
+          toggleFilter,
+          sortCol,
+          sortDir,
+          showAdd,
+          form,
+          errors,
+          detail,
+          history,
+          toast,
+          teams,
+          leaders,
+          hasFilter,
+          filtered,
+          allColumns,
+          visibleCols,
+          activeColumns,
+          showColPicker,
+          toggleCol,
+          toggleAllCols,
+          fixedCols,
+          countByStatus,
+          sc,
+          clearFilters,
+          toggleSort,
+          sortIcon,
+          submitProject,
+          changeStatus,
+          openDetail,
+          deleteProject,
+          exportExcel,
+          editing,
+          editForm,
+          startEdit,
+          cancelEdit,
+          updateProject,
+          showChat,
+          chatInput,
+          chatMessages,
+          chatBodyRef,
+          sendChat
+        };
       }
-      ['financial_performance','performance_y1','performance_y2','performance_x1','performance_x2','gpu_request_b300_equivalent'].forEach(k => {
-        if (payload[k] != null) payload[k] = parseFloat(payload[k]) || null;
-      });
-      ['current_gpu_count','required_gpu_count'].forEach(k => {
-        if (payload[k] != null) payload[k] = parseInt(payload[k]) || null;
-      });
-      try {
-        const res = await fetch(`${API}/projects/${detail.value.id}`, {
-          method:"PUT",
-          headers:{"Content-Type":"application/json"},
-          body: JSON.stringify(payload)
-        });
-        if (!res.ok) throw new Error();
-        const updated = await res.json();
-        detail.value = updated;
-        const idx = projects.value.findIndex(p => p.id === updated.id);
-        if (idx !== -1) projects.value[idx] = updated;
-        editing.value = false;
-        editForm.value = {};
-        showToast("과제가 수정되었습니다");
-      } catch(e) { showToast("수정 실패", "error"); }
-    }
-
-    // ===== 삭제 =====
-    async function deleteProject(projectId) {
-      if (!confirm("정말 삭제하시겠습니까?")) return;
-      try {
-        const res = await fetch(`${API}/projects/${projectId}`, { method:"DELETE" });
-        if (!res.ok) throw new Error();
-        await fetchProjects();
-        detail.value = null;
-        showToast("삭제 완료");
-      } catch(e) { showToast("삭제 실패", "error"); }
-    }
-
-    onMounted(fetchProjects);
-
-    return {
-      statuses, domains, summaryColors, projects, loading,
-      filterStatus, filterDomain, filterTeam, filterLeader, keyword,
-      sortCol, sortDir, showAdd, form, errors, detail, history, toast,
-      teams, leaders, hasFilter, filtered,
-      countByStatus, sc, clearFilters, toggleSort, sortIcon,
-      submitProject, changeStatus, openDetail, deleteProject, exportExcel,
-      editing, editForm, startEdit, cancelEdit, updateProject,
-      showChat, chatInput, chatMessages, chatBodyRef, sendChat
-    };
-  }
-}).mount('#app');
-</script>
+    }).mount('#app');
+  </script>
 </body>
+
 </html>
