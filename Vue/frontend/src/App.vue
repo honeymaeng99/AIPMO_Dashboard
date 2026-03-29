@@ -1,11 +1,11 @@
 <template>
-    <!-- Header -->
+    <!-- ==================== 헤더 영역: 로고, 엑셀 다운로드, 다크모드 토글, 과제 추가 버튼 ==================== -->
     <header class="header">
       <div class="header-inner">
         <div class="logo">
           <div class="logo-icon">⚡</div>
           <div>
-            <h1>MTC AI 과제 관리 플랫폼-Vue</h1>
+            <h1>MTC AI 과제 관리 플랫폼</h1>
             <div class="sub">MTC AI Project Management Platform</div>
           </div>
         </div>
@@ -29,9 +29,10 @@
       </div>
     </header>
 
+    <!-- ==================== 메인 콘텐츠 영역 ==================== -->
     <div class="main">
 
-      <!-- Loading -->
+      <!-- 로딩 스피너 -->
       <div v-if="loading" class="loading">
         <div class="spinner"></div>
         <div>데이터를 불러오는 중...</div>
@@ -39,7 +40,7 @@
 
       <template v-else>
 
-        <!-- Summary Cards -->
+        <!-- 상태별 요약 카드: 전체/기획/Data 확보/PoC 등 건수 표시, 클릭 시 필터 적용 -->
         <div class="summary">
           <div class="s-card" :class="{active: !filterStatuses.length}"
             :style="!filterStatuses.length ? 'background:#343A40;box-shadow:0 8px 25px #343A4044' : ''"
@@ -55,7 +56,7 @@
           </div>
         </div>
 
-        <!-- Filter -->
+        <!-- 필터 바: 상태/도메인/실행팀 다중 선택 + 키워드 검색 -->
         <div class="filter-bar" @click.self="openFilter = null">
           <div class="f-label">필터</div>
 
@@ -114,13 +115,13 @@
           <button v-if="hasFilter" class="btn-reset" @click="clearFilters">초기화</button>
         </div>
 
-        <!-- Count + Column Edit -->
+        <!-- 결과 건수 표시 및 컬럼 편집 버튼 -->
         <div class="table-toolbar">
           <div class="result-count" style="margin-bottom:0">총 <span>{{ filtered.length }}</span>건</div>
           <button class="btn-col-edit" @click="showColPicker = true">⚙️ Column 수정</button>
         </div>
 
-        <!-- Column Picker Modal -->
+        <!-- 컬럼 선택 모달: 테이블에 표시할 컬럼을 사용자가 선택 -->
         <div v-if="showColPicker" class="col-picker-overlay" @click.self="showColPicker = false">
           <div class="col-picker-bg" @click="showColPicker = false"></div>
           <div class="col-picker">
@@ -143,7 +144,7 @@
           </div>
         </div>
 
-        <!-- Table -->
+        <!-- 과제 목록 테이블: 좌우 스크롤 지원, 정렬/클릭 상세보기 -->
         <div class="table-outer">
           <div class="table-scroll-side left" @click="scrollTable(-300)" @mousemove="moveArrow($event, 'left')" @mouseleave="hideArrow('left')">
             <div class="arrow" ref="arrowLeft">&lt;</div>
@@ -192,7 +193,7 @@
       </template>
     </div>
 
-    <!-- ===== Add Modal ===== -->
+    <!-- ==================== 새 과제 등록 모달 ==================== -->
     <div v-if="showAdd" class="modal-overlay" @click.self="showAdd = false">
       <div class="modal-bg" @click="showAdd = false"></div>
       <div class="modal-box wide">
@@ -440,7 +441,7 @@
       </div>
     </div>
 
-    <!-- ===== Detail Modal ===== -->
+    <!-- ==================== 과제 상세보기/수정 모달 ==================== -->
     <div v-if="detail" class="modal-overlay" @click.self="detail = null">
       <div class="modal-bg" @click="detail = null"></div>
       <div class="modal-box wide" style="padding-top:20px">
@@ -792,12 +793,12 @@
       </div>
     </div>
 
-    <!-- AI Chat FAB -->
+    <!-- AI 채팅 플로팅 버튼 (FAB) -->
     <button class="chat-fab" @click="showChat = !showChat" :title="showChat ? '채팅 닫기' : 'AI 어시스턴트'">
       {{ showChat ? '✕' : '🤖' }}
     </button>
 
-    <!-- AI Chat Window -->
+    <!-- AI 채팅 윈도우: 사용자 질문 입력 및 응답 표시 -->
     <div v-if="showChat" class="chat-window">
       <div class="chat-header">
         <div class="ch-icon">🤖</div>
@@ -816,16 +817,22 @@
       </div>
     </div>
 
-    <!-- Toast -->
+    <!-- 알림 토스트 메시지 (성공/오류) -->
     <div v-if="toast.show" class="toast" :class="toast.type">{{ toast.msg }}</div>
 </template>
 
 <script setup>
+/**
+ * App.vue - 메인 컴포넌트 (Composition API + script setup)
+ * 과제 CRUD, 필터링, 정렬, 엑셀 다운로드, AI 채팅 등 전체 기능을 담당한다.
+ */
 import { ref, computed, onMounted, watch } from 'vue'
-import * as XLSX from 'xlsx'
+import * as XLSX from 'xlsx'  // 엑셀 파일 생성 라이브러리
 
+// API 기본 경로 (Vite 프록시를 통해 백엔드로 전달)
 const API = '/api'
 
+// 상태별 색상 매핑 (배지 표시용)
 const STATUS_COLORS = {
   "기획": { bg: "#F0F4FF", text: "#3B5BDB", dot: "#3B5BDB" },
   "Data 확보": { bg: "#FFF9DB", text: "#E67700", dot: "#E67700" },
@@ -835,26 +842,29 @@ const STATUS_COLORS = {
   "Pending/Drop": { bg: "#F1F3F5", text: "#868E96", dot: "#868E96" },
 }
 
+// 상수 정의: 과제 상태 목록, 도메인 목록, 요약 카드 색상
 const statuses = ["기획", "Data 확보", "PoC", "MVP/Pilot", "전면적용", "Pending/Drop"]
 const domains = ["생산", "설비", "수율/품질"]
 const summaryColors = ["#343A40", "#3B5BDB", "#E67700", "#E8590C", "#7048E8", "#2B8A3E", "#868E96"]
 
+// ===== 다크 모드 =====
 const darkMode = ref(false)
 watch(darkMode, (v) => {
   document.documentElement.classList.toggle('dark', v)
 })
 
-const projects = ref([])
-const loading = ref(true)
-const filterStatuses = ref([])
-const filterDomains = ref([])
-const filterTeams = ref([])
-const keyword = ref("")
-const openFilter = ref(null)
-const sortCol = ref(null)
-const sortDir = ref("asc")
+// ===== 반응형 상태 변수 =====
+const projects = ref([])           // 전체 과제 목록
+const loading = ref(true)          // 데이터 로딩 상태
+const filterStatuses = ref([])     // 상태 필터 (다중 선택)
+const filterDomains = ref([])      // 도메인 필터 (다중 선택)
+const filterTeams = ref([])        // 실행/대표팀 필터 (다중 선택)
+const keyword = ref("")            // 검색 키워드
+const openFilter = ref(null)       // 현재 열린 필터 드롭다운
+const sortCol = ref(null)          // 정렬 기준 컬럼
+const sortDir = ref("asc")        // 정렬 방향 (asc/desc)
 
-// ===== 컬럼 설정 =====
+// ===== 테이블 컬럼 설정: key(DB 필드명), label(표시명), width, tdClass(셀 스타일) =====
 const allColumns = [
   { key: 'id', label: 'ID', width: '90px', tdClass: 'td-id' },
   { key: 'current_status', label: '상태', width: '130px' },
@@ -891,15 +901,19 @@ const allColumns = [
   { key: 'created_at', label: '등록일', width: '100px', tdClass: 'td-date' },
   { key: 'updated_at', label: '수정일', width: '100px', tdClass: 'td-date' },
 ]
+// 기본으로 표시할 컬럼 목록
 const defaultVisibleCols = ['id', 'current_status', 'project_name', 'domain', 'owner_team',
   'executive_owner', 'project_leader', 'projects_type', 'planning_date'
 ]
 const showColPicker = ref(false)
 const visibleCols = ref([...defaultVisibleCols])
+// 현재 표시 중인 컬럼 객체 배열 (computed)
 const activeColumns = computed(() => allColumns.filter(c => visibleCols.value.includes(c.key)))
 
+// 항상 표시되는 고정 컬럼 (숨길 수 없음)
 const fixedCols = ['id', 'current_status', 'project_name']
 
+// 컬럼 표시/숨김 토글
 function toggleCol(key) {
   if (fixedCols.includes(key)) return
   const idx = visibleCols.value.indexOf(key)
@@ -907,6 +921,7 @@ function toggleCol(key) {
   else visibleCols.value.push(key)
 }
 
+// 전체 컬럼 선택/해제 토글
 function toggleAllCols() {
   const optional = allColumns.filter(c => !fixedCols.includes(c.key)).map(c => c.key)
   const allOn = optional.every(k => visibleCols.value.includes(k))
@@ -914,7 +929,9 @@ function toggleAllCols() {
   else visibleCols.value = allColumns.map(c => c.key)
 }
 
+// ===== 과제 등록 폼 =====
 const showAdd = ref(false)
+// 폼 초기값 생성 함수
 const defaultForm = () => ({
   project_name: "",
   domain: "",
@@ -952,23 +969,28 @@ const defaultForm = () => ({
 const form = ref(defaultForm())
 const errors = ref({})
 
-const detail = ref(null)
-const history = ref([])
-const editing = ref(false)
-const editForm = ref({})
+// ===== 상세보기/수정 관련 상태 =====
+const detail = ref(null)           // 현재 선택된 과제 상세 정보
+const history = ref([])            // 상태 변경 이력
+const editing = ref(false)         // 수정 모드 여부
+const editForm = ref({})           // 수정 폼 데이터
 
+// 토스트 알림 상태
 const toast = ref({ show: false, msg: "", type: "success" })
 
+// ===== AI 채팅 및 테이블 스크롤 관련 =====
 const showChat = ref(false)
 const chatInput = ref("")
 const tableScrollRef = ref(null)
 const arrowLeft = ref(null)
 const arrowRight = ref(null)
+// 테이블 좌우 스크롤 이동
 function scrollTable(amount) {
   if (tableScrollRef.value) {
     tableScrollRef.value.scrollLeft += amount
   }
 }
+// 스크롤 화살표 위치를 마우스 커서에 맞춰 이동
 function moveArrow(e, side) {
   const arrow = side === 'left' ? arrowLeft.value : arrowRight.value
   const outer = e.currentTarget.parentElement
@@ -998,12 +1020,14 @@ const chatMessages = ref([{
   text: "안녕하세요! AI 어시스턴트입니다. 과제에 대해 궁금한 점을 물어보세요."
 }])
 
+// 토스트 알림 표시 (2.5초 후 자동 사라짐)
 function showToast(msg, type = "success") {
   toast.value = { show: true, msg, type }
   setTimeout(() => toast.value.show = false, 2500)
 }
 
-// ===== API 호출 =====
+// ===== API 호출 함수 =====
+// 전체 과제 목록 조회
 async function fetchProjects() {
   try {
     const res = await fetch(`${API}/projects`)
@@ -1015,6 +1039,7 @@ async function fetchProjects() {
   }
 }
 
+// 특정 과제의 상태 변경 이력 조회
 async function fetchHistory(projectId) {
   try {
     const res = await fetch(`${API}/projects/${projectId}/history`)
@@ -1024,11 +1049,12 @@ async function fetchHistory(projectId) {
   }
 }
 
-// ===== Computed =====
-const teams = computed(() => [...new Set(projects.value.map(p => p.owner_team).filter(Boolean))])
-const leaders = computed(() => [...new Set(projects.value.map(p => p.project_leader).filter(Boolean))])
+// ===== Computed (파생 상태) =====
+const teams = computed(() => [...new Set(projects.value.map(p => p.owner_team).filter(Boolean))])     // 실행/대표팀 목록 (중복 제거)
+const leaders = computed(() => [...new Set(projects.value.map(p => p.project_leader).filter(Boolean))]) // 과제 리더 목록
 const hasFilter = computed(() => !!(filterStatuses.value.length || filterDomains.value.length || filterTeams.value.length || keyword.value))
 
+// 필터 + 키워드 + 정렬이 적용된 과제 목록
 const filtered = computed(() => {
   let r = [...projects.value]
   if (filterStatuses.value.length) r = r.filter(p => filterStatuses.value.includes(p.current_status))
@@ -1071,14 +1097,17 @@ const filtered = computed(() => {
   return r
 })
 
+// 특정 상태의 과제 수 반환
 function countByStatus(s) {
   return projects.value.filter(p => p.current_status === s).length
 }
 
+// 상태에 해당하는 색상 객체 반환
 function sc(status) {
   return STATUS_COLORS[status] || STATUS_COLORS["Pending/Drop"]
 }
 
+// 모든 필터 초기화
 function clearFilters() {
   filterStatuses.value = []
   filterDomains.value = []
@@ -1087,6 +1116,7 @@ function clearFilters() {
   openFilter.value = null
 }
 
+// 필터 값 토글 (선택/해제)
 function toggleFilter(type, val) {
   const map = {
     status: filterStatuses,
@@ -1099,6 +1129,7 @@ function toggleFilter(type, val) {
   else arr.value.push(val)
 }
 
+// 테이블 컬럼 정렬 토글 (오름차순 <-> 내림차순)
 function toggleSort(col) {
   if (sortCol.value === col) sortDir.value = sortDir.value === "asc" ? "desc" : "asc"
   else {
@@ -1107,11 +1138,12 @@ function toggleSort(col) {
   }
 }
 
+// 정렬 방향 아이콘 반환
 function sortIcon(col) {
   return sortCol.value === col ? (sortDir.value === "asc" ? "↑" : "↓") : "↕"
 }
 
-// ===== 과제 등록 =====
+// ===== 과제 등록: 유효성 검사 후 POST 요청 =====
 async function submitProject() {
   const errs = {}
   if (!form.value.project_name.trim()) errs.project_name = true
@@ -1121,6 +1153,22 @@ async function submitProject() {
   if (!form.value.project_leader?.trim()) errs.project_leader = true
   errors.value = errs
   if (Object.keys(errs).length) return
+
+  // 숫자 필드 검증
+  const numericFields = {
+    performance_y1: '성과 Y1', performance_y2: '성과 Y2',
+    performance_x1: '성과 X1', performance_x2: '성과 X2',
+    financial_performance: '재무 성과',
+    gpu_request_b300_equivalent: 'B300 환산',
+    current_gpu_count: '현재 GPU 수', required_gpu_count: '필요 GPU 수'
+  }
+  for (const [k, label] of Object.entries(numericFields)) {
+    const v = form.value[k]
+    if (v !== "" && v !== null && v !== undefined && isNaN(Number(v))) {
+      showToast(`"${label}" 항목에는 숫자만 입력할 수 있습니다.`, "error")
+      return
+    }
+  }
 
   // null 처리: 빈 문자열은 null로 변환
   const payload = {}
@@ -1158,7 +1206,7 @@ async function submitProject() {
   }
 }
 
-// ===== 상태 변경 =====
+// ===== 상태 변경: 확인 후 PATCH 요청, 이력 자동 기록 =====
 async function changeStatus(project, newStatus) {
   if (project.current_status === newStatus) return
   const ok = confirm(`과제 상태를 "${project.current_status}" → "${newStatus}"(으)로 변경하시겠습니까?`)
@@ -1183,7 +1231,7 @@ async function changeStatus(project, newStatus) {
   }
 }
 
-// ===== AI 채팅 =====
+// ===== AI 채팅: 메시지 전송 (현재 목업, 추후 AI API 연동 예정) =====
 function sendChat() {
   const msg = chatInput.value.trim()
   if (!msg) return
@@ -1202,7 +1250,7 @@ function sendChat() {
   }, 50)
 }
 
-// ===== 엑셀 다운로드 =====
+// ===== 엑셀 다운로드: 현재 필터된 목록을 .xlsx 파일로 내보내기 =====
 function exportExcel() {
   const headers = {
     id: 'ID',
@@ -1256,11 +1304,11 @@ function exportExcel() {
   const ws = XLSX.utils.json_to_sheet(rows)
   const wb = XLSX.utils.book_new()
   XLSX.utils.book_append_sheet(wb, ws, '과제 목록')
-  XLSX.writeFile(wb, `과제목록_${new Date().toISOString().slice(0,10)}.xlsx`)
+  XLSX.writeFile(wb, `MTC AI 과제 목록_${new Date().toISOString().slice(0,10)}.xlsx`)
   showToast(`${rows.length}건 엑셀 다운로드 완료`)
 }
 
-// ===== 상세 보기 =====
+// ===== 상세 보기: 과제 클릭 시 상세 모달 열기 =====
 function openDetail(project) {
   detail.value = { ...project }
   editing.value = false
@@ -1268,7 +1316,7 @@ function openDetail(project) {
   fetchHistory(project.id)
 }
 
-// ===== 수정 =====
+// ===== 수정: 관리자 코드 검증 후 수정 모드 진입 =====
 async function startEdit() {
   const code = prompt("수정하려면 관리자 코드를 입력하세요:")
   if (!code) return
@@ -1280,12 +1328,30 @@ async function startEdit() {
   editing.value = true
 }
 
+// 수정 취소
 function cancelEdit() {
   editing.value = false
   editForm.value = {}
 }
 
+// 수정 내용 저장 (PUT 요청)
 async function updateProject() {
+  // 숫자 필드 검증
+  const numericFields = {
+    performance_y1: '성과 Y1', performance_y2: '성과 Y2',
+    performance_x1: '성과 X1', performance_x2: '성과 X2',
+    financial_performance: '재무 성과',
+    gpu_request_b300_equivalent: 'B300 환산',
+    current_gpu_count: '현재 GPU 수', required_gpu_count: '필요 GPU 수'
+  }
+  for (const [k, label] of Object.entries(numericFields)) {
+    const v = editForm.value[k]
+    if (v !== "" && v !== null && v !== undefined && isNaN(Number(v))) {
+      showToast(`"${label}" 항목에는 숫자만 입력할 수 있습니다.`, "error")
+      return
+    }
+  }
+
   const payload = {}
   for (const [k, v] of Object.entries(editForm.value)) {
     if (k === 'id' || k === 'created_at' || k === 'updated_at') continue
@@ -1318,7 +1384,7 @@ async function updateProject() {
   }
 }
 
-// ===== 삭제 =====
+// ===== 삭제: 관리자 코드 검증 + 확인 후 소프트 삭제 (DELETE 요청) =====
 async function deleteProject(projectId) {
   const code = prompt("삭제하려면 관리자 코드를 입력하세요:")
   if (!code) return
@@ -1338,8 +1404,10 @@ async function deleteProject(projectId) {
   }
 }
 
+// ===== 컴포넌트 마운트 시 초기화 =====
 onMounted(() => {
-  fetchProjects()
+  fetchProjects()  // 과제 목록 최초 로딩
+  // 필터 드롭다운 외부 클릭 시 닫기
   document.addEventListener('click', () => {
     openFilter.value = null
   })

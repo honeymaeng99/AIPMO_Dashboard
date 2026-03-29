@@ -196,6 +196,7 @@ def init_db():
     conn.close()
 
 # ========== 다음 ID 생성 ==========
+# "AIP-001", "AIP-002" 형식으로 순차 ID 발급
 def next_project_id():
     conn = get_db()
     c = conn.cursor()
@@ -332,7 +333,7 @@ def create_project(project: ProjectCreate):
     conn.close()
     return row_to_dict(row)
 
-# 과제 수정
+# 과제 수정 - None이 아닌 필드만 업데이트 (부분 수정)
 @app.put("/api/projects/{project_id}")
 def update_project(project_id: str, project: ProjectUpdate):
     conn = get_db()
@@ -416,7 +417,7 @@ def get_history(project_id: str):
     return [row_to_dict(r) for r in rows]
 
 
-# 요약 통계
+# 요약 통계 - 상태별 과제 건수 집계
 @app.get("/api/summary")
 def get_summary():
     conn = get_db()

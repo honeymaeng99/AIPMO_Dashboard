@@ -4,7 +4,7 @@ AI 과제 관리 프로그램 - FastAPI 서버
 실행 방법:
   1. pip install fastapi uvicorn
   2. python server.py
-  3. 브라우저에서 http://localhost:8000 접속
+  3. 브라우저에서 http://localhost:8001 접속
 """
 
 import sqlite3

@@ -937,7 +937,12 @@ tbody tr:hover {
   background: #fff;
   border-radius: 10px;
   padding: 12px 14px;
-  border: 1px solid rgba(0, 0, 0, .04)
+  border: 1px solid rgba(0, 0, 0, .04);
+  transition: border-color 0.3s ease;
+}
+
+.detail-grid .d-item:hover {
+  border-color: rgba(59, 91, 219, 0.3);
 }
 
 .detail-grid .lb {
@@ -956,14 +961,20 @@ tbody tr:hover {
 }
 
 .detail-sec {
-  margin-bottom: 8px
+  margin-bottom: 8px;
+  border-radius: 10px;
 }
 
 .detail-sec .d-item {
   background: #fff;
   border-radius: 10px;
   padding: 12px 14px;
-  border: 1px solid rgba(0, 0, 0, .04)
+  border: 1px solid rgba(0, 0, 0, .04);
+  transition: border-color 0.3s ease;
+}
+
+.detail-sec .d-item:hover {
+  border-color: rgba(59, 91, 219, 0.3);
 }
 
 .detail-sec .lb {
@@ -1750,14 +1761,39 @@ html.dark .modal-overlay {
 }
 
 html.dark .modal, html.dark .detail-modal {
-  background: #1a1a2e;
+  background: #1e2d4a;
   color: #E9ECEF;
-  border: 1px solid #2a2a4a;
+  border: 1px solid #3a4a6a;
+}
+
+html.dark .modal-box {
+  background: #1e2d4a;
+  color: #E9ECEF;
+}
+
+html.dark .modal-header h2 {
+  color: #fff !important;
 }
 
 html.dark .detail-sec {
-  background: #16213e !important;
-  border-color: #2a2a4a !important;
+  background: #1e2d4a !important;
+  border-color: #2a3a5c !important;
+  overflow: hidden;
+}
+
+html.dark .detail-sec .sec-title {
+  color: #748FFC !important;
+}
+
+html.dark .detail-sec .d-item,
+html.dark .detail-grid .d-item {
+  border-radius: 10px !important;
+  border-color: transparent !important;
+}
+
+html.dark .detail-sec .d-item:hover,
+html.dark .detail-grid .d-item:hover {
+  border-color: rgba(116, 143, 252, 0.4) !important;
 }
 
 html.dark .d-item .lb {
@@ -1765,13 +1801,24 @@ html.dark .d-item .lb {
 }
 
 html.dark .d-item .vl {
-  color: #E9ECEF;
+  color: #212529;
+}
+
+html.dark .edit-input, html.dark .edit-select, html.dark .edit-textarea {
+  color: #212529 !important;
+  background: #fff !important;
 }
 
 html.dark input, html.dark select, html.dark textarea {
   background: #0f3460;
   color: #E9ECEF;
   border-color: #2a2a4a;
+}
+
+html.dark .modal-box input, html.dark .modal-box select, html.dark .modal-box textarea {
+  background: #fff !important;
+  color: #212529 !important;
+  border-color: #DEE2E6 !important;
 }
 
 html.dark input::placeholder, html.dark textarea::placeholder {
@@ -1818,7 +1865,17 @@ html.dark .col-picker .col-item {
 }
 
 html.dark .detail-header-bar {
-  background: #0f3460 !important;
+  background: #0a1e3d !important;
+  border: 2px solid #3B5BDB;
+  border-radius: 12px;
+}
+
+html.dark .detail-header-bar .dh-name {
+  color: #fff !important;
+}
+
+html.dark .detail-header-bar .dh-id {
+  color: #ADB5BD !important;
 }
 
 html.dark .history-table th {
