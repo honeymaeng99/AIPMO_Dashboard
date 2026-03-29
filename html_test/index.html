@@ -2097,7 +2097,11 @@
             <table :style="{minWidth: visibleCols.length > 7 ? visibleCols.length * 130 + 'px' : ''}">
               <thead>
                 <tr>
-                  <th v-for="col in activeColumns" :key="col.key" :style="{width: col.width||'', whiteSpace:'nowrap'}"
+                  <th v-for="(col, colIdx) in activeColumns" :key="col.key" :style="{width: col.width||'', whiteSpace:'nowrap', cursor:'grab'}"
+                    draggable="true"
+                    @dragstart="onColDragStart(colIdx)"
+                    @dragover="onColDragOver($event)"
+                    @drop="onColDrop(colIdx)"
                     @click="toggleSort(col.key)">
                     {{ col.label }} <span class="si"
                       :style="{color: sortCol===col.key?'#3B5BDB':'', opacity: sortCol===col.key?1:0.25}">{{ sortIcon(col.key) }}</span>
@@ -3046,7 +3050,11 @@
         ];
         const showColPicker = ref(false);
         const visibleCols = ref([...defaultVisibleCols]);
-        const activeColumns = computed(() => allColumns.filter(c => visibleCols.value.includes(c.key)));
+        const activeColumns = computed(() => {
+          return visibleCols.value
+            .map(key => allColumns.find(c => c.key === key))
+            .filter(Boolean);
+        });
 
         const fixedCols = ['id', 'current_status', 'project_name'];
 
@@ -3056,6 +3064,26 @@
           const idx = visibleCols.value.indexOf(key);
           if (idx !== -1) visibleCols.value.splice(idx, 1);
           else visibleCols.value.push(key);
+        }
+
+        /* 컬럼 드래그 앤 드롭 */
+        const dragColIdx = ref(null);
+        function onColDragStart(idx) {
+          if (activeColumns.value[idx]?.key === 'id') return;
+          dragColIdx.value = idx;
+        }
+        function onColDragOver(e) {
+          e.preventDefault();
+        }
+        function onColDrop(idx) {
+          const from = dragColIdx.value;
+          if (from === null || from === idx) return;
+          if (activeColumns.value[idx]?.key === 'id') return;
+          const arr = [...visibleCols.value];
+          const [moved] = arr.splice(from, 1);
+          arr.splice(idx, 0, moved);
+          visibleCols.value = arr;
+          dragColIdx.value = null;
         }
 
         /* 전체 컬럼 선택/해제 토글 */
@@ -3600,6 +3628,9 @@
           showColPicker,
           toggleCol,
           toggleAllCols,
+          onColDragStart,
+          onColDragOver,
+          onColDrop,
           fixedCols,
           countByStatus,
           sc,

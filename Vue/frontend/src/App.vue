@@ -157,7 +157,11 @@
             <table :style="{minWidth: visibleCols.length > 7 ? visibleCols.length * 130 + 'px' : ''}">
               <thead>
                 <tr>
-                  <th v-for="col in activeColumns" :key="col.key" :style="{width: col.width||'', whiteSpace:'nowrap'}"
+                  <th v-for="(col, colIdx) in activeColumns" :key="col.key" :style="{width: col.width||'', whiteSpace:'nowrap', cursor:'grab'}"
+                    draggable="true"
+                    @dragstart="onColDragStart(colIdx)"
+                    @dragover="onColDragOver($event)"
+                    @drop="onColDrop(colIdx)"
                     @click="toggleSort(col.key)">
                     {{ col.label }} <span class="si"
                       :style="{color: sortCol===col.key?'#3B5BDB':'', opacity: sortCol===col.key?1:0.25}">{{ sortIcon(col.key) }}</span>
@@ -908,7 +912,11 @@ const defaultVisibleCols = ['id', 'current_status', 'project_name', 'domain', 'o
 const showColPicker = ref(false)
 const visibleCols = ref([...defaultVisibleCols])
 // 현재 표시 중인 컬럼 객체 배열 (computed)
-const activeColumns = computed(() => allColumns.filter(c => visibleCols.value.includes(c.key)))
+const activeColumns = computed(() => {
+  return visibleCols.value
+    .map(key => allColumns.find(c => c.key === key))
+    .filter(Boolean)
+})
 
 // 항상 표시되는 고정 컬럼 (숨길 수 없음)
 const fixedCols = ['id', 'current_status', 'project_name']
@@ -922,6 +930,25 @@ function toggleCol(key) {
 }
 
 // 전체 컬럼 선택/해제 토글
+const dragColIdx = ref(null)
+function onColDragStart(idx) {
+  if (activeColumns.value[idx]?.key === 'id') return
+  dragColIdx.value = idx
+}
+function onColDragOver(e) {
+  e.preventDefault()
+}
+function onColDrop(idx) {
+  const from = dragColIdx.value
+  if (from === null || from === idx) return
+  if (activeColumns.value[idx]?.key === 'id') return
+  const arr = [...visibleCols.value]
+  const [moved] = arr.splice(from, 1)
+  arr.splice(idx, 0, moved)
+  visibleCols.value = arr
+  dragColIdx.value = null
+}
+
 function toggleAllCols() {
   const optional = allColumns.filter(c => !fixedCols.includes(c.key)).map(c => c.key)
   const allOn = optional.every(k => visibleCols.value.includes(k))
