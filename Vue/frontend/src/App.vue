@@ -792,6 +792,7 @@
 
         <div class="modal-footer" style="margin-top:24px">
           <button class="btn-delete" @click="deleteProject(detail.id)">삭제</button>
+          <button v-if="editing" class="btn-submit" @click="updateProject">저장</button>
           <button class="btn-cancel" @click="detail = null">닫기</button>
         </div>
       </div>
