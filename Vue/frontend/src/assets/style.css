@@ -1529,8 +1529,8 @@ tbody tr:hover {
   bottom: 96px;
   right: 28px;
   z-index: 1100;
-  width: 380px;
-  height: 520px;
+  width: 450px;
+  height: 750px;
   background: #fff;
   border-radius: 20px;
   box-shadow: 0 16px 50px rgba(0, 0, 0, .18);
@@ -1819,6 +1819,11 @@ html.dark .modal-box input, html.dark .modal-box select, html.dark .modal-box te
   background: #fff !important;
   color: #212529 !important;
   border-color: #DEE2E6 !important;
+}
+
+html.dark .chat-input-wrap input {
+  background: #fff !important;
+  color: #212529 !important;
 }
 
 html.dark input::placeholder, html.dark textarea::placeholder {
