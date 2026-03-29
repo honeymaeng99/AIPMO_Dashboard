@@ -29,7 +29,7 @@ app.add_middleware(
     allow_headers=["*"],            # 모든 헤더 허용
 )
 
-DB_PATH = "projects.db"
+DB_PATH = os.path.join(os.path.dirname(os.path.abspath(__file__)), "projects.db")
  
 # ========== Pydantic 모델 ==========
 # 데이터 타입 검사, 자동 검증 , Json <-> Python 변환
@@ -467,9 +467,11 @@ def get_summary():
 
 
 # ========== 프론트엔드 서빙 ==========
+BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+
 @app.get("/")
 def serve_index():
-    return FileResponse("index.html")
+    return FileResponse(os.path.join(BASE_DIR, "index.html"))
 
 
 # ========== 서버 시작 ==========

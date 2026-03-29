@@ -5,7 +5,7 @@
         <div class="logo">
           <div class="logo-icon">⚡</div>
           <div>
-            <h1>MTC AI 과제 관리 플랫폼</h1>
+            <h1>MTC AI 과제 관리 플랫폼-Vue</h1>
             <div class="sub">MTC AI Project Management Platform</div>
           </div>
         </div>
@@ -474,10 +474,7 @@
             </div>
             <div class="d-item">
               <div class="lb">현재 상태</div>
-              <div v-if="!editing" class="vl">{{ detail.current_status || '-' }}</div>
-              <select v-else v-model="editForm.current_status" class="edit-select">
-                <option v-for="s in statuses" :key="s" :value="s">{{ s }}</option>
-              </select>
+              <div class="vl">{{ detail.current_status || '-' }}</div>
             </div>
             <div class="d-item">
               <div class="lb">협업 부서</div>
@@ -1114,6 +1111,8 @@ async function submitProject() {
 // ===== 상태 변경 =====
 async function changeStatus(project, newStatus) {
   if (project.current_status === newStatus) return
+  const ok = confirm(`과제 상태를 "${project.current_status}" → "${newStatus}"(으)로 변경하시겠습니까?`)
+  if (!ok) return
   try {
     const res = await fetch(`${API}/projects/${project.id}/status`, {
       method: "PATCH",
