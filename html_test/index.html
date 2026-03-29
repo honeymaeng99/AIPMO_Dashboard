@@ -1722,6 +1722,144 @@
         padding: 14px 16px
       }
     }
+
+    /* ===== Dark Mode ===== */
+    html.dark body {
+      background: #1a1a2e;
+      color: #E9ECEF;
+    }
+
+    html.dark .header-bar {
+      background: linear-gradient(135deg, #16213e 0%, #0f3460 100%);
+    }
+
+    html.dark .summary-card {
+      background: #16213e !important;
+      border-color: #2a2a4a;
+    }
+
+    html.dark .table-wrap {
+      background: #16213e;
+      border-color: #2a2a4a;
+    }
+
+    html.dark table thead th {
+      background: #0f3460;
+      color: #E9ECEF;
+      border-bottom-color: #2a2a4a;
+    }
+
+    html.dark table tbody td {
+      border-bottom-color: #2a2a4a;
+      color: #CED4DA;
+    }
+
+    html.dark table tbody tr:hover {
+      background: rgba(59, 91, 219, 0.15) !important;
+    }
+
+    html.dark .modal-overlay {
+      background: rgba(0, 0, 0, 0.7);
+    }
+
+    html.dark .modal, html.dark .detail-modal {
+      background: #1a1a2e;
+      color: #E9ECEF;
+      border: 1px solid #2a2a4a;
+    }
+
+    html.dark .detail-sec {
+      background: #16213e !important;
+      border-color: #2a2a4a !important;
+    }
+
+    html.dark .d-item .lb {
+      color: #868E96;
+    }
+
+    html.dark .d-item .vl {
+      color: #E9ECEF;
+    }
+
+    html.dark input, html.dark select, html.dark textarea {
+      background: #0f3460;
+      color: #E9ECEF;
+      border-color: #2a2a4a;
+    }
+
+    html.dark input::placeholder, html.dark textarea::placeholder {
+      color: #6C757D;
+    }
+
+    html.dark .filter-bar {
+      background: #16213e;
+      border-color: #2a2a4a;
+    }
+
+    html.dark .ms-btn {
+      background: #0f3460;
+      color: #CED4DA;
+      border-color: #2a2a4a;
+    }
+
+    html.dark .ms-dropdown {
+      background: #16213e;
+      border-color: #2a2a4a;
+    }
+
+    html.dark .ms-item {
+      color: #CED4DA;
+    }
+
+    html.dark .ms-item:hover, html.dark .ms-item.checked {
+      background: #0f3460;
+    }
+
+    html.dark .search-input {
+      background: #0f3460 !important;
+      color: #E9ECEF !important;
+      border-color: #2a2a4a !important;
+    }
+
+    html.dark .col-picker {
+      background: #16213e;
+      border-color: #2a2a4a;
+    }
+
+    html.dark .col-picker .col-item {
+      color: #CED4DA;
+    }
+
+    html.dark .detail-header-bar {
+      background: #0f3460 !important;
+    }
+
+    html.dark .history-table th {
+      background: #0f3460;
+    }
+
+    html.dark .history-table td {
+      border-color: #2a2a4a;
+      color: #CED4DA;
+    }
+
+    html.dark .toast {
+      background: #16213e;
+      color: #E9ECEF;
+      border-color: #2a2a4a;
+    }
+
+    html.dark .table-scroll-side.left {
+      background: linear-gradient(to right, rgba(59,91,219,0.15), transparent);
+    }
+
+    html.dark .table-scroll-side.right {
+      background: linear-gradient(to left, rgba(59,91,219,0.15), transparent);
+    }
+
+    html.dark .table-scroll-side .arrow {
+      color: #748FFC;
+    }
   </style>
 </head>
 
@@ -1744,6 +1882,12 @@
             style="background:linear-gradient(135deg,#2B8A3E,#20C997);box-shadow:0 4px 15px rgba(43,138,62,.35)"
             @click="exportExcel">
             <span style="font-size:16px;line-height:1">📥</span> 엑셀 다운로드
+          </button>
+
+          <button class="btn-add"
+            :style="{background: darkMode ? 'linear-gradient(135deg,#F59F00,#FF922B)' : 'linear-gradient(135deg,#343A40,#212529)', boxShadow: darkMode ? '0 4px 15px rgba(245,159,0,.35)' : '0 4px 15px rgba(33,37,41,.35)'}"
+            @click="darkMode = !darkMode">
+            <span style="font-size:16px;line-height:1">{{ darkMode ? '☀️' : '🌙' }}</span> {{ darkMode ? '라이트 모드' : '다크 모드' }}
           </button>
 
           <button class="btn-add" @click="showAdd = true">
@@ -2550,7 +2694,8 @@
       createApp,
       ref,
       computed,
-      onMounted
+      onMounted,
+      watch
     } = Vue;
 
     const API = '/api';
@@ -2593,6 +2738,11 @@
         const statuses = ["기획", "Data 확보", "PoC", "MVP/Pilot", "전면적용", "Pending/Drop"];
         const domains = ["생산", "설비", "수율/품질"];
         const summaryColors = ["#343A40", "#3B5BDB", "#E67700", "#E8590C", "#7048E8", "#2B8A3E", "#868E96"];
+
+        const darkMode = ref(false);
+        watch(darkMode, (v) => {
+          document.documentElement.classList.toggle('dark', v);
+        });
 
         const projects = ref([]);
         const loading = ref(true);
@@ -3348,7 +3498,8 @@
           arrowLeft,
           arrowRight,
           moveArrow,
-          hideArrow
+          hideArrow,
+          darkMode
         };
       }
     }).mount('#app');

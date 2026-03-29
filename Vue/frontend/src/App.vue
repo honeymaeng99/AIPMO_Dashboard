@@ -16,6 +16,12 @@
             <span style="font-size:16px;line-height:1">📥</span> 엑셀 다운로드
           </button>
 
+          <button class="btn-add"
+            :style="{background: darkMode ? 'linear-gradient(135deg,#F59F00,#FF922B)' : 'linear-gradient(135deg,#343A40,#212529)', boxShadow: darkMode ? '0 4px 15px rgba(245,159,0,.35)' : '0 4px 15px rgba(33,37,41,.35)'}"
+            @click="darkMode = !darkMode">
+            <span style="font-size:16px;line-height:1">{{ darkMode ? '☀️' : '🌙' }}</span> {{ darkMode ? '라이트 모드' : '다크 모드' }}
+          </button>
+
           <button class="btn-add" @click="showAdd = true">
             <span style="font-size:18px;line-height:1">+</span> 과제 추가
           </button>
@@ -815,7 +821,7 @@
 </template>
 
 <script setup>
-import { ref, computed, onMounted } from 'vue'
+import { ref, computed, onMounted, watch } from 'vue'
 import * as XLSX from 'xlsx'
 
 const API = '/api'
@@ -832,6 +838,11 @@ const STATUS_COLORS = {
 const statuses = ["기획", "Data 확보", "PoC", "MVP/Pilot", "전면적용", "Pending/Drop"]
 const domains = ["생산", "설비", "수율/품질"]
 const summaryColors = ["#343A40", "#3B5BDB", "#E67700", "#E8590C", "#7048E8", "#2B8A3E", "#868E96"]
+
+const darkMode = ref(false)
+watch(darkMode, (v) => {
+  document.documentElement.classList.toggle('dark', v)
+})
 
 const projects = ref([])
 const loading = ref(true)

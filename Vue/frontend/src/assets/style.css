@@ -1709,3 +1709,141 @@ tbody tr:hover {
     padding: 14px 16px
   }
 }
+
+/* ===== Dark Mode ===== */
+html.dark body {
+  background: #1a1a2e;
+  color: #E9ECEF;
+}
+
+html.dark .header-bar {
+  background: linear-gradient(135deg, #16213e 0%, #0f3460 100%);
+}
+
+html.dark .summary-card {
+  background: #16213e !important;
+  border-color: #2a2a4a;
+}
+
+html.dark .table-wrap {
+  background: #16213e;
+  border-color: #2a2a4a;
+}
+
+html.dark table thead th {
+  background: #0f3460;
+  color: #E9ECEF;
+  border-bottom-color: #2a2a4a;
+}
+
+html.dark table tbody td {
+  border-bottom-color: #2a2a4a;
+  color: #CED4DA;
+}
+
+html.dark table tbody tr:hover {
+  background: rgba(59, 91, 219, 0.15) !important;
+}
+
+html.dark .modal-overlay {
+  background: rgba(0, 0, 0, 0.7);
+}
+
+html.dark .modal, html.dark .detail-modal {
+  background: #1a1a2e;
+  color: #E9ECEF;
+  border: 1px solid #2a2a4a;
+}
+
+html.dark .detail-sec {
+  background: #16213e !important;
+  border-color: #2a2a4a !important;
+}
+
+html.dark .d-item .lb {
+  color: #868E96;
+}
+
+html.dark .d-item .vl {
+  color: #E9ECEF;
+}
+
+html.dark input, html.dark select, html.dark textarea {
+  background: #0f3460;
+  color: #E9ECEF;
+  border-color: #2a2a4a;
+}
+
+html.dark input::placeholder, html.dark textarea::placeholder {
+  color: #6C757D;
+}
+
+html.dark .filter-bar {
+  background: #16213e;
+  border-color: #2a2a4a;
+}
+
+html.dark .ms-btn {
+  background: #0f3460;
+  color: #CED4DA;
+  border-color: #2a2a4a;
+}
+
+html.dark .ms-dropdown {
+  background: #16213e;
+  border-color: #2a2a4a;
+}
+
+html.dark .ms-item {
+  color: #CED4DA;
+}
+
+html.dark .ms-item:hover, html.dark .ms-item.checked {
+  background: #0f3460;
+}
+
+html.dark .search-input {
+  background: #0f3460 !important;
+  color: #E9ECEF !important;
+  border-color: #2a2a4a !important;
+}
+
+html.dark .col-picker {
+  background: #16213e;
+  border-color: #2a2a4a;
+}
+
+html.dark .col-picker .col-item {
+  color: #CED4DA;
+}
+
+html.dark .detail-header-bar {
+  background: #0f3460 !important;
+}
+
+html.dark .history-table th {
+  background: #0f3460;
+}
+
+html.dark .history-table td {
+  border-color: #2a2a4a;
+  color: #CED4DA;
+}
+
+html.dark .toast {
+  background: #16213e;
+  color: #E9ECEF;
+  border-color: #2a2a4a;
+}
+
+html.dark .table-scroll-side.left {
+  background: linear-gradient(to right, rgba(59,91,219,0.15), transparent);
+}
+
+html.dark .table-scroll-side.right {
+  background: linear-gradient(to left, rgba(59,91,219,0.15), transparent);
+}
+
+html.dark .table-scroll-side .arrow {
+  color: #748FFC;
+}
