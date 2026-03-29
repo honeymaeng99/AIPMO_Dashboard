@@ -868,7 +868,7 @@ const sortDir = ref("asc")        // 정렬 방향 (asc/desc)
 const allColumns = [
   { key: 'id', label: 'ID', width: '90px', tdClass: 'td-id' },
   { key: 'current_status', label: '상태', width: '130px' },
-  { key: 'project_name', label: '과제명', width: '', tdClass: 'td-title' },
+  { key: 'project_name', label: '과제명', width: '220px', tdClass: 'td-title' },
   { key: 'domain', label: '도메인', width: '100px', tdClass: 'td-text' },
   { key: 'projects_type', label: '과제 유형', width: '120px', tdClass: 'td-sub' },
   { key: 'owner_team', label: '실행/대표팀', width: '110px', tdClass: 'td-text' },
