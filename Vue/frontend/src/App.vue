@@ -56,7 +56,7 @@
           <!-- 상태 -->
           <div class="multi-select">
             <div class="ms-btn" @click.stop="openFilter = openFilter==='status' ? null : 'status'">
-              전체 상태
+              {{ filterStatuses.length ? '상태' : '전체 상태' }}
               <span v-if="filterStatuses.length" class="ms-count">{{ filterStatuses.length }}</span>
               <span class="ms-arrow">▼</span>
             </div>
@@ -72,7 +72,7 @@
           <!-- 도메인 -->
           <div class="multi-select">
             <div class="ms-btn" @click.stop="openFilter = openFilter==='domain' ? null : 'domain'">
-              전체 도메인
+              {{ filterDomains.length ? '도메인' : '전체 도메인' }}
               <span v-if="filterDomains.length" class="ms-count">{{ filterDomains.length }}</span>
               <span class="ms-arrow">▼</span>
             </div>
@@ -88,7 +88,7 @@
           <!-- 실행/대표팀 -->
           <div class="multi-select">
             <div class="ms-btn" @click.stop="openFilter = openFilter==='team' ? null : 'team'">
-              전체 실행/대표팀
+              {{ filterTeams.length ? '실행/대표팀' : '전체 실행/대표팀' }}
               <span v-if="filterTeams.length" class="ms-count">{{ filterTeams.length }}</span>
               <span class="ms-arrow">▼</span>
             </div>
@@ -138,8 +138,15 @@
         </div>
 
         <!-- Table -->
+        <div class="table-outer">
+          <div class="table-scroll-side left" @click="scrollTable(-300)" @mousemove="moveArrow($event, 'left')" @mouseleave="hideArrow('left')">
+            <div class="arrow" ref="arrowLeft">&lt;</div>
+          </div>
+          <div class="table-scroll-side right" @click="scrollTable(300)" @mousemove="moveArrow($event, 'right')" @mouseleave="hideArrow('right')">
+            <div class="arrow" ref="arrowRight">&gt;</div>
+          </div>
         <div class="table-wrap">
-          <div class="table-scroll">
+          <div class="table-scroll" ref="tableScrollRef">
             <table :style="{minWidth: visibleCols.length > 7 ? visibleCols.length * 130 + 'px' : ''}">
               <thead>
                 <tr>
@@ -174,6 +181,7 @@
             </table>
           </div>
         </div>
+        </div><!-- table-outer -->
 
       </template>
     </div>
@@ -489,7 +497,7 @@
           <div class="detail-sec" style="margin-top:4px">
             <div class="d-item">
               <div class="lb">과제 설명</div>
-              <div v-if="!editing" class="vl">{{ detail.project_description || '-' }}</div>
+              <div v-if="!editing" class="vl" style="white-space:pre-line">{{ detail.project_description || '-' }}</div>
               <textarea v-else v-model="editForm.project_description" class="edit-textarea"
                 placeholder="과제 설명"></textarea>
             </div>
@@ -736,7 +744,7 @@
           <div class="detail-sec">
             <div class="d-item">
               <div class="lb">추가 지원 요청 사항</div>
-              <div v-if="!editing" class="vl">{{ detail.additional_support_request || '-' }}</div>
+              <div v-if="!editing" class="vl" style="white-space:pre-line">{{ detail.additional_support_request || '-' }}</div>
               <textarea v-else v-model="editForm.additional_support_request" class="edit-textarea"
                 placeholder="추가 지원 요청 사항"></textarea>
             </div>
@@ -942,6 +950,37 @@ const toast = ref({ show: false, msg: "", type: "success" })
 
 const showChat = ref(false)
 const chatInput = ref("")
+const tableScrollRef = ref(null)
+const arrowLeft = ref(null)
+const arrowRight = ref(null)
+function scrollTable(amount) {
+  if (tableScrollRef.value) {
+    tableScrollRef.value.scrollLeft += amount
+  }
+}
+function moveArrow(e, side) {
+  const arrow = side === 'left' ? arrowLeft.value : arrowRight.value
+  const outer = e.currentTarget.parentElement
+  if (arrow && outer) {
+    const rect = outer.getBoundingClientRect()
+    arrow.style.opacity = '1'
+    arrow.style.top = (e.clientY - 11) + 'px'
+    if (side === 'left') {
+      arrow.style.left = (rect.left + 16) + 'px'
+      arrow.style.right = ''
+    } else {
+      arrow.style.right = (window.innerWidth - rect.right + 16) + 'px'
+      arrow.style.left = ''
+    }
+  }
+}
+function hideArrow(side) {
+  const arrow = side === 'left' ? arrowLeft.value : arrowRight.value
+  if (arrow) {
+    arrow.style.opacity = '0'
+  }
+}
+
 const chatBodyRef = ref(null)
 const chatMessages = ref([{
   role: "ai",

@@ -5,7 +5,7 @@ MTC AI Project Management Platform - Vue 3 + Vite + FastAPI
 ## 프로젝트 구조
 
 ```
-Vue_test/
+Vue/
 ├── start.bat              # 프로덕션 실행 (빌드 + 서버)
 ├── dev.bat                # 개발 모드 실행 (핫리로드)
 ├── backend/
@@ -17,6 +17,7 @@ Vue_test/
     ├── package.json       # Node.js 패키지 설정
     ├── vite.config.js     # Vite 설정 (API 프록시 포함)
     ├── index.html         # HTML 엔트리
+    ├── dist/              # 빌드 결과물 (npm run build)
     └── src/
         ├── main.js        # Vue 앱 초기화
         ├── App.vue        # 메인 컴포넌트 (SFC)
@@ -92,9 +93,11 @@ venv\Scripts\python server.py
 
 - 과제 등록 / 수정 / 삭제 (소프트 삭제)
 - 과제 상태 관리 (기획 → Data 확보 → PoC → MVP/Pilot → 전면적용 → Pending/Drop)
+- 상태 변경 시 확인 다이얼로그
+- 수정 모드에서 상태 변경 제한 (하단 상태 변경 버튼으로만 변경 가능)
 - 멀티 필터 (상태, 도메인, 실행/대표팀)
 - 키워드 검색 (과제명, ID, 실행/대표팀, 대표 임원, 실무 리더)
-- 테이블 컬럼 커스터마이징
+- 테이블 컬럼 커스터마이징 (ID, 상태, 과제명은 고정)
 - 컬럼 정렬 (상태는 파이프라인 순서대로)
 - 엑셀 다운로드
 - 과제 수정/삭제 시 관리자 코드 검증 (서버측)
